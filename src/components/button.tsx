@@ -1,6 +1,6 @@
 interface ButtonProps {
     label?: string;
-    labelIcon?: string;
+    labelIcon?: string | React.ReactNode;
     containerClassName?: string;
     onClick?: () => void;
 }
@@ -8,7 +8,7 @@ interface ButtonProps {
 export default function Button({ label, labelIcon, containerClassName, onClick }: ButtonProps) {
     return (
         <button
-            className={`cursor-pointer h-14 px-4 py-2 bg-[#1f1f22] text-[#f9f5f8] font-medium rounded-2xl hover:bg-[#2a2a2e] border border-[#252428] ${containerClassName}`}
+            className={`flex flex-row items-center justify-center cursor-pointer h-14 px-4 py-2 bg-[#1f1f22] text-[#f9f5f8] font-medium rounded-2xl hover:bg-[#2a2a2e] border border-[#252428] ${containerClassName}`}
             onClick={onClick}
         >
             {labelIcon && <span className="mr-2">{labelIcon}</span>}
