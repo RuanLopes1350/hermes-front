@@ -4,17 +4,18 @@ import Button from "@/src/components/button"
 import { ArrowRight } from "lucide-react"
 import { FaGithub, FaGoogle } from "react-icons/fa"
 import Link from "next/link"
+import { GitHub, Version, Documentacao, Privacidade, Status } from "../../layout"
 
 export default function SignUpPage() {
     return (
         <>
-            <div className="flex flex-col items-center justify-center min-h-screen gap-8 bg-[#0f0f11]">
+            <div className="flex flex-col items-center w-full gap-8">
                 <div className="flex flex-col items-center mt-4">
                     <img className="border border-[#252428] rounded-2xl w-20 h-20" src="*" alt="*" />
                     <h1 className="text-[#f9f5f8] font-bold text-5xl">Hermes</h1>
                     <p className="text-[#adaaad] text-xl">Microsserviço de Envio de E-mails</p>
                 </div>
-                <div className="w-1/3 bg-[#161619] p-8 border border-[#252428] rounded-sm shadow-md">
+                <div className="w-full max-w-lg bg-[#161619] p-8 border border-[#252428] rounded-xl shadow-md">
                     <h2 className="text-[#f9f5f8] text-3xl font-bold">Criar uma nova conta</h2>
                     <p className="text-[#adaaad] text-xl">Informe suas credenciais de acesso</p>
                     <div className="flex flex-col mt-4">
@@ -30,7 +31,7 @@ export default function SignUpPage() {
                         <Input type="password" label="CONFIRMAR SENHA" labelColor="text-[#a1a1aa]" placeholder="********" containerClassName="w-full" />
                     </div>
                     <div className="flex flex-col mt-4">
-                        <ButtonInput label="CRIAR CONTA" labelIcon={<ArrowRight />} containerClassName="w-full h-14" />
+                        <ButtonInput label="Criar Conta" labelIcon={<ArrowRight />} containerClassName="w-full h-14 mt-2" />
                     </div>
                     <div className="flex items-center gap-4 my-6">
                         <div className="flex-1 h-px bg-[#252428]"></div>
@@ -43,16 +44,18 @@ export default function SignUpPage() {
                     </div>
 
                     <div className="flex flex-row items-center justify-center pt-6">
-                        <p className="text-[#adaaad]">Já possui uma conta? <Link href="/sign-in" className="text-[#be9dff] hover:underline">Fazer login</Link></p>
+                        <p className="text-[#adaaad]">Já possui uma conta? <Link href="/auth/sign-in" className="text-[#be9dff] hover:underline">Faça login</Link></p>
                     </div>
 
                 </div>
                 <div className="flex flex-col items-center gap-4">
                     <div className="flex flex-row gap-8">
-                        <p className="text-[#71717a]">DOCUMENTAÇÃO</p>
-                        <p className="text-[#71717a]">STATUS</p>
-                        <p className="text-[#71717a]">PRIVACIDADE</p>
+                        <a href={Documentacao} target="_blank" rel="noopener noreferrer" className="text-[#71717a]">DOCUMENTAÇÃO</a>
+                        <a href={Status} target="_blank" rel="noopener noreferrer" className="text-[#71717a]">STATUS</a>
+                        <a href={Privacidade} target="_blank" rel="noopener noreferrer" className="text-[#71717a]">PRIVACIDADE</a>
                     </div>
+                    <p className="text-[#71717a]">2026 Hermes - Versão <a className="text-blue-500">{Version}</a></p>
+                    <p className="text-[#71717a]">Desenvolvido por <a href={GitHub} target="_blank" rel="noopener noreferrer" className="text-blue-500">🔱Ruan Lopes🦈</a></p>
                 </div>
             </div>
         </>
