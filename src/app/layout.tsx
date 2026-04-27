@@ -18,13 +18,6 @@ export const metadata: Metadata = {
   description: "A transactional email microservice built with Node.js.",
 };
 
-// Suas variáveis e constantes globais
-export const GitHub: string = 'https://github.com/RuanLopes1350';
-export const Version: string = '1.0.0';
-export const Documentacao: string = '#';
-export const Status: string = '#';
-export const Privacidade: string = '#';
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -35,9 +28,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      {/* O fundo global escuro e as classes de altura são aplicadas diretamente no body */}
-      <body className="min-h-full flex flex-col bg-[#0E0E10]">
-        {/* Todo o conteúdo (auth, system, etc) será injetado aqui */}
+      <body className="min-h-full flex flex-col bg-background selection:bg-primary/30">
         {children}
       </body>
     </html>

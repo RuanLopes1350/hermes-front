@@ -12,91 +12,127 @@ export default function LeftPanel() {
     };
 
     return (
-        <div className="fixed left-0 top-0 w-64 bg-[#262528] text-white p-4 flex flex-col h-screen overflow-y-auto">
-            <div className="flex flex-row items-center gap-2 mb-8">
-                <img className="w-12 h-12" src='/hermes-icon.svg' alt="Hermes Icon" />
+        <div className="fixed left-0 top-0 w-64 bg-surface border-r border-border-subtle text-text-primary p-6 flex flex-col h-screen overflow-y-auto">
+            <div className="flex flex-row items-center gap-3 mb-10">
+                <div className="bg-primary/10 p-2 rounded-xl">
+                    <img className="w-10 h-10" src='/hermes-icon.svg' alt="Hermes Icon" />
+                </div>
                 <div className="flex flex-col items-start justify-center gap-0">
-                    <h1 className="font-bold text-lg">Hermes</h1>
-                    <p className="text-xs text-gray-400">Microsserviço de E-mails</p>
+                    <h1 className="font-bold text-xl tracking-tight">Hermes</h1>
+                    <p className="text-[10px] uppercase tracking-wider text-text-secondary font-medium">Mail Engine</p>
                 </div>
             </div>
 
             <div className="flex flex-col justify-between flex-grow">
-                <div className="flex flex-col gap-2">
+                <nav className="flex flex-col gap-1.5">
+                    <p className="text-[10px] font-bold text-text-secondary uppercase px-3 mb-2 tracking-widest">Geral</p>
+
                     <Link
                         href="/system/dashboard"
-                        className={`flex flex-row gap-2.5 cursor-pointer px-2 py-1 rounded transition-colors ${
-                            isActive("dashboard") ? "bg-blue-600" : "hover:bg-gray-700"
-                        }`}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive("dashboard")
+                            ? "bg-primary text-white shadow-lg shadow-primary/20"
+                            : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+                            }`}
                     >
-                        <LayoutDashboard /> Dashboard
+                        <LayoutDashboard size={18} /> Dashboard
                     </Link>
+
                     <Link
                         href="/system/services"
-                        className={`flex flex-row gap-2.5 cursor-pointer px-2 py-1 rounded transition-colors ${
-                            isActive("services") ? "bg-blue-600" : "hover:bg-gray-700"
-                        }`}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive("services")
+                            ? "bg-primary text-white shadow-lg shadow-primary/20"
+                            : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+                            }`}
                     >
-                        <GrServices /> Serviços
+                        <GrServices size={18} /> Serviços
                     </Link>
+
+                    <p className="text-[10px] font-bold text-text-secondary uppercase px-3 mt-6 mb-2 tracking-widest">Segurança</p>
+
                     <Link
                         href="/system/credentials"
-                        className={`flex flex-row gap-2.5 cursor-pointer px-2 py-1 rounded transition-colors ${
-                            isActive("credentials") ? "bg-blue-600" : "hover:bg-gray-700"
-                        }`}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive("credentials")
+                            ? "bg-primary text-white shadow-lg shadow-primary/20"
+                            : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+                            }`}
                     >
-                        <KeyRound /> Credenciais
+                        <KeyRound size={18} /> Credenciais
                     </Link>
+
                     <Link
                         href="/system/api-keys"
-                        className={`flex flex-row gap-2.5 cursor-pointer px-2 py-1 rounded transition-colors ${
-                            isActive("api-keys") ? "bg-blue-600" : "hover:bg-gray-700"
-                        }`}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive("api-keys")
+                            ? "bg-primary text-white shadow-lg shadow-primary/20"
+                            : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+                            }`}
                     >
-                        <Code /> API Keys
+                        <Code size={18} /> API Keys
                     </Link>
+
+                    <p className="text-[10px] font-bold text-text-secondary uppercase px-3 mt-6 mb-2 tracking-widest">Monitoramento</p>
+
                     <Link
                         href="/system/templates"
-                        className={`flex flex-row gap-2.5 cursor-pointer px-2 py-1 rounded transition-colors ${
-                            isActive("templates") ? "bg-blue-600" : "hover:bg-gray-700"
-                        }`}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive("templates")
+                            ? "bg-primary text-white shadow-lg shadow-primary/20"
+                            : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+                            }`}
                     >
-                        <FileText /> Templates
+                        <FileText size={18} /> Templates
                     </Link>
+
+                    <Link
+                        href="/system/sandbox"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive("sandbox")
+                            ? "bg-primary text-white shadow-lg shadow-primary/20"
+                            : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+                            }`}
+                    >
+                        <FileText size={18} /> Sandbox
+                    </Link>
+
                     <Link
                         href="/system/history"
-                        className={`flex flex-row gap-2.5 cursor-pointer px-2 py-1 rounded transition-colors ${
-                            isActive("history") ? "bg-blue-600" : "hover:bg-gray-700"
-                        }`}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive("history")
+                            ? "bg-primary text-white shadow-lg shadow-primary/20"
+                            : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+                            }`}
                     >
-                        <History /> Histórico
+                        <History size={18} /> Histórico
                     </Link>
+
                     <Link
                         href="/system/logs"
-                        className={`flex flex-row gap-2.5 cursor-pointer px-2 py-1 rounded transition-colors ${
-                            isActive("logs") ? "bg-blue-600" : "hover:bg-gray-700"
-                        }`}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive("logs")
+                            ? "bg-primary text-white shadow-lg shadow-primary/20"
+                            : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+                            }`}
                     >
-                        <SquareTerminal /> Logs
+                        <SquareTerminal size={18} /> Logs
                     </Link>
-                </div>
+                </nav>
 
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 mt-auto pt-6 border-t border-border-subtle/50">
                     <Link
                         href="/system/profile"
-                        className={`flex flex-row gap-2.5 cursor-pointer px-2 py-1 rounded transition-colors ${
-                            isActive("profile") ? "bg-blue-600" : "hover:bg-gray-700"
-                        }`}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive("profile")
+                            ? "bg-primary text-white"
+                            : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+                            }`}
                     >
-                        <img className="w-6 h-6" src="/no-profile-photo.svg" alt="User's Profile Picture" />Perfil
+                        <div className="w-6 h-6 rounded-full overflow-hidden border border-white/10">
+                            <img className="w-full h-full object-cover" src="/no-profile-photo.svg" alt="Profile" />
+                        </div>
+                        Perfil
                     </Link>
                     <Link
                         href="/system/settings"
-                        className={`flex flex-row gap-2.5 cursor-pointer px-2 py-1 rounded transition-colors ${
-                            isActive("settings") ? "bg-blue-600" : "hover:bg-gray-700"
-                        }`}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive("settings")
+                            ? "bg-primary text-white"
+                            : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+                            }`}
                     >
-                        <CogIcon /> Configurações
+                        <CogIcon size={18} /> Configurações
                     </Link>
                 </div>
             </div>

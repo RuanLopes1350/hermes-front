@@ -1,62 +1,135 @@
+"use client";
+
 import Input from "@/src/components/input"
 import ButtonInput from "@/src/components/button-input"
 import Button from "@/src/components/button"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Loader2 } from "lucide-react"
 import { FaGithub, FaGoogle } from "react-icons/fa"
 import Link from "next/link"
-import { GitHub, Version, Documentacao, Privacidade, Status } from "../../layout"
+import { GitHub, Version, Documentacao, Privacidade, Status } from "@/src/constants/links"
+import { useState } from "react"
+import { authClient } from "@/src/lib/auth-client"
+import { useRouter } from "next/navigation"
 
 export default function SignInPage() {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const router = useRouter();
+
+    async function handleSignIn() {
+        setLoading(true);
+        setError("");
+        
+        try {
+            const { data, error } = await authClient.signIn.email({
+                email,
+                password,
+            });
+
+            if (error) {
+                setError(error.message || "Erro ao realizar login.");
+            } else {
+                router.push("/system/dashboard");
+            }
+        } catch (err: any) {
+            setError("Erro interno do servidor.");
+        } finally {
+            setLoading(false);
+        }
+    }
+
     return (
-        // Removido o bg-[#0f0f11] e o min-h-screen. 
-        // Agora o elemento pai apenas agrupa o conteúdo com largura total
-        <div className="flex flex-col items-center w-full gap-8">
+        <div className="flex flex-col items-center w-full max-w-screen-xl mx-auto px-6 py-12 gap-12">
             
-            <div className="flex flex-col items-center text-center">
-                <img className="border border-[#252428] rounded-2xl w-20 h-20 mb-2 shadow-sm" src="*" alt="Hermes Logo" />
-                <h1 className="text-[#f9f5f8] font-bold text-5xl">Hermes</h1>
-                <p className="text-[#adaaad] text-xl mt-2">Microsserviço de Envio de E-mails</p>
+            {/* Logo & Hero Section */}
+            <div className="flex flex-col items-center text-center space-y-4">
+                <div className="bg-primary/10 p-4 rounded-3xl border border-primary/20 shadow-2xl shadow-primary/10">
+                    <img className="w-16 h-16" src='/hermes-icon.svg' alt="Hermes Logo" />
+                </div>
+                <div>
+                    <h1 className="text-text-primary font-black text-6xl tracking-tighter">Hermes</h1>
+                    <p className="text-text-secondary text-lg font-medium tracking-tight">Mail Engine Infrastructure</p>
+                </div>
             </div>
 
-            {/* Substituímos o w-1/3 por w-full max-w-lg para responsividade perfeita */}
-            <div className="w-full max-w-lg bg-[#161619] p-8 border border-[#252428] rounded-xl shadow-md">
-                <h2 className="text-[#f9f5f8] text-3xl font-bold">Bem-vindo</h2>
-                <p className="text-[#adaaad] text-lg mb-6">Informe as suas credenciais de acesso</p>
+            {/* Login Card */}
+            <div className="w-full max-w-md bg-surface p-10 border border-border-subtle rounded-3xl shadow-2xl relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50"></div>
                 
-                <div className="flex flex-col gap-4">
-                    <Input type="email" label="E-MAIL" labelColor="text-[#a1a1aa]" placeholder="email@exemplo.com" containerClassName="w-full" />
+                <div className="mb-10 text-center">
+                    <h2 className="text-text-primary text-3xl font-bold tracking-tight">Bem-vindo</h2>
+                    <p className="text-text-secondary text-sm font-medium mt-1">Acesse sua conta para continuar</p>
+                </div>
+                
+                <div className="flex flex-col gap-6">
+                    {error && (
+                        <div className="bg-danger/10 border border-danger/20 text-danger text-xs p-3 rounded-lg font-medium">
+                            {error}
+                        </div>
+                    )}
+
+                    <Input 
+                        type="email" 
+                        label="E-mail profissional" 
+                        placeholder="exemplo@empresa.com" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
                     
-                    <Input type="password" label="SENHA" labelColor="text-[#a1a1aa]" secondaryLabel={<Link href="/auth/recovery" className="text-[#be9dff] hover:underline">Esqueci a minha senha</Link>} secondaryLabelColor="text-[#be9dff]" placeholder="********" containerClassName="w-full" />
+                    <div className="space-y-1">
+                        <Input 
+                            type="password" 
+                            label="Senha" 
+                            secondaryLabel={
+                                <Link href="/auth/recovery" className="text-primary hover:text-primary-hover transition-colors">
+                                    Recuperar acesso
+                                </Link>
+                            } 
+                            placeholder="Sua senha secreta" 
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                    </div>
                     
-                    {/* Ajuste de margem superior no botão para dar espaço visual (mt-2) */}
-                    <ButtonInput label="ENTRAR" labelIcon={<ArrowRight />} containerClassName="w-full h-14 mt-2" />
+                    <ButtonInput 
+                        label={loading ? "Autenticando..." : "Acessar Dashboard"} 
+                        labelIcon={loading ? <Loader2 className="animate-spin" size={18} /> : <ArrowRight size={18} />} 
+                        containerClassName="mt-4"
+                        onClick={handleSignIn}
+                    />
                 </div>
 
-                <div className="flex items-center gap-4 my-6">
-                    <div className="flex-1 h-px bg-[#252428]"></div>
-                    <p className="text-xs text-[#71717a] whitespace-nowrap">OU CONTINUAR COM</p>
-                    <div className="flex-1 h-px bg-[#252428]"></div>
+                <div className="flex items-center gap-4 my-8">
+                    <div className="flex-1 h-px bg-border-subtle/50"></div>
+                    <p className="text-[10px] font-bold text-text-secondary/50 tracking-widest whitespace-nowrap">OU CONECTAR COM</p>
+                    <div className="flex-1 h-px bg-border-subtle/50"></div>
                 </div>
 
-                <div className="w-full flex flex-row gap-4">
-                    <Button label="GitHub" labelIcon={<FaGithub />} containerClassName="w-1/2" />
-                    <Button label="Google" labelIcon={<FaGoogle />} containerClassName="w-1/2" />
+                <div className="grid grid-cols-2 gap-4">
+                    <Button label="GitHub" labelIcon={<FaGithub size={18} />} variant="outline" containerClassName="w-full" />
+                    <Button label="Google" labelIcon={<FaGoogle size={18} />} variant="outline" containerClassName="w-full" />
                 </div>
 
-                <div className="flex flex-row items-center justify-center pt-6">
-                    {/* Correção lógica da mensagem de registo */}
-                    <p className="text-[#adaaad]">Ainda não possui uma conta? <Link href="/auth/sign-up" className="text-[#be9dff] hover:underline">Registe-se</Link></p>
+                <div className="mt-10 text-center">
+                    <p className="text-text-secondary text-sm font-medium">
+                        Novo por aqui? <Link href="/auth/sign-up" className="text-primary font-bold hover:underline">Criar conta gratuita</Link>
+                    </p>
                 </div>
             </div>
 
-            <div className="flex flex-col items-center gap-4 mt-4 text-sm text-center">
-                <div className="flex flex-row gap-8">
-                    <a href={Documentacao} target="_blank" rel="noopener noreferrer" className="text-[#71717a] hover:text-[#f9f5f8] transition-colors">DOCUMENTAÇÃO</a>
-                    <a href={Status} target="_blank" rel="noopener noreferrer" className="text-[#71717a] hover:text-[#f9f5f8] transition-colors">STATUS</a>
-                    <a href={Privacidade} target="_blank" rel="noopener noreferrer" className="text-[#71717a] hover:text-[#f9f5f8] transition-colors">PRIVACIDADE</a>
+            {/* Footer Links */}
+            <div className="flex flex-col items-center gap-6 text-[10px] font-bold tracking-widest text-text-secondary/60 uppercase">
+                <div className="flex flex-row gap-10">
+                    <a href={Documentacao} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Documentação</a>
+                    <a href={Status} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Status</a>
+                    <a href={Privacidade} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Privacidade</a>
                 </div>
-                <p className="text-[#71717a]">2026 Hermes - Versão <span className="text-blue-500">{Version}</span></p>
-                <p className="text-[#71717a]">Desenvolvido por <a href={GitHub} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">🔱Ruan Lopes🦈</a></p>
+                <div className="text-center space-y-2">
+                    <p>Hermes Infrastructure © 2026 — v{Version}</p>
+                    <p className="opacity-50">Desenvolvido por <a href={GitHub} target="_blank" rel="noopener noreferrer" className="text-text-primary hover:text-primary underline decoration-primary/30">Ruan Lopes</a></p>
+                </div>
             </div>
         </div>
     )

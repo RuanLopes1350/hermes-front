@@ -7,11 +7,12 @@ interface ButtonInputProps {
 
 export default function ButtonInput({ label, labelIcon, containerClassName, onClick }: ButtonInputProps) {
     return (
-        <div>
-            <button onClick={onClick} className={`cursor-pointer bg-linear-to-r from-[#BE9DFF] to-[#8B4EF7] text-[#3d0088] font-bold py-2 px-4 rounded-2xl flex items-center justify-center ${containerClassName}`}>
-                {label}
-                {labelIcon && <span className="ml-2">{labelIcon}</span>}
-            </button>
-        </div>
+        <button 
+            onClick={onClick} 
+            className={`w-full cursor-pointer bg-primary text-white font-bold h-12 px-6 rounded-xl flex items-center justify-center gap-2 uppercase text-xs tracking-widest shadow-lg shadow-primary/20 hover:bg-primary-hover transition-all duration-300 ${containerClassName}`}
+        >
+            {label}
+            {labelIcon && <span className="opacity-90">{labelIcon}</span>}
+        </button>
     )
 }
