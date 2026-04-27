@@ -4,7 +4,7 @@ import Button from "@/src/components/button"
 import { ArrowRight, ArrowLeft } from "lucide-react"
 import { FaGithub, FaGoogle } from "react-icons/fa"
 import Link from "next/link"
-import { GitHub, Version, Documentacao, Privacidade, Status } from "../../layout"
+import { GitHub, Version, Documentacao, Privacidade, Status } from "@/src/constants/links"
 
 export default function NewPasswordPage() {
     return (
