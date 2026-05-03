@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @theme {
+  /* Cores Originais do Projeto */
   --color-background: #0F172A;
   --color-surface: #1E293B;
   --color-primary: #3B82F6;
@@ -10,8 +11,35 @@
   --color-border-subtle: #334155;
   --color-danger: #EF4444;
   --color-success: #10B981;
+
+  /* Mapeamento Shadcn */
+  --color-foreground: #F8FAFC;
+  --color-card: #1E293B;
+  --color-card-foreground: #F8FAFC;
+  --color-popover: #1E293B;
+  --color-popover-foreground: #F8FAFC;
+  --color-secondary: #334155;
+  --color-secondary-foreground: #F8FAFC;
+  --color-muted: #1E293B;
+  --color-muted-foreground: #94A3B8;
+  --color-accent: #334155;
+  --color-accent-foreground: #F8FAFC;
+  --color-destructive: #EF4444;
+  --color-destructive-foreground: #F8FAFC;
+  --color-border: #334155;
+  --color-input: #334155;
+  --color-ring: #3B82F6;
+
+  --radius-lg: 0.75rem;
+  --radius-md: calc(0.75rem - 2px);
+  --radius-sm: calc(0.75rem - 4px);
 }
 
-body {
-  @apply bg-background text-text-primary;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }

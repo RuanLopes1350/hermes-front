@@ -1,217 +1,351 @@
 "use client";
 
 import { 
-    Save, 
-    Play, 
     ArrowLeft, 
-    Smartphone, 
-    Monitor, 
+    Save, 
     Eye, 
-    Code,
+    Code, 
+    Copy,
+    Loader2,
     RefreshCw,
-    Send,
-    AlertCircle,
-    Info,
-    Loader2
+    Plus,
+    X,
+    Variable,
+    Zap,
+    Globe,
+    Server,
+    AlignLeft,
+    Trash2
 } from "lucide-react";
-import Button from "@/src/components/button";
-import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { apiFetch } from "@/src/lib/api";
+import { Button } from "@/src/components/ui/button";
+import { Input } from "@/src/components/ui/input";
+import { Card } from "@/src/components/ui/card";
+import { Badge } from "@/src/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/src/components/ui/select";
+import Editor, { OnMount } from "@monaco-editor/react";
 
-export default function TemplateEditorPage() {
+interface Service {
+    id: string;
+    name: string;
+}
+
+export default function TemplateDetailsPage() {
     const { id } = useParams();
-    const isNew = id === 'new';
+    const router = useRouter();
+    const editorRef = useRef<any>(null);
     
-    const [mjml, setMjml] = useState(`<mjml>
-  <mj-body bg-color="#f4f4f4">
-    <mj-section background-color="#ffffff" padding-bottom="0">
-      <mj-column>
-        <mj-image width="100px" src="/hermes-icon.svg" />
-        <mj-divider border-color="#3B82F6"></mj-divider>
-      </mj-column>
-    </mj-section>
-    <mj-section background-color="#ffffff">
-      <mj-column>
-        <mj-text font-size="20px" color="#1E293B" font-family="helvetica" font-weight="bold">
-          Olá, {{nome}}!
-        </mj-text>
-        <mj-text font-size="16px" color="#64748B" font-family="helvetica">
-          Este é um template dinâmico gerado pelo Hermes Engine usando MJML e Handlebars.
-        </mj-text>
-        <mj-button background-color="#3B82F6" href="#">
-          CONFIRMAR ACESSO
-        </mj-button>
-      </mj-column>
-    </mj-section>
-  </mj-body>
-</mjml>`);
+    // UI States
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [rendering, setRendering] = useState(false);
+    
+    // Data States
+    const [name, setName] = useState("");
+    const [subject, setSubject] = useState("");
+    const [content, setContent] = useState("");
+    const [htmlPreview, setHtmlPreview] = useState("");
+    const [serviceId, setServiceId] = useState<string | null>(null);
+    const [isGlobal, setIsGlobal] = useState(false);
+    const [services, setServices] = useState<Service[]>([]);
+    const [variables, setVariables] = useState<string[]>([]);
+    const [newVar, setNewVar] = useState("");
 
-    const [variables, setVariables] = useState(`{
-  "nome": "Desenvolvedor"
-}`);
-
-    const [renderedHtml, setRenderedHtml] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
-    const [activeTab, setActiveTab] = useState<'code' | 'vars'>('code');
-
-    const handleRefreshPreview = async () => {
+    // 1. CARREGAR DADOS (TEMPLATE E SERVIÇOS)
+    const loadData = useCallback(async () => {
         setLoading(true);
         try {
-            const varsJson = JSON.parse(variables);
-            
-            // Usando o utilitário centralizado apiFetch
-            // Ele resolve a URL via variável de ambiente e anexa as credenciais
-            const response = await apiFetch(`/api/services/default/templates/preview`, {
-                method: 'POST',
-                body: JSON.stringify({ mjml, variables: varsJson })
-            });
+            const [tRes, sRes] = await Promise.all([
+                apiFetch(`/api/templates/${id}`),
+                apiFetch("/api/services")
+            ]);
 
-            if (response.ok) {
-                const data = await response.json();
-                setRenderedHtml(data.html);
-            } else {
-                console.error("Erro na resposta da API:", response.status);
+            if (tRes.ok) {
+                const tData = await tRes.json();
+                const t = tData.data;
+                setName(t.name);
+                setSubject(t.subject_template || "");
+                setContent(t.mjml_content || t.html_content || "");
+                setServiceId(t.service_id);
+                setIsGlobal(t.global);
+                setVariables(t.variables || []);
+            }
+
+            if (sRes.ok) {
+                const sData = await sRes.json();
+                setServices(sData.data || []);
             }
         } catch (err) {
-            console.error("Erro ao gerar preview:", err);
+            console.error("Erro ao carregar dados:", err);
         } finally {
             setLoading(false);
         }
+    }, [id]);
+
+    // 2. EXECUTAR PREVIEW
+    const handlePreview = useCallback(async (mjmlCode: string) => {
+        if (!mjmlCode) return;
+        setRendering(true);
+        try {
+            // Mapeia variáveis para o preview visual
+            const previewVars = variables.reduce((acc, v) => ({ ...acc, [v]: `[${v.toUpperCase()}]` }), {});
+            
+            const response = await apiFetch("/api/templates/preview", {
+                method: "POST",
+                body: JSON.stringify({ 
+                    mjml: mjmlCode, 
+                    variables: previewVars 
+                })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                setHtmlPreview(result.html);
+            }
+        } catch (err) {
+            console.error("Falha no preview:", err);
+        } finally {
+            setRendering(false);
+        }
+    }, [variables]);
+
+    // 3. SALVAR ALTERAÇÕES
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            const response = await apiFetch(`/api/templates/${id}`, {
+                method: "PATCH",
+                body: JSON.stringify({
+                    name,
+                    subject_template: subject,
+                    mjml_content: content,
+                    html_content: htmlPreview,
+                    variables,
+                    global: isGlobal,
+                    service_id: isGlobal ? null : serviceId
+                })
+            });
+            if (response.ok) {
+                // Feedback silencioso ou toast
+            }
+        } catch (err) {
+            console.error("Erro ao salvar:", err);
+        } finally {
+            setSaving(false);
+        }
     };
 
+    // 4. DELETAR TEMPLATE
+    const handleDelete = async () => {
+        if (!confirm("Excluir este template permanentemente?")) return;
+        setDeleting(true);
+        try {
+            const response = await apiFetch(`/api/templates/${id}`, { method: "DELETE" });
+            if (response.ok) router.push("/system/templates");
+        } catch (err) {
+            console.error("Erro ao deletar:", err);
+            setDeleting(false);
+        }
+    };
+
+    // 5. UTILITÁRIOS DO EDITOR
+    const formatCode = () => {
+        editorRef.current?.getAction('editor.action.formatDocument').run();
+    };
+
+    const handleEditorMount: OnMount = (editor) => {
+        editorRef.current = editor;
+        setTimeout(() => editor.getAction('editor.action.formatDocument').run(), 800);
+    };
+
+    // Lifecycle
+    useEffect(() => { if (id) loadData(); }, [id, loadData]);
+
     useEffect(() => {
-        handleRefreshPreview();
-    }, []);
+        const timer = setTimeout(() => { if (content) handlePreview(content); }, 1500);
+        return () => clearTimeout(timer);
+    }, [content, handlePreview]);
+
+    if (loading) {
+        return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-primary" size={40} /></div>;
+    }
 
     return (
-        <div className="h-[calc(100vh-120px)] flex flex-col gap-6">
-            {/* Header / ActionBar */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4 text-left">
+        <div className="h-[calc(100vh-140px)] flex flex-col gap-6 overflow-hidden text-left">
+            {/* Toolbar Superior */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+                <div className="flex items-center gap-4">
                     <Link href="/system/templates">
-                        <button className="p-2 hover:bg-white/5 rounded-xl text-text-secondary transition-colors">
-                            <ArrowLeft size={20} />
-                        </button>
+                        <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl bg-surface border-border-subtle text-muted-foreground hover:text-primary">
+                            <ArrowLeft size={18} />
+                        </Button>
                     </Link>
-                    <div>
-                        <h2 className="text-xl font-bold tracking-tight uppercase italic">{isNew ? 'Novo Template' : 'Editar Template'}</h2>
-                        <p className="text-[10px] font-mono text-primary font-bold uppercase tracking-widest">{isNew ? 'Rascunho' : id}</p>
+                    <div className="text-left">
+                        <div className="flex items-center gap-2">
+                            <h2 className="text-xl font-bold tracking-tight uppercase text-foreground leading-tight">{name}</h2>
+                            <Badge className={`${isGlobal ? 'bg-primary/10 text-primary' : 'bg-success/10 text-success'} border-none text-[9px] font-bold uppercase gap-1 px-2 py-0.5`}>
+                                {isGlobal ? <Globe size={10} /> : <Server size={10} />}
+                                {isGlobal ? "Global" : (services.find(s => s.id === serviceId)?.name || "Privado")}
+                            </Badge>
+                        </div>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <button className="flex items-center gap-2 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-text-secondary hover:text-text-primary transition-colors border border-border-subtle rounded-xl">
-                        <Send size={14} /> Enviar Teste
-                    </button>
+                    <div className="flex items-center gap-2 bg-surface border border-border-subtle rounded-xl px-3 py-1 mr-2 h-10">
+                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Assunto:</span>
+                        <input 
+                            value={subject}
+                            onChange={(e) => setSubject(e.target.value)}
+                            className="bg-transparent border-none text-[11px] font-medium italic focus:ring-0 w-64 text-foreground placeholder:opacity-30"
+                            placeholder="Assunto do e-mail..."
+                        />
+                    </div>
+                    
                     <Button 
-                        label="Salvar Alterações" 
-                        variant="primary" 
-                        labelIcon={<Save size={18} />} 
-                    />
+                        variant="outline" 
+                        onClick={() => handlePreview(content)}
+                        disabled={rendering}
+                        className="gap-2 font-bold text-[10px] uppercase tracking-widest h-10 px-5 border-border-subtle hover:bg-white/5"
+                    >
+                        <RefreshCw size={14} className={rendering ? "animate-spin" : ""} /> Preview
+                    </Button>
+
+                    <Button 
+                        onClick={handleSave}
+                        disabled={saving || deleting}
+                        className="gap-2 font-black text-[10px] uppercase tracking-widest h-10 px-6 bg-primary shadow-lg shadow-primary/20"
+                    >
+                        {saving ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />}
+                        Salvar
+                    </Button>
+
+                    <Button 
+                        variant="outline"
+                        onClick={handleDelete}
+                        disabled={deleting || saving}
+                        className="h-10 w-10 p-0 rounded-xl border-border-subtle bg-danger/5 text-danger hover:bg-danger hover:text-white transition-all"
+                    >
+                        {deleting ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={18} />}
+                    </Button>
                 </div>
             </div>
 
-            {/* Main Editor Area */}
-            <div className="flex-1 flex gap-6 overflow-hidden">
-                
-                {/* Left Side: Code Editor */}
-                <div className="w-1/2 flex flex-col bg-surface border border-border-subtle rounded-3xl overflow-hidden shadow-xl">
-                    <div className="flex border-b border-border-subtle bg-background/30 p-2">
-                        <button 
-                            onClick={() => setActiveTab('code')}
-                            className={`px-6 py-2 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${
-                                activeTab === 'code' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-text-secondary hover:text-text-primary'
-                            }`}
-                        >
-                            MJML Code
-                        </button>
-                        <button 
-                            onClick={() => setActiveTab('vars')}
-                            className={`px-6 py-2 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${
-                                activeTab === 'vars' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-text-secondary hover:text-text-primary'
-                            }`}
-                        >
-                            Variables (JSON)
-                        </button>
-                    </div>
-
-                    <div className="flex-1 relative group">
-                        {activeTab === 'code' ? (
-                            <textarea 
-                                value={mjml}
-                                onChange={(e) => setMjml(e.target.value)}
-                                className="w-full h-full bg-transparent p-8 font-mono text-sm text-primary/80 focus:outline-none resize-none scrollbar-hide leading-relaxed"
-                                spellCheck={false}
-                            />
-                        ) : (
-                            <textarea 
-                                value={variables}
-                                onChange={(e) => setVariables(e.target.value)}
-                                className="w-full h-full bg-transparent p-8 font-mono text-sm text-success/80 focus:outline-none resize-none scrollbar-hide leading-relaxed"
-                                spellCheck={false}
-                            />
-                        )}
-                        <button 
-                            onClick={handleRefreshPreview}
-                            className="absolute bottom-6 right-6 p-4 bg-primary text-white rounded-2xl shadow-2xl hover:scale-110 active:scale-95 transition-all group-hover:opacity-100 opacity-80"
-                            title="Atualizar Preview"
-                        >
-                            {loading ? <RefreshCw className="animate-spin" size={20} /> : <Play size={20} fill="currentColor" />}
-                        </button>
-                    </div>
-                </div>
-
-                {/* Right Side: Visual Preview */}
-                <div className="w-1/2 flex flex-col bg-surface border border-border-subtle rounded-3xl overflow-hidden shadow-xl">
-                    <div className="flex items-center justify-between border-b border-border-subtle bg-background/30 p-3 px-6">
-                        <div className="flex items-center gap-4">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-text-secondary">Preview Real-time</span>
+            {/* Editor e Visualização Lado a Lado */}
+            <div className="flex-1 flex gap-6 min-h-0">
+                <Card className="flex-1 bg-surface border-border-subtle rounded-[32px] border overflow-hidden flex flex-col text-left">
+                    <div className="p-4 border-b border-border-subtle bg-background/30 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Code size={14} className="text-primary" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground font-mono">engine.mjml</span>
                         </div>
-                        <div className="flex bg-background/50 p-1 rounded-xl border border-border-subtle">
-                            <button 
-                                onClick={() => setViewMode('desktop')}
-                                className={`p-1.5 rounded-lg transition-all ${viewMode === 'desktop' ? 'bg-primary text-white' : 'text-text-secondary hover:text-text-primary'}`}
-                            >
-                                <Monitor size={16} />
-                            </button>
-                            <button 
-                                onClick={() => setViewMode('mobile')}
-                                className={`p-1.5 rounded-lg transition-all ${viewMode === 'mobile' ? 'bg-primary text-white' : 'text-text-secondary hover:text-text-primary'}`}
-                            >
-                                <Smartphone size={16} />
-                            </button>
-                        </div>
+                        <Button variant="ghost" size="sm" onClick={formatCode} className="h-7 text-[9px] uppercase font-bold text-muted-foreground hover:text-primary gap-1.5 px-2">
+                            <AlignLeft size={12} /> Indentar MJML
+                        </Button>
                     </div>
+                    <div className="flex-1 bg-[#1e1e1e]">
+                        <Editor
+                            height="100%"
+                            defaultLanguage="xml"
+                            theme="vs-dark"
+                            value={content}
+                            onChange={(val) => setContent(val || "")}
+                            onMount={handleEditorMount}
+                            options={{
+                                minimap: { enabled: false },
+                                fontSize: 13,
+                                fontFamily: 'JetBrains Mono, monospace',
+                                lineHeight: 1.5,
+                                padding: { top: 15 },
+                                automaticLayout: true,
+                                wordWrap: "on",
+                                tabSize: 2,
+                                formatOnPaste: true,
+                                formatOnType: true
+                            }}
+                        />
+                    </div>
+                </Card>
 
-                    <div className="flex-1 bg-[#f4f4f4] relative flex items-center justify-center p-8 overflow-hidden">
-                        {loading && (
-                            <div className="absolute inset-0 z-10 bg-white/50 backdrop-blur-[2px] flex items-center justify-center">
-                                <Loader2 className="animate-spin text-primary" size={40} />
+                <div className="w-[450px] flex flex-col gap-6 shrink-0">
+                    <Card className="flex-1 bg-surface border-border-subtle rounded-[32px] border overflow-hidden flex flex-col relative text-left">
+                        <div className="p-4 border-b border-border-subtle bg-background/30 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <Eye size={14} className="text-success" />
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Saída em Tempo Real</span>
                             </div>
-                        )}
-                        <div className={`h-full bg-white shadow-2xl transition-all duration-500 overflow-hidden rounded-lg ${
-                            viewMode === 'desktop' ? 'w-full' : 'w-[375px]'
-                        }`}>
-                            <iframe 
-                                srcDoc={renderedHtml}
-                                title="MJML Preview"
-                                className="w-full h-full border-none"
-                            />
+                            {rendering && <Badge className="bg-primary/10 text-primary animate-pulse border-none text-[8px]">RENDERING</Badge>}
                         </div>
-                    </div>
+                        <div className="flex-1 bg-white">
+                            {htmlPreview ? (
+                                <iframe srcDoc={htmlPreview} className="w-full h-full border-none" title="Preview" />
+                            ) : (
+                                <div className="h-full flex flex-col items-center justify-center text-slate-300 gap-2 italic text-xs px-12 text-center">
+                                    <Zap size={24} className="opacity-10" />
+                                    Processando MJML...
+                                </div>
+                            )}
+                        </div>
+                    </Card>
+
+                    {/* Tags e Escopo */}
+                    <Card className="bg-surface border-border-subtle rounded-[32px] p-5 border text-left shrink-0">
+                        <div className="flex flex-col gap-5 text-left">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2 text-left">
+                                    <Variable size={14} className="text-primary" />
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-foreground">Tags Dinâmicas</span>
+                                </div>
+                                <Select value={isGlobal ? "global" : (serviceId || "")} onValueChange={(v) => {
+                                    if (v === "global") { setIsGlobal(true); setServiceId(null); }
+                                    else { setIsGlobal(false); setServiceId(v); }
+                                }}>
+                                    <SelectTrigger className="bg-background border-border-subtle h-8 w-32 text-[9px] font-bold uppercase tracking-widest rounded-lg">
+                                        <SelectValue placeholder="Escopo..." />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-surface border-border-subtle">
+                                        <SelectItem value="global">🌍 Global</SelectItem>
+                                        {services.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="flex gap-2 text-left">
+                                <Input 
+                                    placeholder="Nova tag..."
+                                    value={newVar}
+                                    onChange={(e) => setNewVar(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && (variables.includes(newVar) ? null : setVariables([...variables, newVar]), setNewVar(""))}
+                                    className="bg-background border-border-subtle rounded-xl h-9 text-[10px] italic px-4 focus:border-primary"
+                                />
+                                <Button size="icon" className="h-9 w-9 shrink-0 rounded-xl bg-primary/10 text-primary hover:bg-primary transition-all" onClick={() => {
+                                    if (newVar && !variables.includes(newVar)) { setVariables([...variables, newVar]); setNewVar(""); }
+                                }}>
+                                    <Plus size={14} />
+                                </Button>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2 max-h-[100px] overflow-y-auto text-left">
+                                {variables.map((tag) => (
+                                    <Badge key={tag} variant="outline" className="bg-background/50 border-border-subtle text-primary font-mono text-[9px] gap-2 py-1.5 px-3">
+                                        {"{{" + tag + "}}"}
+                                        <button onClick={() => setVariables(variables.filter(i => i !== tag))} className="text-muted-foreground hover:text-danger"><X size={10} /></button>
+                                    </Badge>
+                                ))}
+                            </div>
+                        </div>
+                    </Card>
                 </div>
-
-            </div>
-
-            {/* Hint Box */}
-            <div className="flex items-center gap-3 bg-primary/5 border border-primary/20 p-4 rounded-2xl">
-                <Info size={18} className="text-primary" />
-                <p className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">
-                    Dica: Use <span className="text-text-primary">{"{{variavel}}"}</span> para injetar dados dinâmicos do seu JSON no template.
-                </p>
             </div>
         </div>
     );

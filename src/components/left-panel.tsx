@@ -1,31 +1,40 @@
 "use client";
 
-import { LayoutDashboard, KeyRound, Code, FileText, History, SquareTerminal, CogIcon } from "lucide-react"
+import { LayoutDashboard, KeyRound, Code, FileText, History, SquareTerminal, CogIcon, Users } from "lucide-react"
 import { GrServices } from "react-icons/gr";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function LeftPanel() {
     const pathname = usePathname();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     const isActive = (path: string) => {
         return pathname?.startsWith(`/system/${path}`);
     };
 
+    if (!mounted) return <div className="w-64 border-r border-border-subtle bg-surface h-full" />;
+
     return (
-        <div className="fixed left-0 top-0 w-64 bg-surface border-r border-border-subtle text-text-primary p-6 flex flex-col h-screen overflow-y-auto">
+        <aside className="w-64 bg-surface border-r border-border-subtle text-text-primary p-6 flex flex-col h-full overflow-y-auto shrink-0 z-50">
             <div className="flex flex-row items-center gap-3 mb-10">
                 <div className="bg-primary/10 p-2 rounded-xl">
                     <img className="w-10 h-10" src='/hermes-icon.svg' alt="Hermes Icon" />
                 </div>
                 <div className="flex flex-col items-start justify-center gap-0">
                     <h1 className="font-bold text-xl tracking-tight">Hermes</h1>
-                    <p className="text-[10px] uppercase tracking-wider text-text-secondary font-medium">Mail Engine</p>
+                    <p className="text-[10px] uppercase tracking-wider text-text-secondary font-medium text-left">Mail Engine</p>
                 </div>
             </div>
 
             <div className="flex flex-col justify-between flex-grow">
-                <nav className="flex flex-col gap-1.5">
-                    <p className="text-[10px] font-bold text-text-secondary uppercase px-3 mb-2 tracking-widest">Geral</p>
+                <nav className="flex flex-col gap-1.5 text-left">
+                    <p className="text-[10px] font-bold text-text-secondary uppercase px-3 mb-2 tracking-widest text-left">Geral</p>
 
                     <Link
                         href="/system/dashboard"
@@ -47,7 +56,7 @@ export default function LeftPanel() {
                         <GrServices size={18} /> Serviços
                     </Link>
 
-                    <p className="text-[10px] font-bold text-text-secondary uppercase px-3 mt-6 mb-2 tracking-widest">Segurança</p>
+                    <p className="text-[10px] font-bold text-text-secondary uppercase px-3 mt-6 mb-2 tracking-widest text-left">Segurança</p>
 
                     <Link
                         href="/system/credentials"
@@ -69,7 +78,7 @@ export default function LeftPanel() {
                         <Code size={18} /> API Keys
                     </Link>
 
-                    <p className="text-[10px] font-bold text-text-secondary uppercase px-3 mt-6 mb-2 tracking-widest">Monitoramento</p>
+                    <p className="text-[10px] font-bold text-text-secondary uppercase px-3 mt-6 mb-2 tracking-widest text-left">Monitoramento</p>
 
                     <Link
                         href="/system/templates"
@@ -88,17 +97,7 @@ export default function LeftPanel() {
                             : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
                             }`}
                     >
-                        <FileText size={18} /> Sandbox
-                    </Link>
-
-                    <Link
-                        href="/system/history"
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive("history")
-                            ? "bg-primary text-white shadow-lg shadow-primary/20"
-                            : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
-                            }`}
-                    >
-                        <History size={18} /> Histórico
+                        <SquareTerminal size={18} /> Sandbox
                     </Link>
 
                     <Link
@@ -108,11 +107,23 @@ export default function LeftPanel() {
                             : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
                             }`}
                     >
-                        <SquareTerminal size={18} /> Logs
+                        <History size={18} /> Logs
+                    </Link>
+
+                    <p className="text-[10px] font-bold text-text-secondary uppercase px-3 mt-6 mb-2 tracking-widest text-left">Administração</p>
+
+                    <Link
+                        href="/system/users"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive("users")
+                            ? "bg-primary text-white shadow-lg shadow-primary/20"
+                            : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+                            }`}
+                    >
+                        <Users size={18} /> Usuários
                     </Link>
                 </nav>
 
-                <div className="flex flex-col gap-2 mt-auto pt-6 border-t border-border-subtle/50">
+                <div className="flex flex-col gap-2 mt-auto pt-6 border-t border-border-subtle/50 text-left">
                     <Link
                         href="/system/profile"
                         className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive("profile")
@@ -125,17 +136,8 @@ export default function LeftPanel() {
                         </div>
                         Perfil
                     </Link>
-                    <Link
-                        href="/system/settings"
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive("settings")
-                            ? "bg-primary text-white"
-                            : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
-                            }`}
-                    >
-                        <CogIcon size={18} /> Configurações
-                    </Link>
                 </div>
             </div>
-        </div>
+        </aside>
     )
 }

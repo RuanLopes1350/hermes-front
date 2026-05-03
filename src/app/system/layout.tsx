@@ -11,20 +11,19 @@ export default function SystemLayout({
 }>) {
   const pathname = usePathname();
   
-  // Extrair o nome da página atual para o breadcrumb
   const pageName = pathname?.split("/").pop() || "dashboard";
   const formattedPageName = pageName.charAt(0).toUpperCase() + pageName.slice(1);
 
   return (
     <div className="flex h-screen bg-background text-text-primary overflow-hidden">
-      {/* Menu Lateral - Adicionado de volta */}
+      {/* Menu Lateral Estabilizado */}
       <LeftPanel />
 
-      {/* Área de Conteúdo Principal */}
-      <div className="flex-1 flex flex-col md:ml-64 overflow-hidden">
+      {/* Área de Conteúdo Principal - Removido a margem fixa */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         
         {/* Top Navigation Bar */}
-        <header className="h-16 border-b border-border-subtle bg-surface/50 backdrop-blur-md flex items-center justify-between px-8 z-10">
+        <header className="h-16 border-b border-border-subtle bg-surface/50 backdrop-blur-md flex items-center justify-between px-8 z-10 shrink-0">
           <div className="flex items-center gap-4">
             <nav className="flex text-sm font-medium">
               <span className="text-text-secondary">Sistema</span>
@@ -64,7 +63,6 @@ export default function SystemLayout({
 
         {/* Viewport Principal */}
         <main className="flex-1 overflow-y-auto p-8 relative">
-           {/* Background decorative elements */}
            <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none"></div>
            
            <div className="max-w-7xl mx-auto relative z-10">
