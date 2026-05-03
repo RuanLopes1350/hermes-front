@@ -303,7 +303,6 @@ export default function CredentialsPage() {
                         ) : (
                             <div className="p-12 text-center animate-in zoom-in duration-500">
                                 <div className="bg-success/10 w-20 h-20 rounded-[30px] flex items-center justify-center text-success mx-auto mb-8">
-                                    <ShieldCheck size={40} />
                                 </div>
                                 <h3 className="text-3xl font-black italic uppercase tracking-tighter text-success mb-2 text-center">Conexão Criada!</h3>
                                 <p className="text-muted-foreground text-sm italic mb-10 text-center">O Hermes gerou uma <span className="text-foreground font-bold">API Key exclusiva</span> para este remetente.</p>
