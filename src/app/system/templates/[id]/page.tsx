@@ -1,10 +1,10 @@
 "use client";
 
-import {
-    ArrowLeft,
-    Save,
-    Eye,
-    Code,
+import { 
+    ArrowLeft, 
+    Save, 
+    Eye, 
+    Code, 
     Copy,
     Loader2,
     RefreshCw,
@@ -26,11 +26,11 @@ import { Input } from "@/src/components/ui/input";
 import { Card } from "@/src/components/ui/card";
 import { Badge } from "@/src/components/ui/badge";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/src/components/ui/select";
 import Editor, { OnMount } from "@monaco-editor/react";
 import format from "xml-formatter";
@@ -44,17 +44,17 @@ export default function TemplateDetailsPage() {
     const { id } = useParams();
     const router = useRouter();
     const editorRef = useRef<any>(null);
-
+    
     // UI States
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [rendering, setRendering] = useState(false);
-
+    
     // Data States
     const [name, setName] = useState("");
     const [subject, setSubject] = useState("");
-    const [content, setContent] = useState("");
+    const [content, setContent] = useState(""); // Este é o código MJML
     const [htmlPreview, setHtmlPreview] = useState("");
     const [serviceId, setServiceId] = useState<string | null>(null);
     const [isGlobal, setIsGlobal] = useState(false);
@@ -62,7 +62,7 @@ export default function TemplateDetailsPage() {
     const [variables, setVariables] = useState<string[]>([]);
     const [newVar, setNewVar] = useState("");
 
-    // 1. CARREGAR DADOS (TEMPLATE E SERVIÇOS)
+    // 1. CARREGAR DADOS
     const loadData = useCallback(async () => {
         setLoading(true);
         try {
@@ -76,7 +76,8 @@ export default function TemplateDetailsPage() {
                 const t = tData.data;
                 setName(t.name);
                 setSubject(t.subject_template || "");
-                setContent(t.mjml_content || t.html_content || "");
+                // IMPORTANTE: Carregamos do campo html_content que guarda o MJML no seu banco
+                setContent(t.html_content || ""); 
                 setServiceId(t.service_id);
                 setIsGlobal(t.global);
                 setVariables(t.variables || []);
@@ -99,12 +100,12 @@ export default function TemplateDetailsPage() {
         setRendering(true);
         try {
             const previewVars = variables.reduce((acc, v) => ({ ...acc, [v]: `[${v.toUpperCase()}]` }), {});
-
+            
             const response = await apiFetch("/api/templates/preview", {
                 method: "POST",
-                body: JSON.stringify({
-                    mjml: mjmlCode,
-                    variables: previewVars
+                body: JSON.stringify({ 
+                    mjml: mjmlCode, 
+                    variables: previewVars 
                 })
             });
 
@@ -123,18 +124,20 @@ export default function TemplateDetailsPage() {
     const handleSave = async () => {
         setSaving(true);
         try {
+            // CORREÇÃO: Enviamos o código do editor para 'html_content' 
+            // e NÃO enviamos a versão renderizada, deixando a API lidar com isso.
             await apiFetch(`/api/templates/${id}`, {
                 method: "PATCH",
                 body: JSON.stringify({
                     name,
                     subject_template: subject,
-                    mjml_content: content,
-                    html_content: htmlPreview,
+                    html_content: content, 
                     variables,
                     global: isGlobal,
                     service_id: isGlobal ? null : serviceId
                 })
             });
+            alert("Template salvo!");
         } catch (err) {
             console.error("Erro ao salvar:", err);
         } finally {
@@ -167,14 +170,12 @@ export default function TemplateDetailsPage() {
             setContent(formatted);
         } catch (err) {
             console.warn("Erro ao formatar XML:", err);
-            // Fallback para o formatador do Monaco se o xml-formatter falhar (ex: xml inválido)
             editorRef.current?.getAction('editor.action.formatDocument').run();
         }
     }, [content]);
 
     const handleEditorMount: OnMount = (editor) => {
         editorRef.current = editor;
-        // Formata após carregar o conteúdo inicial
     };
 
     // Lifecycle
@@ -191,17 +192,16 @@ export default function TemplateDetailsPage() {
 
     return (
         <div className="h-[calc(100vh-140px)] flex flex-col gap-6 overflow-hidden text-left">
-            {/* Toolbar Superior */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
                 <div className="flex items-center gap-4 text-left">
                     <Link href="/system/templates">
-                        <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl bg-surface border-border-subtle text-muted-foreground hover:text-primary">
+                        <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl bg-surface border-border-subtle text-muted-foreground hover:text-primary text-left">
                             <ArrowLeft size={18} />
                         </Button>
                     </Link>
                     <div className="text-left">
-                        <div className="flex items-center gap-2">
-                            <h2 className="text-xl font-bold tracking-tight uppercase text-foreground leading-tight">{name}</h2>
+                        <div className="flex items-center gap-2 text-left">
+                            <h2 className="text-xl font-bold tracking-tight uppercase text-foreground leading-tight text-left">{name}</h2>
                             <Badge className={`${isGlobal ? 'bg-primary/10 text-primary' : 'bg-success/10 text-success'} border-none text-[9px] font-bold uppercase gap-1 px-2 py-0.5`}>
                                 {isGlobal ? <Globe size={10} /> : <Server size={10} />}
                                 {isGlobal ? "Global" : (services.find(s => s.id === serviceId)?.name || "Privado")}
@@ -210,19 +210,19 @@ export default function TemplateDetailsPage() {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 bg-surface border border-border-subtle rounded-xl px-3 py-1 mr-2 h-10">
-                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Assunto:</span>
-                        <input
+                <div className="flex items-center gap-3 text-left">
+                    <div className="flex items-center gap-2 bg-surface border border-border-subtle rounded-xl px-3 py-1 mr-2 h-10 text-left">
+                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-left">Assunto:</span>
+                        <input 
                             value={subject}
                             onChange={(e) => setSubject(e.target.value)}
                             className="bg-transparent border-none text-[11px] font-medium italic focus:ring-0 w-64 text-foreground placeholder:opacity-30"
                             placeholder="Assunto do e-mail..."
                         />
                     </div>
-
-                    <Button
-                        variant="outline"
+                    
+                    <Button 
+                        variant="outline" 
                         onClick={() => handlePreview(content)}
                         disabled={rendering}
                         className="gap-2 font-bold text-[10px] uppercase tracking-widest h-10 px-5 border-border-subtle hover:bg-white/5"
@@ -230,7 +230,7 @@ export default function TemplateDetailsPage() {
                         <RefreshCw size={14} className={rendering ? "animate-spin" : ""} /> Preview
                     </Button>
 
-                    <Button
+                    <Button 
                         onClick={handleSave}
                         disabled={saving || deleting}
                         className="gap-2 font-black text-[10px] uppercase tracking-widest h-10 px-6 bg-primary shadow-lg shadow-primary/20"
@@ -239,7 +239,7 @@ export default function TemplateDetailsPage() {
                         Salvar
                     </Button>
 
-                    <Button
+                    <Button 
                         variant="outline"
                         onClick={handleDelete}
                         disabled={deleting || saving}
@@ -250,10 +250,9 @@ export default function TemplateDetailsPage() {
                 </div>
             </div>
 
-            {/* Editor e Visualização Lado a Lado */}
             <div className="flex-1 flex gap-6 min-h-0 text-left">
                 <Card className="flex-1 bg-surface border-border-subtle rounded-[32px] border overflow-hidden flex flex-col text-left">
-                    <div className="p-4 border-b border-border-subtle bg-background/30 flex items-center justify-between">
+                    <div className="p-4 border-b border-border-subtle bg-background/30 flex items-center justify-between text-left">
                         <div className="flex items-center gap-2 text-left">
                             <Code size={14} className="text-primary" />
                             <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground font-mono">engine.mjml</span>
@@ -262,7 +261,7 @@ export default function TemplateDetailsPage() {
                             <AlignLeft size={12} /> Indentar MJML
                         </Button>
                     </div>
-                    <div className="flex-1 bg-[#1e1e1e]">
+                    <div className="flex-1 bg-[#1e1e1e] text-left">
                         <Editor
                             height="100%"
                             defaultLanguage="xml"
@@ -284,16 +283,16 @@ export default function TemplateDetailsPage() {
                     </div>
                 </Card>
 
-                <div className="w-[450px] flex flex-col gap-6 shrink-0">
+                <div className="w-[450px] flex flex-col gap-6 shrink-0 text-left">
                     <Card className="flex-1 bg-surface border-border-subtle rounded-[32px] border overflow-hidden flex flex-col relative text-left">
-                        <div className="p-4 border-b border-border-subtle bg-background/30 flex items-center justify-between">
-                            <div className="flex items-center gap-2">
+                        <div className="p-4 border-b border-border-subtle bg-background/30 flex items-center justify-between text-left">
+                            <div className="flex items-center gap-2 text-left">
                                 <Eye size={14} className="text-success" />
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Saída em Tempo Real</span>
                             </div>
                             {rendering && <Badge className="bg-primary/10 text-primary animate-pulse border-none text-[8px]">RENDERING</Badge>}
                         </div>
-                        <div className="flex-1 bg-white">
+                        <div className="flex-1 bg-white relative">
                             {htmlPreview ? (
                                 <iframe srcDoc={htmlPreview} className="w-full h-full border-none" title="Preview" />
                             ) : (
@@ -305,13 +304,12 @@ export default function TemplateDetailsPage() {
                         </div>
                     </Card>
 
-                    {/* Tags e Escopo */}
-                    <Card className="bg-surface border-border-subtle rounded-[32px] p-5 border text-left shrink-0">
-                        <div className="flex flex-col gap-5 text-left">
+                    <Card className="bg-surface border-border-subtle rounded-[32px] p-5 border text-left shrink-0 text-left">
+                        <div className="flex flex-col gap-5 text-left text-left">
                             <div className="flex items-center justify-between text-left">
                                 <div className="flex items-center gap-2 text-left">
                                     <Variable size={14} className="text-primary" />
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-foreground">Tags Dinâmicas</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-foreground text-left">Tags Dinâmicas</span>
                                 </div>
                                 <Select value={isGlobal ? "global" : (serviceId || "")} onValueChange={(v) => {
                                     if (v === "global") { setIsGlobal(true); setServiceId(null); }
@@ -328,12 +326,12 @@ export default function TemplateDetailsPage() {
                             </div>
 
                             <div className="flex gap-2 text-left">
-                                <Input
+                                <Input 
                                     placeholder="Nova tag..."
                                     value={newVar}
                                     onChange={(e) => setNewVar(e.target.value)}
                                     onKeyDown={(e) => e.key === "Enter" && (variables.includes(newVar) ? null : setVariables([...variables, newVar]), setNewVar(""))}
-                                    className="bg-background border-border-subtle rounded-xl h-9 text-[10px] italic px-4 focus:border-primary"
+                                    className="bg-background border-border-subtle rounded-xl h-9 text-[10px] italic px-4 focus:border-primary text-left"
                                 />
                                 <Button size="icon" className="h-9 w-9 shrink-0 rounded-xl bg-primary/10 text-primary hover:bg-primary transition-all" onClick={() => {
                                     if (newVar && !variables.includes(newVar)) { setVariables([...variables, newVar]); setNewVar(""); }
