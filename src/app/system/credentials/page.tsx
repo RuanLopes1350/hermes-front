@@ -37,14 +37,8 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/src/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/src/components/ui/select";
 import { Card } from "@/src/components/ui/card";
+import { CustomSelect } from "@/src/components/ui/custom-select";
 
 interface Service {
     id: string;
@@ -187,14 +181,12 @@ export default function CredentialsPage() {
                                     
                                     <div className="space-y-3">
                                         <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">1. Selecione o Projeto (Serviço)</label>
-                                        <Select value={selectedServiceId} onValueChange={setSelectedServiceId}>
-                                            <SelectTrigger className="w-full bg-background border-border-subtle rounded-2xl px-6 py-7 text-sm focus:border-primary outline-none italic font-medium">
-                                                <SelectValue placeholder="Escolha um serviço..." />
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-surface border-border-subtle">
-                                                {services.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
+                                        <CustomSelect 
+                                            value={selectedServiceId} 
+                                            onValueChange={setSelectedServiceId}
+                                            placeholder="Escolha um serviço..."
+                                            options={services.map(s => ({ value: s.id, label: s.name }))}
+                                        />
                                     </div>
 
                                     {!selectedType ? (
