@@ -25,6 +25,8 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     if (response.status === 401) {
         // Se houver erro de auth, poderíamos redirecionar para o login aqui
         console.warn("Sessão expirada ou inválida.");
+        localStorage.removeItem("authToken");
+        window.location.href = "/auth/sign-in";
     }
 
     return response;

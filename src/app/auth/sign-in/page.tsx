@@ -21,7 +21,7 @@ export default function SignInPage() {
     async function handleSignIn() {
         setLoading(true);
         setError("");
-        
+
         try {
             const { data, error } = await authClient.signIn.email({
                 email,
@@ -41,8 +41,8 @@ export default function SignInPage() {
     }
 
     return (
-        <div className="flex flex-col items-center w-full max-w-screen-xl mx-auto px-6 py-12 gap-12">
-            
+        <div className="flex flex-col items-center w-full max-w-7xl mx-auto px-6 py-12 gap-12">
+
             {/* Logo & Hero Section */}
             <div className="flex flex-col items-center text-center space-y-4">
                 <div className="bg-primary/10 p-4 rounded-3xl border border-primary/20 shadow-2xl shadow-primary/10">
@@ -50,19 +50,19 @@ export default function SignInPage() {
                 </div>
                 <div>
                     <h1 className="text-text-primary font-black text-6xl tracking-tighter">Hermes</h1>
-                    <p className="text-text-secondary text-lg font-medium tracking-tight">Mail Engine Infrastructure</p>
+                    <p className="text-text-secondary text-lg font-medium tracking-tight">Lembrar de colocar um sub-titulo aqui</p>
                 </div>
             </div>
 
             {/* Login Card */}
             <div className="w-full max-w-md bg-surface p-10 border border-border-subtle rounded-3xl shadow-2xl relative overflow-hidden group">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50"></div>
-                
+                <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-primary to-transparent opacity-50"></div>
+
                 <div className="mb-10 text-center">
                     <h2 className="text-text-primary text-3xl font-bold tracking-tight">Bem-vindo</h2>
                     <p className="text-text-secondary text-sm font-medium mt-1">Acesse sua conta para continuar</p>
                 </div>
-                
+
                 <div className="flex flex-col gap-6">
                     {error && (
                         <div className="bg-danger/10 border border-danger/20 text-danger text-xs p-3 rounded-lg font-medium">
@@ -70,33 +70,38 @@ export default function SignInPage() {
                         </div>
                     )}
 
-                    <Input 
-                        type="email" 
-                        label="E-mail profissional" 
-                        placeholder="exemplo@empresa.com" 
+                    <Input
+                        type="email"
+                        label="E-mail profissional"
+                        placeholder="exemplo@empresa.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                     />
-                    
+
                     <div className="space-y-1">
-                        <Input 
-                            type="password" 
-                            label="Senha" 
+                        <Input
+                            type="password"
+                            label="Senha"
                             secondaryLabel={
                                 <Link href="/auth/recovery" className="text-primary hover:text-primary-hover transition-colors">
                                     Recuperar acesso
                                 </Link>
-                            } 
-                            placeholder="Sua senha secreta" 
+                            }
+                            placeholder="Sua senha secreta"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
-                    
-                    <ButtonInput 
-                        label={loading ? "Autenticando..." : "Acessar Dashboard"} 
-                        labelIcon={loading ? <Loader2 className="animate-spin" size={18} /> : <ArrowRight size={18} />} 
+
+                    <ButtonInput
+                        label={loading ? "Autenticando..." : "Acessar Plataforma"}
+                        labelIcon={loading ? <Loader2 className="animate-spin" size={18} /> : <ArrowRight size={18} />}
                         containerClassName="mt-4"
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                handleSignIn();
+                            }
+                        }}
                         onClick={handleSignIn}
                     />
                 </div>
