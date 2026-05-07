@@ -30,6 +30,7 @@ import {
   DialogFooter,
 } from "@/src/components/ui/dialog";
 import { Badge } from "@/src/components/ui/badge";
+import { ConfirmModal } from "@/src/components/ui/confirm-modal";
 
 interface Template {
     id: string;
@@ -50,6 +51,8 @@ export default function TemplatesPage() {
     const [loading, setLoading] = useState(true);
     const [creating, setCreating] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [templateToDelete, setTemplateToDelete] = useState<Template | null>(null);
     const [open, setOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
     const router = useRouter();
@@ -121,22 +124,32 @@ export default function TemplatesPage() {
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (!confirm("Tem certeza que deseja excluir este template?")) return;
-        
+    const handleRequestDelete = (template: Template) => {
+        setTemplateToDelete(template);
+        setShowDeleteModal(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!templateToDelete) return;
+        const { id } = templateToDelete;
         setDeletingId(id);
         try {
             const response = await apiFetch(`/api/templates/${id}`, {
                 method: "DELETE"
             });
             if (response.ok) {
-                setTemplates(templates.filter(t => t.id !== id));
+                setTemplates(prev => prev.filter(t => t.id !== id));
             }
         } catch (err) {
             console.error("Erro ao excluir:", err);
         } finally {
             setDeletingId(null);
         }
+    };
+
+    const handleCloseDeleteModal = () => {
+        setShowDeleteModal(false);
+        setTemplateToDelete(null);
     };
 
     if (!mounted) return null;
@@ -151,7 +164,7 @@ export default function TemplatesPage() {
                 
                 <Dialog open={open} onOpenChange={setOpen}>
                     <DialogTrigger asChild>
-                        <Button className="gap-2 uppercase font-black tracking-widest text-[10px] bg-primary shadow-lg shadow-primary/20 h-12 px-6">
+                        <Button className="cursor-pointer gap-2 uppercase font-black tracking-widest text-[10px] bg-primary shadow-lg shadow-primary/20 h-12 px-6">
                             <Plus size={18} /> Novo Template
                         </Button>
                     </DialogTrigger>
@@ -233,11 +246,11 @@ export default function TemplatesPage() {
                                         <FileText size={24} />
                                     </div>
                                     {template.global ? (
-                                        <Badge className="bg-primary/10 text-primary border-none text-[9px] font-bold uppercase gap-1.5 px-3 py-1">
+                                        <Badge className="bg-primary/10 text-primary border-none text-[9px] font-bold uppercase gap-1.5 px-3 py-1 cursor-default">
                                             <Globe size={10} /> Global
                                         </Badge>
                                     ) : (
-                                        <Badge variant="outline" className="border-border-subtle text-[9px] font-bold uppercase px-3 py-1">
+                                        <Badge variant="outline" className="border-border-subtle text-[9px] font-bold uppercase px-3 py-1 cursor-default">
                                             <Server size={10} className="mr-1.5" />
                                             {services.find(s => s.id === template.service_id)?.name || "Privado"}
                                         </Badge>
@@ -254,15 +267,15 @@ export default function TemplatesPage() {
                                         href={`/system/templates/${template.id}`}
                                         className="flex-1 text-left"
                                     >
-                                        <Button variant="outline" className="w-full py-2.5 rounded-xl bg-background border-border-subtle text-[10px] font-bold uppercase tracking-widest hover:bg-white/5 transition-all gap-2 text-foreground group/btn">
+                                        <Button variant="outline" className="cursor-pointer w-full py-2.5 rounded-xl bg-background border-border-subtle text-[10px] font-bold uppercase tracking-widest hover:bg-white/5 transition-all gap-2 text-foreground group/btn">
                                             Abrir Editor <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
                                         </Button>
                                     </Link>
                                     <Button 
                                         variant="outline"
-                                        onClick={() => handleDelete(template.id)}
+                                        onClick={() => handleRequestDelete(template)}
                                         disabled={deletingId === template.id}
-                                        className="h-10 w-10 p-0 rounded-xl border-border-subtle bg-danger/5 text-danger hover:bg-danger hover:text-white transition-all shrink-0"
+                                        className="cursor-pointer h-10 w-10 p-0 rounded-xl border-border-subtle bg-danger/5 text-danger hover:bg-danger hover:text-white transition-all shrink-0"
                                     >
                                         {deletingId === template.id ? <Loader2 className="animate-spin" size={14} /> : <Trash2 size={16} />}
                                     </Button>
@@ -272,6 +285,16 @@ export default function TemplatesPage() {
                     )}
                 </div>
             )}
+
+            <ConfirmModal 
+                isOpen={showDeleteModal} 
+                onClose={handleCloseDeleteModal} 
+                onConfirm={handleConfirmDelete} 
+                variant="danger" 
+                title="Excluir Template?" 
+                description={`Tem certeza que deseja excluir "${templateToDelete?.name}"? Esta ação é permanente.`}
+                confirmText="Sim, Excluir"
+            />
         </div>
     );
 }

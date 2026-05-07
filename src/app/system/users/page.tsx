@@ -170,13 +170,13 @@ export default function UsersPage() {
                         size="icon" 
                         onClick={fetchUsers} 
                         disabled={loading}
-                        className="rounded-xl border-border-subtle"
+                        className="rounded-xl border-border-subtle cursor-pointer"
                     >
                         <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
                     </Button>
                     
                     {(session?.user as any)?.isAdmin && (
-                        <Button className="gap-2 uppercase font-black tracking-widest text-[10px] px-6">
+                        <Button className="gap-2 uppercase font-black tracking-widest text-[10px] px-6 cursor-pointer">
                             <UserPlus size={18} /> Convidar Usuário
                         </Button>
                     )}
@@ -272,7 +272,7 @@ export default function UsersPage() {
                                                 <Button 
                                                     variant="ghost" 
                                                     size="icon" 
-                                                    className="text-muted-foreground hover:text-foreground hover:bg-white/10"
+                                                    className="text-muted-foreground hover:text-foreground hover:bg-white/10 cursor-pointer"
                                                 >
                                                     <Settings size={18} />
                                                 </Button>
@@ -283,7 +283,7 @@ export default function UsersPage() {
                                                         size="icon" 
                                                         onClick={() => handleDeleteUser(user.id, user.name)}
                                                         disabled={isActionInProgress}
-                                                        className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                                                        className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
                                                     >
                                                         {isActionInProgress ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={18} />}
                                                     </Button>

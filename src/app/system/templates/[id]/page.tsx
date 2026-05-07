@@ -25,6 +25,7 @@ import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Card } from "@/src/components/ui/card";
 import { Badge } from "@/src/components/ui/badge";
+import { ConfirmModal } from "@/src/components/ui/confirm-modal";
 import {
   Select,
   SelectContent,
@@ -50,6 +51,7 @@ export default function TemplateDetailsPage() {
     const [saving, setSaving] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [rendering, setRendering] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     
     // Data States
     const [name, setName] = useState("");
@@ -146,16 +148,24 @@ export default function TemplateDetailsPage() {
     };
 
     // 4. DELETAR TEMPLATE
-    const handleDelete = async () => {
-        if (!confirm("Excluir este template permanentemente?")) return;
+    const handleRequestDelete = () => {
+        setShowDeleteModal(true);
+    };
+
+    const handleConfirmDelete = async () => {
         setDeleting(true);
         try {
             const response = await apiFetch(`/api/templates/${id}`, { method: "DELETE" });
             if (response.ok) router.push("/system/templates");
         } catch (err) {
             console.error("Erro ao deletar:", err);
+        } finally {
             setDeleting(false);
         }
+    };
+
+    const handleCloseDeleteModal = () => {
+        setShowDeleteModal(false);
     };
 
     // 5. UTILITÁRIOS DO EDITOR
@@ -195,14 +205,14 @@ export default function TemplateDetailsPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
                 <div className="flex items-center gap-4 text-left">
                     <Link href="/system/templates">
-                        <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl bg-surface border-border-subtle text-muted-foreground hover:text-primary text-left">
+                        <Button variant="outline" size="icon" className="cursor-pointer h-10 w-10 rounded-xl bg-surface border-border-subtle text-muted-foreground hover:text-primary text-left">
                             <ArrowLeft size={18} />
                         </Button>
                     </Link>
                     <div className="text-left">
                         <div className="flex items-center gap-2 text-left">
                             <h2 className="text-xl font-bold tracking-tight uppercase text-foreground leading-tight text-left">{name}</h2>
-                            <Badge className={`${isGlobal ? 'bg-primary/10 text-primary' : 'bg-success/10 text-success'} border-none text-[9px] font-bold uppercase gap-1 px-2 py-0.5`}>
+                            <Badge className={`${isGlobal ? 'bg-primary/10 text-primary' : 'bg-success/10 text-success'} border-none text-[9px] font-bold uppercase gap-1 px-2 py-0.5 cursor-default`}>
                                 {isGlobal ? <Globe size={10} /> : <Server size={10} />}
                                 {isGlobal ? "Global" : (services.find(s => s.id === serviceId)?.name || "Privado")}
                             </Badge>
@@ -225,7 +235,7 @@ export default function TemplateDetailsPage() {
                         variant="outline" 
                         onClick={() => handlePreview(content)}
                         disabled={rendering}
-                        className="gap-2 font-bold text-[10px] uppercase tracking-widest h-10 px-5 border-border-subtle hover:bg-white/5"
+                        className="cursor-pointer gap-2 font-bold text-[10px] uppercase tracking-widest h-10 px-5 border-border-subtle hover:bg-white/5"
                     >
                         <RefreshCw size={14} className={rendering ? "animate-spin" : ""} /> Preview
                     </Button>
@@ -233,7 +243,7 @@ export default function TemplateDetailsPage() {
                     <Button 
                         onClick={handleSave}
                         disabled={saving || deleting}
-                        className="gap-2 font-black text-[10px] uppercase tracking-widest h-10 px-6 bg-primary shadow-lg shadow-primary/20"
+                        className="cursor-pointer gap-2 font-black text-[10px] uppercase tracking-widest h-10 px-6 bg-primary shadow-lg shadow-primary/20"
                     >
                         {saving ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />}
                         Salvar
@@ -241,9 +251,9 @@ export default function TemplateDetailsPage() {
 
                     <Button 
                         variant="outline"
-                        onClick={handleDelete}
+                        onClick={handleRequestDelete}
                         disabled={deleting || saving}
-                        className="h-10 w-10 p-0 rounded-xl border-border-subtle bg-danger/5 text-danger hover:bg-danger hover:text-white transition-all"
+                        className="cursor-pointer h-10 w-10 p-0 rounded-xl border-border-subtle bg-danger/5 text-danger hover:bg-danger hover:text-white transition-all"
                     >
                         {deleting ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={18} />}
                     </Button>
@@ -257,7 +267,7 @@ export default function TemplateDetailsPage() {
                             <Code size={14} className="text-primary" />
                             <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground font-mono">engine.mjml</span>
                         </div>
-                        <Button variant="ghost" size="sm" onClick={formatCode} className="h-7 text-[9px] uppercase font-bold text-muted-foreground hover:text-primary gap-1.5 px-2">
+                        <Button variant="ghost" size="sm" onClick={formatCode} className="cursor-pointer h-7 text-[9px] uppercase font-bold text-muted-foreground hover:text-primary gap-1.5 px-2">
                             <AlignLeft size={12} /> Indentar MJML
                         </Button>
                     </div>
@@ -333,7 +343,7 @@ export default function TemplateDetailsPage() {
                                     onKeyDown={(e) => e.key === "Enter" && (variables.includes(newVar) ? null : setVariables([...variables, newVar]), setNewVar(""))}
                                     className="bg-background border-border-subtle rounded-xl h-9 text-[10px] italic px-4 focus:border-primary text-left"
                                 />
-                                <Button size="icon" className="h-9 w-9 shrink-0 rounded-xl bg-primary/10 text-primary hover:bg-primary transition-all" onClick={() => {
+                                <Button size="icon" className="cursor-pointer h-9 w-9 shrink-0 rounded-xl bg-primary/10 text-primary hover:bg-primary transition-all" onClick={() => {
                                     if (newVar && !variables.includes(newVar)) { setVariables([...variables, newVar]); setNewVar(""); }
                                 }}>
                                     <Plus size={14} />
@@ -352,6 +362,16 @@ export default function TemplateDetailsPage() {
                     </Card>
                 </div>
             </div>
+
+            <ConfirmModal 
+                isOpen={showDeleteModal} 
+                onClose={handleCloseDeleteModal} 
+                onConfirm={handleConfirmDelete} 
+                variant="danger" 
+                title="Excluir Template?" 
+                description={`Excluir "${name}" permanentemente? Esta ação não pode ser desfeita.`}
+                confirmText="Sim, Excluir"
+            />
         </div>
     );
 }

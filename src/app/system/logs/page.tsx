@@ -123,11 +123,11 @@ export default function LogsPage() {
                         size="icon" 
                         onClick={fetchLogs} 
                         disabled={loading}
-                        className="rounded-xl border-border-subtle"
+                        className="rounded-xl border-border-subtle cursor-pointer"
                     >
                         <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
                     </Button>
-                    <Button variant="outline" className="gap-2 uppercase tracking-widest font-bold text-[10px]">
+                    <Button variant="outline" className="gap-2 uppercase tracking-widest font-bold text-[10px] cursor-pointer">
                         <Download size={16} /> Exportar CSV
                     </Button>
                 </div>
@@ -224,7 +224,7 @@ export default function LogsPage() {
                                                 </div>
                                             </TableCell>
                                             <TableCell className="px-8 py-6 text-right">
-                                                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                                                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary cursor-pointer">
                                                     <Eye size={18} />
                                                 </Button>
                                             </TableCell>

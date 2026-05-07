@@ -32,6 +32,7 @@ import {
     DropdownMenuTrigger,
     DropdownMenuSeparator,
 } from "@/src/components/ui/dropdown-menu";
+import { ConfirmModal } from "@/src/components/ui/confirm-modal";
 import { Card } from "@/src/components/ui/card";
 import { useToast } from "@/src/hooks/use-toast";
 
@@ -49,6 +50,8 @@ export default function ServicesPage() {
     const [currentService, setCurrentService] = useState<Service | null>(null);
     const [serviceName, setServiceName] = useState("");
     const [processing, setProcessing] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
     const { toast } = useToast();
 
     const fetchServices = async () => {
@@ -129,11 +132,14 @@ export default function ServicesPage() {
         }
     };
 
-    const handleDeleteService = async (id: string, name: string) => {
-        if (!confirm(`Tem certeza que deseja deletar "${name}"? Todos os e-mails, templates e chaves vinculados a este serviço serão removidos permanentemente.`)) {
-            return;
-        }
+    const handleRequestDeleteService = (service: Service) => {
+        setServiceToDelete(service);
+        setShowDeleteModal(true);
+    };
 
+    const handleConfirmDeleteService = async () => {
+        if (!serviceToDelete) return;
+        const { id, name } = serviceToDelete;
         try {
             const response = await apiFetch(`/api/services/${id}`, {
                 method: 'DELETE'
@@ -163,6 +169,11 @@ export default function ServicesPage() {
         }
     };
 
+    const handleCloseDeleteModal = () => {
+        setShowDeleteModal(false);
+        setServiceToDelete(null);
+    };
+
     useEffect(() => {
         fetchServices();
     }, []);
@@ -175,7 +186,7 @@ export default function ServicesPage() {
                     <p className="text-muted-foreground text-sm font-medium italic">Gerencie as instâncias isoladas de e-mail para suas aplicações.</p>
                 </div>
 
-                <Button onClick={handleOpenCreate} className="gap-2 uppercase font-black tracking-widest text-[10px] px-6">
+                <Button onClick={handleOpenCreate} className="cursor-pointer gap-2 uppercase font-black tracking-widest text-[10px] px-6">
                     <Plus size={18} /> Novo Serviço
                 </Button>
 
@@ -256,7 +267,7 @@ export default function ServicesPage() {
                                         </DropdownMenuItem>
                                         <DropdownMenuSeparator className="bg-border-subtle/50" />
                                         <DropdownMenuItem
-                                            onClick={() => handleDeleteService(service.id, service.name)}
+                                            onClick={() => handleRequestDeleteService(service)}
                                             className="gap-2 cursor-pointer py-3 text-xs font-bold uppercase tracking-wider text-danger focus:text-danger focus:bg-danger/10"
                                         >
                                             <Trash2 size={14} /> Excluir Projeto
@@ -301,6 +312,16 @@ export default function ServicesPage() {
                     </div>
                 </div>
             )}
+
+            <ConfirmModal 
+                isOpen={showDeleteModal} 
+                onClose={handleCloseDeleteModal} 
+                onConfirm={handleConfirmDeleteService} 
+                variant="danger" 
+                title="Excluir Serviço?" 
+                description={`Tem certeza que deseja deletar "${serviceToDelete?.name}"? Todos os e-mails, templates e chaves vinculados a este serviço serão removidos permanentemente.`}
+                confirmText="Sim, Excluir Tudo"
+            />
         </div>
     );
 }
