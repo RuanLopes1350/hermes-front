@@ -1,377 +1,452 @@
-"use client";
+'use client';
 
-import { 
-    ArrowLeft, 
-    Save, 
-    Eye, 
-    Code, 
-    Copy,
-    Loader2,
-    RefreshCw,
-    Plus,
-    X,
-    Variable,
-    Zap,
-    Globe,
-    Server,
-    AlignLeft,
-    Trash2
-} from "lucide-react";
-import Link from "next/link";
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { apiFetch } from "@/src/lib/api";
-import { Button } from "@/src/components/ui/button";
-import { Input } from "@/src/components/ui/input";
-import { Card } from "@/src/components/ui/card";
-import { Badge } from "@/src/components/ui/badge";
-import { ConfirmModal } from "@/src/components/ui/confirm-modal";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/src/components/ui/select";
-import Editor, { OnMount } from "@monaco-editor/react";
-import format from "xml-formatter";
+	ArrowLeft,
+	Save,
+	Eye,
+	Code,
+	Copy,
+	Loader2,
+	RefreshCw,
+	Plus,
+	X,
+	Variable,
+	Zap,
+	Globe,
+	Server,
+	AlignLeft,
+	Trash2,
+} from 'lucide-react';
+import Link from 'next/link';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { apiFetch } from '@/src/lib/api';
+import { Button } from '@/src/components/ui/button';
+import { Input } from '@/src/components/ui/input';
+import { Card } from '@/src/components/ui/card';
+import { Badge } from '@/src/components/ui/badge';
+import { ConfirmModal } from '@/src/components/ui/confirm-modal';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/src/components/ui/select';
+import Editor, { OnMount } from '@monaco-editor/react';
+import format from 'xml-formatter';
 
 interface Service {
-    id: string;
-    name: string;
+	id: string;
+	name: string;
 }
 
 export default function TemplateDetailsPage() {
-    const { id } = useParams();
-    const router = useRouter();
-    const editorRef = useRef<any>(null);
-    
-    // UI States
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
-    const [deleting, setDeleting] = useState(false);
-    const [rendering, setRendering] = useState(false);
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    
-    // Data States
-    const [name, setName] = useState("");
-    const [subject, setSubject] = useState("");
-    const [content, setContent] = useState(""); // Este é o código MJML
-    const [htmlPreview, setHtmlPreview] = useState("");
-    const [serviceId, setServiceId] = useState<string | null>(null);
-    const [isGlobal, setIsGlobal] = useState(false);
-    const [services, setServices] = useState<Service[]>([]);
-    const [variables, setVariables] = useState<string[]>([]);
-    const [newVar, setNewVar] = useState("");
+	const { id } = useParams();
+	const router = useRouter();
+	const editorRef = useRef<any>(null);
 
-    // 1. CARREGAR DADOS
-    const loadData = useCallback(async () => {
-        setLoading(true);
-        try {
-            const [tRes, sRes] = await Promise.all([
-                apiFetch(`/api/templates/${id}`),
-                apiFetch("/api/services")
-            ]);
+	// UI States
+	const [loading, setLoading] = useState(true);
+	const [saving, setSaving] = useState(false);
+	const [deleting, setDeleting] = useState(false);
+	const [rendering, setRendering] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-            if (tRes.ok) {
-                const tData = await tRes.json();
-                const t = tData.data;
-                setName(t.name);
-                setSubject(t.subject_template || "");
-                // IMPORTANTE: Carregamos do campo html_content que guarda o MJML no seu banco
-                setContent(t.html_content || ""); 
-                setServiceId(t.service_id);
-                setIsGlobal(t.global);
-                setVariables(t.variables || []);
-            }
+	// Data States
+	const [name, setName] = useState('');
+	const [subject, setSubject] = useState('');
+	const [content, setContent] = useState(''); // Este é o código MJML
+	const [htmlPreview, setHtmlPreview] = useState('');
+	const [serviceId, setServiceId] = useState<string | null>(null);
+	const [isGlobal, setIsGlobal] = useState(false);
+	const [services, setServices] = useState<Service[]>([]);
+	const [variables, setVariables] = useState<string[]>([]);
+	const [newVar, setNewVar] = useState('');
 
-            if (sRes.ok) {
-                const sData = await sRes.json();
-                setServices(sData.data || []);
-            }
-        } catch (err) {
-            console.error("Erro ao carregar dados:", err);
-        } finally {
-            setLoading(false);
-        }
-    }, [id]);
+	// 1. CARREGAR DADOS
+	const loadData = useCallback(async () => {
+		setLoading(true);
+		try {
+			const [tRes, sRes] = await Promise.all([
+				apiFetch(`/api/templates/${id}`),
+				apiFetch('/api/services'),
+			]);
 
-    // 2. EXECUTAR PREVIEW
-    const handlePreview = useCallback(async (mjmlCode: string) => {
-        if (!mjmlCode) return;
-        setRendering(true);
-        try {
-            const previewVars = variables.reduce((acc, v) => ({ ...acc, [v]: `[${v.toUpperCase()}]` }), {});
-            
-            const response = await apiFetch("/api/templates/preview", {
-                method: "POST",
-                body: JSON.stringify({ 
-                    mjml: mjmlCode, 
-                    variables: previewVars 
-                })
-            });
+			if (tRes.ok) {
+				const tData = await tRes.json();
+				const t = tData.data;
+				setName(t.name);
+				setSubject(t.subject_template || '');
+				// IMPORTANTE: Carregamos do campo html_content que guarda o MJML no seu banco
+				setContent(t.html_content || '');
+				setServiceId(t.service_id);
+				setIsGlobal(t.global);
+				setVariables(t.variables || []);
+			}
 
-            if (response.ok) {
-                const result = await response.json();
-                setHtmlPreview(result.html);
-            }
-        } catch (err) {
-            console.error("Falha no preview:", err);
-        } finally {
-            setRendering(false);
-        }
-    }, [variables]);
+			if (sRes.ok) {
+				const sData = await sRes.json();
+				setServices(sData.data || []);
+			}
+		} catch (err) {
+			console.error('Erro ao carregar dados:', err);
+		} finally {
+			setLoading(false);
+		}
+	}, [id]);
 
-    // 3. SALVAR ALTERAÇÕES
-    const handleSave = async () => {
-        setSaving(true);
-        try {
-            // CORREÇÃO: Enviamos o código do editor para 'html_content' 
-            // e NÃO enviamos a versão renderizada, deixando a API lidar com isso.
-            await apiFetch(`/api/templates/${id}`, {
-                method: "PATCH",
-                body: JSON.stringify({
-                    name,
-                    subject_template: subject,
-                    html_content: content, 
-                    variables,
-                    global: isGlobal,
-                    service_id: isGlobal ? null : serviceId
-                })
-            });
-            alert("Template salvo!");
-        } catch (err) {
-            console.error("Erro ao salvar:", err);
-        } finally {
-            setSaving(false);
-        }
-    };
+	// 2. EXECUTAR PREVIEW
+	const handlePreview = useCallback(
+		async (mjmlCode: string) => {
+			if (!mjmlCode) return;
+			setRendering(true);
+			try {
+				const previewVars = variables.reduce(
+					(acc, v) => ({ ...acc, [v]: `[${v.toUpperCase()}]` }),
+					{},
+				);
 
-    // 4. DELETAR TEMPLATE
-    const handleRequestDelete = () => {
-        setShowDeleteModal(true);
-    };
+				const response = await apiFetch('/api/templates/preview', {
+					method: 'POST',
+					body: JSON.stringify({
+						mjml: mjmlCode,
+						variables: previewVars,
+					}),
+				});
 
-    const handleConfirmDelete = async () => {
-        setDeleting(true);
-        try {
-            const response = await apiFetch(`/api/templates/${id}`, { method: "DELETE" });
-            if (response.ok) router.push("/system/templates");
-        } catch (err) {
-            console.error("Erro ao deletar:", err);
-        } finally {
-            setDeleting(false);
-        }
-    };
+				if (response.ok) {
+					const result = await response.json();
+					setHtmlPreview(result.html);
+				}
+			} catch (err) {
+				console.error('Falha no preview:', err);
+			} finally {
+				setRendering(false);
+			}
+		},
+		[variables],
+	);
 
-    const handleCloseDeleteModal = () => {
-        setShowDeleteModal(false);
-    };
+	// 3. SALVAR ALTERAÇÕES
+	const handleSave = async () => {
+		setSaving(true);
+		try {
+			// CORREÇÃO: Enviamos o código do editor para 'html_content'
+			// e NÃO enviamos a versão renderizada, deixando a API lidar com isso.
+			await apiFetch(`/api/templates/${id}`, {
+				method: 'PATCH',
+				body: JSON.stringify({
+					name,
+					subject_template: subject,
+					html_content: content,
+					variables,
+					global: isGlobal,
+					service_id: isGlobal ? null : serviceId,
+				}),
+			});
+			alert('Template salvo!');
+		} catch (err) {
+			console.error('Erro ao salvar:', err);
+		} finally {
+			setSaving(false);
+		}
+	};
 
-    // 5. UTILITÁRIOS DO EDITOR
-    const formatCode = useCallback(() => {
-        if (!content) return;
-        try {
-            const formatted = format(content, {
-                indentation: '  ',
-                collapseContent: true,
-                lineSeparator: '\n'
-            });
-            setContent(formatted);
-        } catch (err) {
-            console.warn("Erro ao formatar XML:", err);
-            editorRef.current?.getAction('editor.action.formatDocument').run();
-        }
-    }, [content]);
+	// 4. DELETAR TEMPLATE
+	const handleRequestDelete = () => {
+		setShowDeleteModal(true);
+	};
 
-    const handleEditorMount: OnMount = (editor) => {
-        editorRef.current = editor;
-    };
+	const handleConfirmDelete = async () => {
+		setDeleting(true);
+		try {
+			const response = await apiFetch(`/api/templates/${id}`, { method: 'DELETE' });
+			if (response.ok) router.push('/system/templates');
+		} catch (err) {
+			console.error('Erro ao deletar:', err);
+		} finally {
+			setDeleting(false);
+		}
+	};
 
-    // Lifecycle
-    useEffect(() => { if (id) loadData(); }, [id, loadData]);
+	const handleCloseDeleteModal = () => {
+		setShowDeleteModal(false);
+	};
 
-    useEffect(() => {
-        const timer = setTimeout(() => { if (content) handlePreview(content); }, 1500);
-        return () => clearTimeout(timer);
-    }, [content, handlePreview]);
+	// 5. UTILITÁRIOS DO EDITOR
+	const formatCode = useCallback(() => {
+		if (!content) return;
+		try {
+			const formatted = format(content, {
+				indentation: '  ',
+				collapseContent: true,
+				lineSeparator: '\n',
+			});
+			setContent(formatted);
+		} catch (err) {
+			console.warn('Erro ao formatar XML:', err);
+			editorRef.current?.getAction('editor.action.formatDocument').run();
+		}
+	}, [content]);
 
-    if (loading) {
-        return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-primary" size={40} /></div>;
-    }
+	const handleEditorMount: OnMount = (editor) => {
+		editorRef.current = editor;
+	};
 
-    return (
-        <div className="h-[calc(100vh-140px)] flex flex-col gap-6 overflow-hidden text-left">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
-                <div className="flex items-center gap-4 text-left">
-                    <Link href="/system/templates">
-                        <Button variant="outline" size="icon" className="cursor-pointer h-10 w-10 rounded-xl bg-surface border-border-subtle text-muted-foreground hover:text-primary text-left">
-                            <ArrowLeft size={18} />
-                        </Button>
-                    </Link>
-                    <div className="text-left">
-                        <div className="flex items-center gap-2 text-left">
-                            <h2 className="text-xl font-bold tracking-tight uppercase text-foreground leading-tight text-left">{name}</h2>
-                            <Badge className={`${isGlobal ? 'bg-primary/10 text-primary' : 'bg-success/10 text-success'} border-none text-[9px] font-bold uppercase gap-1 px-2 py-0.5 cursor-default`}>
-                                {isGlobal ? <Globe size={10} /> : <Server size={10} />}
-                                {isGlobal ? "Global" : (services.find(s => s.id === serviceId)?.name || "Privado")}
-                            </Badge>
-                        </div>
-                    </div>
-                </div>
+	// Lifecycle
+	useEffect(() => {
+		if (id) loadData();
+	}, [id, loadData]);
 
-                <div className="flex items-center gap-3 text-left">
-                    <div className="flex items-center gap-2 bg-surface border border-border-subtle rounded-xl px-3 py-1 mr-2 h-10 text-left">
-                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-left">Assunto:</span>
-                        <input 
-                            value={subject}
-                            onChange={(e) => setSubject(e.target.value)}
-                            className="bg-transparent border-none text-[11px] font-medium italic focus:ring-0 w-64 text-foreground placeholder:opacity-30"
-                            placeholder="Assunto do e-mail..."
-                        />
-                    </div>
-                    
-                    <Button 
-                        variant="outline" 
-                        onClick={() => handlePreview(content)}
-                        disabled={rendering}
-                        className="cursor-pointer gap-2 font-bold text-[10px] uppercase tracking-widest h-10 px-5 border-border-subtle hover:bg-white/5"
-                    >
-                        <RefreshCw size={14} className={rendering ? "animate-spin" : ""} /> Preview
-                    </Button>
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			if (content) handlePreview(content);
+		}, 1500);
+		return () => clearTimeout(timer);
+	}, [content, handlePreview]);
 
-                    <Button 
-                        onClick={handleSave}
-                        disabled={saving || deleting}
-                        className="cursor-pointer gap-2 font-black text-[10px] uppercase tracking-widest h-10 px-6 bg-primary shadow-lg shadow-primary/20"
-                    >
-                        {saving ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />}
-                        Salvar
-                    </Button>
+	if (loading) {
+		return (
+			<div className="h-screen flex items-center justify-center">
+				<Loader2 className="animate-spin text-primary" size={40} />
+			</div>
+		);
+	}
 
-                    <Button 
-                        variant="outline"
-                        onClick={handleRequestDelete}
-                        disabled={deleting || saving}
-                        className="cursor-pointer h-10 w-10 p-0 rounded-xl border-border-subtle bg-danger/5 text-danger hover:bg-danger hover:text-white transition-all"
-                    >
-                        {deleting ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={18} />}
-                    </Button>
-                </div>
-            </div>
+	return (
+		<div className="h-[calc(100vh-140px)] flex flex-col gap-6 overflow-hidden text-left">
+			<div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+				<div className="flex items-center gap-4 text-left">
+					<Link href="/system/templates">
+						<Button
+							variant="outline"
+							size="icon"
+							className="cursor-pointer h-10 w-10 rounded-xl bg-surface border-border-subtle text-muted-foreground hover:text-primary text-left"
+						>
+							<ArrowLeft size={18} />
+						</Button>
+					</Link>
+					<div className="text-left">
+						<div className="flex items-center gap-2 text-left">
+							<h2 className="text-xl font-bold tracking-tight uppercase text-foreground leading-tight text-left">
+								{name}
+							</h2>
+							<Badge
+								className={`${isGlobal ? 'bg-primary/10 text-primary' : 'bg-success/10 text-success'} border-none text-[9px] font-bold uppercase gap-1 px-2 py-0.5 cursor-default`}
+							>
+								{isGlobal ? <Globe size={10} /> : <Server size={10} />}
+								{isGlobal ? 'Global' : services.find((s) => s.id === serviceId)?.name || 'Privado'}
+							</Badge>
+						</div>
+					</div>
+				</div>
 
-            <div className="flex-1 flex gap-6 min-h-0 text-left">
-                <Card className="flex-1 bg-surface border-border-subtle rounded-[32px] border overflow-hidden flex flex-col text-left">
-                    <div className="p-4 border-b border-border-subtle bg-background/30 flex items-center justify-between text-left">
-                        <div className="flex items-center gap-2 text-left">
-                            <Code size={14} className="text-primary" />
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground font-mono">engine.mjml</span>
-                        </div>
-                        <Button variant="ghost" size="sm" onClick={formatCode} className="cursor-pointer h-7 text-[9px] uppercase font-bold text-muted-foreground hover:text-primary gap-1.5 px-2">
-                            <AlignLeft size={12} /> Indentar MJML
-                        </Button>
-                    </div>
-                    <div className="flex-1 bg-[#1e1e1e] text-left">
-                        <Editor
-                            height="100%"
-                            defaultLanguage="xml"
-                            theme="vs-dark"
-                            value={content}
-                            onChange={(val) => setContent(val || "")}
-                            onMount={handleEditorMount}
-                            options={{
-                                minimap: { enabled: false },
-                                fontSize: 13,
-                                fontFamily: 'JetBrains Mono, monospace',
-                                lineHeight: 1.5,
-                                padding: { top: 15 },
-                                automaticLayout: true,
-                                wordWrap: "on",
-                                tabSize: 2
-                            }}
-                        />
-                    </div>
-                </Card>
+				<div className="flex items-center gap-3 text-left">
+					<div className="flex items-center gap-2 bg-surface border border-border-subtle rounded-xl px-3 py-1 mr-2 h-10 text-left">
+						<span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-left">
+							Assunto:
+						</span>
+						<input
+							value={subject}
+							onChange={(e) => setSubject(e.target.value)}
+							className="bg-transparent border-none text-[11px] font-medium italic focus:ring-0 w-64 text-foreground placeholder:opacity-30"
+							placeholder="Assunto do e-mail..."
+						/>
+					</div>
 
-                <div className="w-[450px] flex flex-col gap-6 shrink-0 text-left">
-                    <Card className="flex-1 bg-surface border-border-subtle rounded-[32px] border overflow-hidden flex flex-col relative text-left">
-                        <div className="p-4 border-b border-border-subtle bg-background/30 flex items-center justify-between text-left">
-                            <div className="flex items-center gap-2 text-left">
-                                <Eye size={14} className="text-success" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Saída em Tempo Real</span>
-                            </div>
-                            {rendering && <Badge className="bg-primary/10 text-primary animate-pulse border-none text-[8px]">RENDERING</Badge>}
-                        </div>
-                        <div className="flex-1 bg-white relative">
-                            {htmlPreview ? (
-                                <iframe srcDoc={htmlPreview} className="w-full h-full border-none" title="Preview" />
-                            ) : (
-                                <div className="h-full flex flex-col items-center justify-center text-slate-300 gap-2 italic text-xs px-12 text-center leading-relaxed">
-                                    <Zap size={24} className="opacity-10" />
-                                    Processando MJML...
-                                </div>
-                            )}
-                        </div>
-                    </Card>
+					<Button
+						variant="outline"
+						onClick={() => handlePreview(content)}
+						disabled={rendering}
+						className="cursor-pointer gap-2 font-bold text-[10px] uppercase tracking-widest h-10 px-5 border-border-subtle hover:bg-white/5"
+					>
+						<RefreshCw size={14} className={rendering ? 'animate-spin' : ''} /> Preview
+					</Button>
 
-                    <Card className="bg-surface border-border-subtle rounded-[32px] p-5 border text-left shrink-0 text-left">
-                        <div className="flex flex-col gap-5 text-left text-left">
-                            <div className="flex items-center justify-between text-left">
-                                <div className="flex items-center gap-2 text-left">
-                                    <Variable size={14} className="text-primary" />
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-foreground text-left">Tags Dinâmicas</span>
-                                </div>
-                                <Select value={isGlobal ? "global" : (serviceId || "")} onValueChange={(v) => {
-                                    if (v === "global") { setIsGlobal(true); setServiceId(null); }
-                                    else { setIsGlobal(false); setServiceId(v); }
-                                }}>
-                                    <SelectTrigger className="bg-background border-border-subtle h-8 w-32 text-[9px] font-bold uppercase tracking-widest rounded-lg text-left">
-                                        <SelectValue placeholder="Escopo..." />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-surface border-border-subtle">
-                                        <SelectItem value="global">🌍 Global</SelectItem>
-                                        {services.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+					<Button
+						onClick={handleSave}
+						disabled={saving || deleting}
+						className="cursor-pointer gap-2 font-black text-[10px] uppercase tracking-widest h-10 px-6 bg-primary shadow-lg shadow-primary/20"
+					>
+						{saving ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />}
+						Salvar
+					</Button>
 
-                            <div className="flex gap-2 text-left">
-                                <Input 
-                                    placeholder="Nova tag..."
-                                    value={newVar}
-                                    onChange={(e) => setNewVar(e.target.value)}
-                                    onKeyDown={(e) => e.key === "Enter" && (variables.includes(newVar) ? null : setVariables([...variables, newVar]), setNewVar(""))}
-                                    className="bg-background border-border-subtle rounded-xl h-9 text-[10px] italic px-4 focus:border-primary text-left"
-                                />
-                                <Button size="icon" className="cursor-pointer h-9 w-9 shrink-0 rounded-xl bg-primary/10 text-primary hover:bg-primary transition-all" onClick={() => {
-                                    if (newVar && !variables.includes(newVar)) { setVariables([...variables, newVar]); setNewVar(""); }
-                                }}>
-                                    <Plus size={14} />
-                                </Button>
-                            </div>
+					<Button
+						variant="outline"
+						onClick={handleRequestDelete}
+						disabled={deleting || saving}
+						className="cursor-pointer h-10 w-10 p-0 rounded-xl border-border-subtle bg-danger/5 text-danger hover:bg-danger hover:text-white transition-all"
+					>
+						{deleting ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={18} />}
+					</Button>
+				</div>
+			</div>
 
-                            <div className="flex flex-wrap gap-2 max-h-[100px] overflow-y-auto text-left">
-                                {variables.map((tag) => (
-                                    <Badge key={tag} variant="outline" className="bg-background/50 border-border-subtle text-primary font-mono text-[9px] gap-2 py-1.5 px-3">
-                                        {"{{" + tag + "}}"}
-                                        <button onClick={() => setVariables(variables.filter(i => i !== tag))} className="text-muted-foreground hover:text-danger"><X size={10} /></button>
-                                    </Badge>
-                                ))}
-                            </div>
-                        </div>
-                    </Card>
-                </div>
-            </div>
+			<div className="flex-1 flex gap-6 min-h-0 text-left">
+				<Card className="flex-1 bg-surface border-border-subtle rounded-[32px] border overflow-hidden flex flex-col text-left">
+					<div className="p-4 border-b border-border-subtle bg-background/30 flex items-center justify-between text-left">
+						<div className="flex items-center gap-2 text-left">
+							<Code size={14} className="text-primary" />
+							<span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground font-mono">
+								engine.mjml
+							</span>
+						</div>
+						<Button
+							variant="ghost"
+							size="sm"
+							onClick={formatCode}
+							className="cursor-pointer h-7 text-[9px] uppercase font-bold text-muted-foreground hover:text-primary gap-1.5 px-2"
+						>
+							<AlignLeft size={12} /> Indentar MJML
+						</Button>
+					</div>
+					<div className="flex-1 bg-[#1e1e1e] text-left">
+						<Editor
+							height="100%"
+							defaultLanguage="xml"
+							theme="vs-dark"
+							value={content}
+							onChange={(val) => setContent(val || '')}
+							onMount={handleEditorMount}
+							options={{
+								minimap: { enabled: false },
+								fontSize: 13,
+								fontFamily: 'JetBrains Mono, monospace',
+								lineHeight: 1.5,
+								padding: { top: 15 },
+								automaticLayout: true,
+								wordWrap: 'on',
+								tabSize: 2,
+							}}
+						/>
+					</div>
+				</Card>
 
-            <ConfirmModal 
-                isOpen={showDeleteModal} 
-                onClose={handleCloseDeleteModal} 
-                onConfirm={handleConfirmDelete} 
-                variant="danger" 
-                title="Excluir Template?" 
-                description={`Excluir "${name}" permanentemente? Esta ação não pode ser desfeita.`}
-                confirmText="Sim, Excluir"
-            />
-        </div>
-    );
+				<div className="w-[450px] flex flex-col gap-6 shrink-0 text-left">
+					<Card className="flex-1 bg-surface border-border-subtle rounded-[32px] border overflow-hidden flex flex-col relative text-left">
+						<div className="p-4 border-b border-border-subtle bg-background/30 flex items-center justify-between text-left">
+							<div className="flex items-center gap-2 text-left">
+								<Eye size={14} className="text-success" />
+								<span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+									Saída em Tempo Real
+								</span>
+							</div>
+							{rendering && (
+								<Badge className="bg-primary/10 text-primary animate-pulse border-none text-[8px]">
+									RENDERING
+								</Badge>
+							)}
+						</div>
+						<div className="flex-1 bg-white relative">
+							{htmlPreview ? (
+								<iframe
+									srcDoc={htmlPreview}
+									className="w-full h-full border-none"
+									title="Preview"
+								/>
+							) : (
+								<div className="h-full flex flex-col items-center justify-center text-slate-300 gap-2 italic text-xs px-12 text-center leading-relaxed">
+									<Zap size={24} className="opacity-10" />
+									Processando MJML...
+								</div>
+							)}
+						</div>
+					</Card>
+
+					<Card className="bg-surface border-border-subtle rounded-[32px] p-5 border text-left shrink-0 text-left">
+						<div className="flex flex-col gap-5 text-left text-left">
+							<div className="flex items-center justify-between text-left">
+								<div className="flex items-center gap-2 text-left">
+									<Variable size={14} className="text-primary" />
+									<span className="text-[10px] font-bold uppercase tracking-widest text-foreground text-left">
+										Tags Dinâmicas
+									</span>
+								</div>
+								<Select
+									value={isGlobal ? 'global' : serviceId || ''}
+									onValueChange={(v) => {
+										if (v === 'global') {
+											setIsGlobal(true);
+											setServiceId(null);
+										} else {
+											setIsGlobal(false);
+											setServiceId(v);
+										}
+									}}
+								>
+									<SelectTrigger className="bg-background border-border-subtle h-8 w-32 text-[9px] font-bold uppercase tracking-widest rounded-lg text-left cursor-pointer">
+										<SelectValue placeholder="Escopo..." />
+									</SelectTrigger>
+									<SelectContent className="bg-surface border-border-subtle">
+										<SelectItem value="global">🌍 Global</SelectItem>
+										{services.map((s) => (
+											<SelectItem key={s.id} value={s.id}>
+												{s.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+
+							<div className="flex gap-2 text-left">
+								<Input
+									placeholder="Nova tag..."
+									value={newVar}
+									onChange={(e) => setNewVar(e.target.value)}
+									onKeyDown={(e) =>
+										e.key === 'Enter' &&
+										(variables.includes(newVar) ? null : setVariables([...variables, newVar]),
+										setNewVar(''))
+									}
+									className="bg-background border-border-subtle rounded-xl h-9 text-[10px] italic px-4 focus:border-primary text-left"
+								/>
+								<Button
+									size="icon"
+									className="cursor-pointer h-9 w-9 shrink-0 rounded-xl bg-primary/10 text-primary hover:bg-primary transition-all"
+									onClick={() => {
+										if (newVar && !variables.includes(newVar)) {
+											setVariables([...variables, newVar]);
+											setNewVar('');
+										}
+									}}
+								>
+									<Plus size={14} />
+								</Button>
+							</div>
+
+							<div className="flex flex-wrap gap-2 max-h-[100px] overflow-y-auto text-left">
+								{variables.map((tag) => (
+									<Badge
+										key={tag}
+										variant="outline"
+										className="bg-background/50 border-border-subtle text-primary font-mono text-[9px] gap-2 py-1.5 px-3"
+									>
+										{'{{' + tag + '}}'}
+										<button
+											onClick={() => setVariables(variables.filter((i) => i !== tag))}
+											className="text-muted-foreground hover:text-danger"
+										>
+											<X size={10} />
+										</button>
+									</Badge>
+								))}
+							</div>
+						</div>
+					</Card>
+				</div>
+			</div>
+
+			<ConfirmModal
+				isOpen={showDeleteModal}
+				onClose={handleCloseDeleteModal}
+				onConfirm={handleConfirmDelete}
+				variant="danger"
+				title="Excluir Template?"
+				description={`Excluir "${name}" permanentemente? Esta ação não pode ser desfeita.`}
+				confirmText="Sim, Excluir"
+			/>
+		</div>
+	);
 }

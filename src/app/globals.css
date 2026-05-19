@@ -1,45 +1,45 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
-  /* Cores Originais do Projeto */
-  --color-background: #0F172A;
-  --color-surface: #1E293B;
-  --color-primary: #3B82F6;
-  --color-primary-hover: #2563EB;
-  --color-text-primary: #F8FAFC;
-  --color-text-secondary: #94A3B8;
-  --color-border-subtle: #334155;
-  --color-danger: #EF4444;
-  --color-success: #10B981;
+	/* Cores Originais do Projeto */
+	--color-background: #0f172a;
+	--color-surface: #1e293b;
+	--color-primary: #3b82f6;
+	--color-primary-hover: #2563eb;
+	--color-text-primary: #f8fafc;
+	--color-text-secondary: #94a3b8;
+	--color-border-subtle: #334155;
+	--color-danger: #ef4444;
+	--color-success: #10b981;
 
-  /* Mapeamento Shadcn */
-  --color-foreground: #F8FAFC;
-  --color-card: #1E293B;
-  --color-card-foreground: #F8FAFC;
-  --color-popover: #1E293B;
-  --color-popover-foreground: #F8FAFC;
-  --color-secondary: #334155;
-  --color-secondary-foreground: #F8FAFC;
-  --color-muted: #1E293B;
-  --color-muted-foreground: #94A3B8;
-  --color-accent: #334155;
-  --color-accent-foreground: #F8FAFC;
-  --color-destructive: #EF4444;
-  --color-destructive-foreground: #F8FAFC;
-  --color-border: #334155;
-  --color-input: #334155;
-  --color-ring: #3B82F6;
+	/* Mapeamento Shadcn */
+	--color-foreground: #f8fafc;
+	--color-card: #1e293b;
+	--color-card-foreground: #f8fafc;
+	--color-popover: #1e293b;
+	--color-popover-foreground: #f8fafc;
+	--color-secondary: #334155;
+	--color-secondary-foreground: #f8fafc;
+	--color-muted: #1e293b;
+	--color-muted-foreground: #94a3b8;
+	--color-accent: #334155;
+	--color-accent-foreground: #f8fafc;
+	--color-destructive: #ef4444;
+	--color-destructive-foreground: #f8fafc;
+	--color-border: #334155;
+	--color-input: #334155;
+	--color-ring: #3b82f6;
 
-  --radius-lg: 0.75rem;
-  --radius-md: calc(0.75rem - 2px);
-  --radius-sm: calc(0.75rem - 4px);
+	--radius-lg: 0.75rem;
+	--radius-md: calc(0.75rem - 2px);
+	--radius-sm: calc(0.75rem - 4px);
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+	* {
+		@apply border-border;
+	}
+	body {
+		@apply bg-background text-foreground;
+	}
 }
