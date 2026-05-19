@@ -11,6 +11,7 @@ import {
 	RefreshCw,
 } from 'lucide-react';
 import { useEffect, useState, useMemo, useCallback } from 'react';
+import { notFound } from 'next/navigation';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { Badge } from '@/src/components/ui/badge';
@@ -55,8 +56,17 @@ export default function UsersPage() {
 	const [isActionInProgress, setIsActionInProgress] = useState(false);
 	const [searchTerm, setSearchTerm] = useState('');
 
-	const { data: session } = authClient.useSession();
+	const { data: session, isPending: isSessionLoading } = authClient.useSession();
 	const { toast } = useToast();
+
+	/**
+	 * Proteção de Rota: Se não for admin, 404 stealth
+	 */
+	useEffect(() => {
+		if (!isSessionLoading && session && !session.user.isAdmin) {
+			notFound();
+		}
+	}, [session, isSessionLoading]);
 
 	/**
 	 * Busca de usuários com tratamento de erro exaustivo.
@@ -89,8 +99,10 @@ export default function UsersPage() {
 	}, [toast]);
 
 	useEffect(() => {
-		fetchUsers();
-	}, [fetchUsers]);
+		if (!isSessionLoading && session?.user.isAdmin) {
+			fetchUsers();
+		}
+	}, [fetchUsers, isSessionLoading, session]);
 
 	/**
 	 * Deleção de usuário com proteção contra auto-deleção e feedback de loading.
@@ -159,6 +171,14 @@ export default function UsersPage() {
 		);
 	}, [users, searchTerm]);
 
+	if (isSessionLoading) {
+		return (
+			<div className="flex items-center justify-center h-full">
+				<Loader2 className="animate-spin text-primary" size={32} />
+			</div>
+		);
+	}
+
 	return (
 		<div className="space-y-12 text-left">
 			{/* Header com ações globais */}
@@ -183,7 +203,7 @@ export default function UsersPage() {
 						<RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
 					</Button>
 
-					{(session?.user as any)?.isAdmin && (
+					{session?.user.isAdmin && (
 						<Button className="gap-2 uppercase font-black tracking-widest text-[10px] px-6 cursor-pointer">
 							<UserPlus size={18} /> Convidar Usuário
 						</Button>
@@ -311,7 +331,7 @@ export default function UsersPage() {
 												</Button>
 
 												{session?.user &&
-													(session.user as any).isAdmin &&
+													session.user.isAdmin &&
 													user.id !== session?.user.id && (
 														<Button
 															variant="ghost"

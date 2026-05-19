@@ -14,10 +14,13 @@ import { GrServices } from 'react-icons/gr';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { authClient } from '@/src/lib/auth-client';
 
 export default function LeftPanel() {
 	const pathname = usePathname();
 	const [mounted, setMounted] = useState(false);
+	const { data: session } = authClient.useSession();
+	const isAdmin = Boolean((session?.user as any)?.isAdmin);
 
 	useEffect(() => {
 		setMounted(true);
@@ -51,87 +54,85 @@ export default function LeftPanel() {
 
 					<Link
 						href="/system/dashboard"
-						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-							isActive('dashboard')
-								? 'bg-primary text-white shadow-lg shadow-primary/20'
-								: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
-						}`}
+						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('dashboard')
+							? 'bg-primary text-white shadow-lg shadow-primary/20'
+							: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
+							}`}
 					>
 						<LayoutDashboard size={18} /> Dashboard
 					</Link>
 
 					<Link
 						href="/system/services"
-						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-							isActive('services')
-								? 'bg-primary text-white shadow-lg shadow-primary/20'
-								: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
-						}`}
+						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('services')
+							? 'bg-primary text-white shadow-lg shadow-primary/20'
+							: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
+							}`}
 					>
 						<GrServices size={18} /> Serviços
 					</Link>
 
-					<p className="text-[10px] font-bold text-text-secondary uppercase px-3 mt-6 mb-2 tracking-widest text-left">
-						Monitoramento
-					</p>
+
 
 					<Link
 						href="/system/templates"
-						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-							isActive('templates')
-								? 'bg-primary text-white shadow-lg shadow-primary/20'
-								: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
-						}`}
+						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('templates')
+							? 'bg-primary text-white shadow-lg shadow-primary/20'
+							: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
+							}`}
 					>
 						<FileText size={18} /> Templates
 					</Link>
 
-					<Link
-						href="/system/sandbox"
-						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-							isActive('sandbox')
-								? 'bg-primary text-white shadow-lg shadow-primary/20'
-								: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
-						}`}
-					>
-						<SquareTerminal size={18} /> Sandbox
-					</Link>
+					{isAdmin && (
+						<>
+							<p className="text-[10px] font-bold text-text-secondary uppercase px-3 mt-6 mb-2 tracking-widest text-left">
+								Monitoramento
+							</p>
+							<Link
+								href="/system/sandbox"
+								className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('sandbox')
+									? 'bg-primary text-white shadow-lg shadow-primary/20'
+									: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
+									}`}
+							>
+								<SquareTerminal size={18} /> Sandbox
+							</Link>
 
-					<Link
-						href="/system/logs"
-						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-							isActive('logs')
-								? 'bg-primary text-white shadow-lg shadow-primary/20'
-								: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
-						}`}
-					>
-						<History size={18} /> Logs
-					</Link>
+							<Link
+								href="/system/logs"
+								className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('logs')
+									? 'bg-primary text-white shadow-lg shadow-primary/20'
+									: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
+									}`}
+							>
+								<History size={18} /> Logs
+							</Link>
 
-					<p className="text-[10px] font-bold text-text-secondary uppercase px-3 mt-6 mb-2 tracking-widest text-left">
-						Administração
-					</p>
+							<p className="text-[10px] font-bold text-text-secondary uppercase px-3 mt-6 mb-2 tracking-widest text-left">
+								Administração
+							</p>
 
-					<Link
-						href="/system/users"
-						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-							isActive('users')
-								? 'bg-primary text-white shadow-lg shadow-primary/20'
-								: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
-						}`}
-					>
-						<Users size={18} /> Usuários
-					</Link>
+							<Link
+								href="/system/users"
+								className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('users')
+									? 'bg-primary text-white shadow-lg shadow-primary/20'
+									: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
+									}`}
+							>
+								<Users size={18} /> Usuários
+							</Link>
+						</>
+					)}
 				</nav>
 
 				<div className="flex flex-col gap-2 mt-auto pt-6 border-t border-border-subtle/50 text-left">
 					<Link
 						href="/system/profile"
-						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-							isActive('profile')
-								? 'bg-primary text-white'
-								: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
-						}`}
+						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('profile')
+							? 'bg-primary text-white'
+							: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
+							}`}
 					>
 						<div className="w-6 h-6 rounded-full overflow-hidden border border-white/10">
 							<img

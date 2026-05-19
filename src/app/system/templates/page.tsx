@@ -31,6 +31,7 @@ import {
 } from '@/src/components/ui/dialog';
 import { Badge } from '@/src/components/ui/badge';
 import { ConfirmModal } from '@/src/components/ui/confirm-modal';
+import { useToast } from '@/src/hooks/use-toast';
 
 interface Template {
 	id: string;
@@ -56,6 +57,7 @@ export default function TemplatesPage() {
 	const [open, setOpen] = useState(false);
 	const [mounted, setMounted] = useState(false);
 	const router = useRouter();
+	const { toast } = useToast();
 
 	const [newName, setNewName] = useState('');
 	const [selectedService, setSelectedService] = useState('');
@@ -132,19 +134,38 @@ export default function TemplatesPage() {
 
 	const handleConfirmDelete = async () => {
 		if (!templateToDelete) return;
-		const { id } = templateToDelete;
+		const { id, name } = templateToDelete;
 		setDeletingId(id);
 		try {
 			const response = await apiFetch(`/api/templates/${id}`, {
 				method: 'DELETE',
 			});
+
+			const result = await response.json();
+
 			if (response.ok) {
 				setTemplates((prev) => prev.filter((t) => t.id !== id));
+				toast({
+					title: 'Template excluído',
+					description: `O template "${name}" foi removido com sucesso.`,
+				});
+			} else {
+				toast({
+					variant: 'destructive',
+					title: 'Erro ao excluir',
+					description: result.message || 'Não foi possível excluir o template.',
+				});
 			}
 		} catch (err) {
 			console.error('Erro ao excluir:', err);
+			toast({
+				variant: 'destructive',
+				title: 'Erro de conexão',
+				description: 'Ocorreu um erro ao tentar se comunicar com o servidor.',
+			});
 		} finally {
 			setDeletingId(null);
+			setShowDeleteModal(false);
 		}
 	};
 

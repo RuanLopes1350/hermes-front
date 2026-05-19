@@ -33,6 +33,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { apiFetch } from '@/src/lib/api';
 import { useToast } from '@/src/hooks/use-toast';
+import { authClient } from '@/src/lib/auth-client';
+import { notFound } from 'next/navigation';
 
 interface Log {
 	id: string;
@@ -59,6 +61,16 @@ export default function LogsPage() {
 	const [searchTerm, setSearchTerm] = useState('');
 	const [statusFilter, setStatusFilter] = useState('all');
 	const { toast } = useToast();
+	const { data: session, isPending: isSessionLoading } = authClient.useSession();
+
+	/**
+	 * Proteção de Rota: Se não for admin, 404 stealth
+	 */
+	useEffect(() => {
+		if (!isSessionLoading && session && !session.user.isAdmin) {
+			notFound();
+		}
+	}, [session, isSessionLoading]);
 
 	const fetchLogs = useCallback(async () => {
 		try {
@@ -84,8 +96,10 @@ export default function LogsPage() {
 	}, [toast]);
 
 	useEffect(() => {
-		fetchLogs();
-	}, [fetchLogs]);
+		if (!isSessionLoading && session?.user.isAdmin) {
+			fetchLogs();
+		}
+	}, [fetchLogs, isSessionLoading, session]);
 
 	const filteredLogs = useMemo(() => {
 		return logs.filter((log) => {
@@ -108,6 +122,14 @@ export default function LogsPage() {
 		const total = logs.length;
 		return { errors, total };
 	}, [logs]);
+
+	if (isSessionLoading) {
+		return (
+			<div className="flex items-center justify-center h-full">
+				<Loader2 className="animate-spin text-primary" size={32} />
+			</div>
+		);
+	}
 
 	return (
 		<div className="space-y-10">

@@ -11,7 +11,7 @@ import {
 	Loader2,
 	RefreshCw,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import {
@@ -29,10 +29,22 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/src/components/ui/select';
+import { authClient } from '@/src/lib/auth-client';
+import { notFound } from 'next/navigation';
 
 export default function SandboxPage() {
 	const [sending, setSending] = useState(false);
 	const [response, setResponse] = useState<any>(null);
+	const { data: session, isPending: isSessionLoading } = authClient.useSession();
+
+	/**
+	 * Proteção de Rota: Se não for admin, 404 stealth
+	 */
+	useEffect(() => {
+		if (!isSessionLoading && session && !session.user.isAdmin) {
+			notFound();
+		}
+	}, [session, isSessionLoading]);
 
 	const handleSendTest = () => {
 		setSending(true);
@@ -46,6 +58,14 @@ export default function SandboxPage() {
 			setSending(false);
 		}, 1500);
 	};
+
+	if (isSessionLoading) {
+		return (
+			<div className="flex items-center justify-center h-full">
+				<Loader2 className="animate-spin text-primary" size={32} />
+			</div>
+		);
+	}
 
 	return (
 		<div className="space-y-12 text-left">
