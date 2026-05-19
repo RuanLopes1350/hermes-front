@@ -40,6 +40,17 @@ export default function SignInPage() {
 		}
 	}
 
+	async function handleGoogleSignIn() {
+		try {
+			await authClient.signIn.social({
+				provider: 'google',
+				callbackURL: window.location.origin + '/system/dashboard',
+			});
+		} catch (err: any) {
+			setError('Erro ao iniciar login com Google.');
+		}
+	}
+
 	return (
 		<div className="flex flex-col items-center w-full max-w-7xl mx-auto px-6 py-12 gap-12">
 			{/* Logo & Hero Section */}
@@ -134,6 +145,7 @@ export default function SignInPage() {
 						labelIcon={<FaGoogle size={18} />}
 						variant="outline"
 						containerClassName="w-full"
+						onClick={handleGoogleSignIn}
 					/>
 				</div>
 
