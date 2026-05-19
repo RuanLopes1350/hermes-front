@@ -50,7 +50,7 @@ export function ConfirmModal({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={(open) => !loading && !open && onClose()}>
-			<DialogContent className="bg-surface border-border-subtle rounded-[32px] max-w-md p-0 overflow-hidden shadow-2xl">
+			<DialogContent className="bg-surface border-border-subtle rounded-4xl max-w-md p-0 overflow-hidden shadow-2xl">
 				<DialogHeader className="p-8 bg-background/30 text-center border-b border-border-subtle">
 					<div
 						className={cn(

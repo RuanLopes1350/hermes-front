@@ -358,7 +358,7 @@ export default function ServiceDetailsPage() {
 						</CardHeader>
 						<CardContent className="p-0 space-y-6 text-left">
 							{unifiedConnections.length === 0 ? (
-								<div className="py-20 border border-dashed border-border-subtle rounded-[32px] text-center italic text-muted-foreground text-sm">
+								<div className="py-20 border border-dashed border-border-subtle rounded-4xl text-center italic text-muted-foreground text-sm">
 									Nenhuma conexão de segurança configurada.
 								</div>
 							) : (
@@ -366,7 +366,7 @@ export default function ServiceDetailsPage() {
 									{unifiedConnections.map((conn) => (
 										<div
 											key={conn.id}
-											className="p-8 bg-background/50 rounded-[32px] border border-border-subtle hover:border-primary/30 transition-all group relative overflow-hidden text-left"
+											className="p-8 bg-background/50 rounded-4xl border border-border-subtle hover:border-primary/30 transition-all group relative overflow-hidden text-left"
 										>
 											<div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 relative z-10 text-left">
 												<div className="flex items-start gap-6 text-left">
@@ -478,7 +478,7 @@ export default function ServiceDetailsPage() {
 								</DialogDescription>
 							</DialogHeader>
 
-							<div className="p-10 space-y-6 max-h-[500px] overflow-y-auto scrollbar-hide text-left">
+							<div className="p-10 space-y-6 max-h-125 overflow-y-auto scrollbar-hide text-left">
 								{error && (
 									<div className="bg-danger/10 border border-danger/20 p-4 rounded-xl text-danger text-[10px] font-bold uppercase">
 										{error}

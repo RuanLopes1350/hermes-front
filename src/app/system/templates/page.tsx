@@ -252,7 +252,7 @@ export default function TemplatesPage() {
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 					{templates.length === 0 ? (
 						<div className="col-span-full h-96 border-2 border-dashed border-border-subtle rounded-[40px] flex flex-col items-center justify-center text-center p-12 bg-surface/30">
-							<div className="w-20 h-20 bg-primary/10 rounded-[32px] flex items-center justify-center text-primary mb-6">
+							<div className="w-20 h-20 bg-primary/10 rounded-4xl flex items-center justify-center text-primary mb-6">
 								<Layout size={40} />
 							</div>
 							<h3 className="text-xl font-bold uppercase tracking-tight mb-2 text-foreground text-center">
@@ -267,7 +267,7 @@ export default function TemplatesPage() {
 						templates.map((template) => (
 							<Card
 								key={template.id}
-								className="group relative bg-surface border-border-subtle rounded-[32px] p-8 hover:border-primary/40 transition-all duration-500 shadow-sm overflow-hidden text-left border"
+								className="group relative bg-surface border-border-subtle rounded-4xl p-8 hover:border-primary/40 transition-all duration-500 shadow-sm overflow-hidden text-left border"
 							>
 								<div className="flex justify-between items-start mb-6 text-left">
 									<div className="p-3 rounded-2xl bg-primary/10 text-primary">

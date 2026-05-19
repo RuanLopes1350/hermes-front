@@ -289,7 +289,7 @@ export default function ServicesPage() {
 									</DropdownMenuTrigger>
 									<DropdownMenuContent
 										align="end"
-										className="bg-surface border-border-subtle rounded-xl min-w-[160px]"
+										className="bg-surface border-border-subtle rounded-xl min-w-40"
 									>
 										<DropdownMenuItem
 											onClick={() => handleOpenEdit(service)}
@@ -337,7 +337,7 @@ export default function ServicesPage() {
 
 					<div
 						onClick={handleOpenCreate}
-						className="group border-2 border-dashed border-border-subtle rounded-3xl p-8 flex flex-col items-center justify-center text-center gap-4 hover:border-primary/50 hover:bg-primary/5 cursor-pointer transition-all duration-300 min-h-[260px]"
+						className="group border-2 border-dashed border-border-subtle rounded-3xl p-8 flex flex-col items-center justify-center text-center gap-4 hover:border-primary/50 hover:bg-primary/5 cursor-pointer transition-all duration-300 min-h-65"
 					>
 						<div className="p-4 bg-white/5 rounded-full text-muted-foreground group-hover:bg-primary group-hover:text-white transition-all duration-500 scale-110">
 							<Plus size={32} />

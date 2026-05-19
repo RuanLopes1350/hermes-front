@@ -285,7 +285,7 @@ export default function TemplateDetailsPage() {
 			</div>
 
 			<div className="flex-1 flex gap-6 min-h-0 text-left">
-				<Card className="flex-1 bg-surface border-border-subtle rounded-[32px] border overflow-hidden flex flex-col text-left">
+				<Card className="flex-1 bg-surface border-border-subtle rounded-4xl border overflow-hidden flex flex-col text-left">
 					<div className="p-4 border-b border-border-subtle bg-background/30 flex items-center justify-between text-left">
 						<div className="flex items-center gap-2 text-left">
 							<Code size={14} className="text-primary" />
@@ -324,8 +324,8 @@ export default function TemplateDetailsPage() {
 					</div>
 				</Card>
 
-				<div className="w-[450px] flex flex-col gap-6 shrink-0 text-left">
-					<Card className="flex-1 bg-surface border-border-subtle rounded-[32px] border overflow-hidden flex flex-col relative text-left">
+				<div className="w-112.5 flex flex-col gap-6 shrink-0 text-left">
+					<Card className="flex-1 bg-surface border-border-subtle rounded-4xl border overflow-hidden flex flex-col relative text-left">
 						<div className="p-4 border-b border-border-subtle bg-background/30 flex items-center justify-between text-left">
 							<div className="flex items-center gap-2 text-left">
 								<Eye size={14} className="text-success" />
@@ -355,8 +355,8 @@ export default function TemplateDetailsPage() {
 						</div>
 					</Card>
 
-					<Card className="bg-surface border-border-subtle rounded-[32px] p-5 border text-left shrink-0 text-left">
-						<div className="flex flex-col gap-5 text-left text-left">
+					<Card className="bg-surface border-border-subtle rounded-4xl p-5 border shrink-0 text-left">
+						<div className="flex flex-col gap-5 text-left">
 							<div className="flex items-center justify-between text-left">
 								<div className="flex items-center gap-2 text-left">
 									<Variable size={14} className="text-primary" />
@@ -416,7 +416,7 @@ export default function TemplateDetailsPage() {
 								</Button>
 							</div>
 
-							<div className="flex flex-wrap gap-2 max-h-[100px] overflow-y-auto text-left">
+							<div className="flex flex-wrap gap-2 max-h-25 overflow-y-auto text-left">
 								{variables.map((tag) => (
 									<Badge
 										key={tag}
