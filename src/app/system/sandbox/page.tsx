@@ -41,7 +41,7 @@ export default function SandboxPage() {
 	 * Proteção de Rota: Se não for admin, 404 stealth
 	 */
 	useEffect(() => {
-		if (!isSessionLoading && session && !session.user.isAdmin) {
+		if (!isSessionLoading && session && (session.user as any).isAdmin) {
 			notFound();
 		}
 	}, [session, isSessionLoading]);

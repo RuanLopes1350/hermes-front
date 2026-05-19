@@ -63,7 +63,7 @@ export default function UsersPage() {
 	 * Proteção de Rota: Se não for admin, 404 stealth
 	 */
 	useEffect(() => {
-		if (!isSessionLoading && session && !session.user.isAdmin) {
+		if (!isSessionLoading && session && (session.user as any).isAdmin) {
 			notFound();
 		}
 	}, [session, isSessionLoading]);
@@ -99,7 +99,7 @@ export default function UsersPage() {
 	}, [toast]);
 
 	useEffect(() => {
-		if (!isSessionLoading && session?.user.isAdmin) {
+		if (!isSessionLoading && session && (session.user as any).isAdmin) {
 			fetchUsers();
 		}
 	}, [fetchUsers, isSessionLoading, session]);
@@ -203,7 +203,7 @@ export default function UsersPage() {
 						<RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
 					</Button>
 
-					{session?.user.isAdmin && (
+					{(session?.user as any).isAdmin && (
 						<Button className="gap-2 uppercase font-black tracking-widest text-[10px] px-6 cursor-pointer">
 							<UserPlus size={18} /> Convidar Usuário
 						</Button>
@@ -331,7 +331,7 @@ export default function UsersPage() {
 												</Button>
 
 												{session?.user &&
-													session.user.isAdmin &&
+													(session.user as any).isAdmin &&
 													user.id !== session?.user.id && (
 														<Button
 															variant="ghost"

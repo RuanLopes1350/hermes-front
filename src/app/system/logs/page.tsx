@@ -67,7 +67,7 @@ export default function LogsPage() {
 	 * Proteção de Rota: Se não for admin, 404 stealth
 	 */
 	useEffect(() => {
-		if (!isSessionLoading && session && !session.user.isAdmin) {
+		if (!isSessionLoading && session && !(session.user as any).isAdmin) {
 			notFound();
 		}
 	}, [session, isSessionLoading]);
@@ -96,7 +96,7 @@ export default function LogsPage() {
 	}, [toast]);
 
 	useEffect(() => {
-		if (!isSessionLoading && session?.user.isAdmin) {
+		if (!isSessionLoading && session && (session.user as any).isAdmin) {
 			fetchLogs();
 		}
 	}, [fetchLogs, isSessionLoading, session]);
