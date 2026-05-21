@@ -35,8 +35,8 @@ export default function LeftPanel() {
 	return (
 		<aside className="w-64 bg-surface border-r border-border-subtle text-text-primary p-6 flex flex-col h-full overflow-y-auto shrink-0 z-50">
 			<div className="flex flex-row items-center gap-3 mb-10">
-				<div className="bg-primary/10 p-2 rounded-xl">
-					<img className="w-10 h-10" src="/hermes-icon.svg" alt="Hermes Icon" />
+				<div className="bg-primary/50 p-2 rounded-xl">
+					<img className="w-10 h-10" src="/hermes-icon1.svg" alt="Hermes Icon" />
 				</div>
 				<div className="flex flex-col items-start justify-center gap-0">
 					<h1 className="font-bold text-xl tracking-tight">Hermes</h1>

@@ -56,7 +56,7 @@ export default function SignInPage() {
 			{/* Logo & Hero Section */}
 			<div className="flex flex-col items-center text-center space-y-4">
 				<div className="bg-primary/10 p-4 rounded-3xl border border-primary/20 shadow-2xl shadow-primary/10">
-					<img className="w-16 h-16" src="/hermes-icon.svg" alt="Hermes Logo" />
+					<img className="w-16 h-16" src="/hermes-icon1.svg" alt="Hermes Logo" />
 				</div>
 				<div>
 					<h1 className="text-text-primary font-black text-6xl tracking-tighter">Hermes</h1>
