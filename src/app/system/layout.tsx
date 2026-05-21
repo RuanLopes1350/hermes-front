@@ -47,29 +47,15 @@ export default function SystemLayout({
 				<header className="h-16 border-b border-border-subtle bg-surface/50 backdrop-blur-md flex items-center justify-between px-8 z-10 shrink-0">
 					<div className="flex items-center gap-4">
 						<nav className="flex text-sm font-medium">
-							<span className="text-text-secondary">Sistema</span>
-							<span className="mx-2 text-border-subtle">/</span>
 							<span className="text-text-primary font-semibold">{formattedPageName}</span>
 						</nav>
 					</div>
 
 					<div className="flex items-center gap-6">
-						<div className="relative group hidden md:block">
-							<Search
-								size={18}
-								className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary group-focus-within:text-primary transition-colors"
-							/>
-							<input
-								type="text"
-								placeholder="Pesquisar..."
-								className="bg-background border border-border-subtle rounded-full py-1.5 pl-10 pr-4 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 w-64 transition-all"
-							/>
-						</div>
-
-						<button className="text-text-secondary hover:text-text-primary transition-colors relative">
+						{/* <button className="text-text-secondary hover:text-text-primary transition-colors relative">
 							<Bell size={20} />
 							<span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-primary rounded-full border-2 border-surface"></span>
-						</button>
+						</button> */}
 
 						<div className="h-8 w-px bg-border-subtle/50"></div>
 
@@ -77,11 +63,6 @@ export default function SystemLayout({
 							<div className="flex flex-col items-end mr-1">
 								<span className="text-xs font-bold text-text-primary group-hover:text-primary transition-colors">
 									{session?.user.name || 'Usuário'}
-								</span>
-								<span className="text-[10px] text-text-secondary">
-									{(session?.user as { isAdmin?: boolean } | undefined)?.isAdmin
-										? 'Administrador'
-										: 'Membro'}
 								</span>
 							</div>
 
