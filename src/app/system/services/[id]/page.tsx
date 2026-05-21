@@ -41,6 +41,13 @@ import {
 import { Badge } from '@/src/components/ui/badge';
 import { ConfirmModal } from '@/src/components/ui/confirm-modal';
 import { CustomSelect } from '@/src/components/ui/custom-select';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/src/components/ui/select';
 
 interface ServiceSettings {
 	timezone: string;
@@ -107,7 +114,7 @@ export default function ServiceDetailsPage() {
 		name: '',
 		login: '',
 		smtpHost: '',
-		smtpPort: '465',
+		smtpPort: '',
 		smtpSecure: true,
 		passkey: '',
 		clientId: '',
@@ -243,7 +250,7 @@ export default function ServiceDetailsPage() {
 			name: '',
 			login: '',
 			smtpHost: '',
-			smtpPort: '465',
+			smtpPort: '',
 			smtpSecure: true,
 			passkey: '',
 			clientId: '',
@@ -543,9 +550,9 @@ export default function ServiceDetailsPage() {
 
 											{selectedType === 'plain' ? (
 												<div className="space-y-6 text-left">
-													<div className="grid grid-cols-3 gap-4 text-left">
-														<div className="col-span-2 space-y-2 text-left">
-															<label className="text-[10px] font-bold text-muted-foreground uppercase px-1 text-left">
+													<div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+														<div className="md:col-span-8 space-y-2">
+															<label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">
 																Host SMTP
 															</label>
 															<Input
@@ -553,11 +560,12 @@ export default function ServiceDetailsPage() {
 																onChange={(e) =>
 																	setFormData({ ...formData, smtpHost: e.target.value })
 																}
-																className="bg-background border-border-subtle rounded-xl px-4 py-6 text-sm focus:border-primary font-medium h-12"
+																placeholder="smtp.exemplo.com"
+																className="bg-background border-border-subtle rounded-xl px-4 h-12 text-sm focus:ring-1 focus:ring-primary italic font-medium"
 															/>
 														</div>
-														<div className="space-y-2 text-left">
-															<label className="text-[10px] font-bold text-muted-foreground uppercase px-1 text-left">
+														<div className="md:col-span-4 space-y-2">
+															<label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">
 																Porta
 															</label>
 															<Input
@@ -565,22 +573,50 @@ export default function ServiceDetailsPage() {
 																onChange={(e) =>
 																	setFormData({ ...formData, smtpPort: e.target.value })
 																}
-																className="bg-background border-border-subtle rounded-xl px-4 py-6 text-sm focus:border-primary font-medium h-12"
+																placeholder="Ex: 465"
+																className="bg-background border-border-subtle rounded-xl px-4 h-12 text-sm focus:ring-1 focus:ring-primary italic font-medium text-center"
 															/>
 														</div>
 													</div>
-													<div className="space-y-2 text-left">
-														<label className="text-[10px] font-bold text-muted-foreground uppercase px-1 text-left">
-															Senha/App Password
-														</label>
-														<Input
-															type="password"
-															value={formData.passkey}
-															onChange={(e) =>
-																setFormData({ ...formData, passkey: e.target.value })
-															}
-															className="bg-background border-border-subtle rounded-xl px-4 py-6 text-sm focus:border-primary font-medium h-12"
-														/>
+
+													<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+														<div className="space-y-2">
+															<label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">
+																Segurança
+															</label>
+															<Select
+																value={formData.smtpSecure ? 'ssl' : 'tls'}
+																onValueChange={(v) =>
+																	setFormData({ ...formData, smtpSecure: v === 'ssl' })
+																}
+															>
+																<SelectTrigger className="bg-background border-border-subtle rounded-xl h-12 italic font-medium text-xs">
+																	<SelectValue />
+																</SelectTrigger>
+																<SelectContent className="bg-surface border-border-subtle">
+																	<SelectItem value="ssl" className="text-xs italic">
+																		SSL/TLS (Porta 465)
+																	</SelectItem>
+																	<SelectItem value="tls" className="text-xs italic">
+																		STARTTLS (Porta 587/25)
+																	</SelectItem>
+																</SelectContent>
+															</Select>
+														</div>
+														<div className="space-y-2">
+															<label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">
+																Senha / App Password
+															</label>
+															<Input
+																type="password"
+																value={formData.passkey}
+																onChange={(e) =>
+																	setFormData({ ...formData, passkey: e.target.value })
+																}
+																placeholder="••••••••"
+																className="bg-background border-border-subtle rounded-xl px-4 h-12 text-sm focus:ring-1 focus:ring-primary"
+															/>
+														</div>
 													</div>
 												</div>
 											) : (
