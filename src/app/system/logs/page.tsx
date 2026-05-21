@@ -10,6 +10,8 @@ import {
 	Filter,
 	Loader2,
 	RefreshCw,
+	ChevronLeft,
+	ChevronRight,
 } from 'lucide-react';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Input } from '@/src/components/ui/input';
@@ -53,6 +55,16 @@ interface ApiResponse<T> {
 	message: string | null;
 	data: T;
 	errors: any[];
+	metadata?: {
+		total: number;
+		limit: number;
+		offset: number;
+	};
+}
+
+interface AppUser {
+	id: string;
+	isAdmin: boolean;
 }
 
 export default function LogsPage() {
@@ -60,22 +72,32 @@ export default function LogsPage() {
 	const [loading, setLoading] = useState(true);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [statusFilter, setStatusFilter] = useState('all');
+	
+	// Estados de Paginação
+	const [currentPage, setCurrentPage] = useState(1);
+	const [totalPages, setTotalPages] = useState(1);
+	const [totalRecords, setTotalRecords] = useState(0);
+	const PAGE_SIZE = 20;
+
 	const { toast } = useToast();
 	const { data: session, isPending: isSessionLoading } = authClient.useSession();
+
+	const user = session?.user as AppUser | undefined;
 
 	/**
 	 * Proteção de Rota: Se não for admin, 404 stealth
 	 */
 	useEffect(() => {
-		if (!isSessionLoading && session && !(session.user as any).isAdmin) {
+		if (!isSessionLoading && user && !user.isAdmin) {
 			notFound();
 		}
-	}, [session, isSessionLoading]);
+	}, [user, isSessionLoading]);
 
-	const fetchLogs = useCallback(async () => {
+	const fetchLogs = useCallback(async (page: number = 1) => {
 		try {
 			setLoading(true);
-			const response = await apiFetch('/api/logs?limit=100');
+			const offset = (page - 1) * PAGE_SIZE;
+			const response = await apiFetch(`/api/logs?limit=${PAGE_SIZE}&offset=${offset}`);
 			const result: ApiResponse<Log[]> = await response.json();
 
 			if (!response.ok || result.error) {
@@ -83,6 +105,13 @@ export default function LogsPage() {
 			}
 
 			setLogs(Array.isArray(result.data) ? result.data : []);
+			
+			if (result.metadata) {
+				setTotalRecords(result.metadata.total);
+				setTotalPages(Math.ceil(result.metadata.total / PAGE_SIZE));
+			}
+			
+			setCurrentPage(page);
 		} catch (error: any) {
 			console.error('Erro na integração /api/logs:', error);
 			toast({
@@ -96,12 +125,14 @@ export default function LogsPage() {
 	}, [toast]);
 
 	useEffect(() => {
-		if (!isSessionLoading && session && (session.user as any).isAdmin) {
-			fetchLogs();
+		if (!isSessionLoading && user?.isAdmin) {
+			fetchLogs(1);
 		}
-	}, [fetchLogs, isSessionLoading, session]);
+	}, [fetchLogs, isSessionLoading, user]);
 
 	const filteredLogs = useMemo(() => {
+		// A filtragem local aqui só faz sentido para o que está carregado na página atual.
+		// Em um sistema real com paginação server-side, o ideal seria passar o search para a API.
 		return logs.filter((log) => {
 			const matchesSearch =
 				log.endpoint.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -117,12 +148,6 @@ export default function LogsPage() {
 		});
 	}, [logs, searchTerm, statusFilter]);
 
-	const stats = useMemo(() => {
-		const errors = logs.filter((l) => l.status_code >= 400).length;
-		const total = logs.length;
-		return { errors, total };
-	}, [logs]);
-
 	if (isSessionLoading) {
 		return (
 			<div className="flex items-center justify-center h-full">
@@ -135,7 +160,7 @@ export default function LogsPage() {
 		<div className="space-y-10">
 			<div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 text-left">
 				<div>
-					<h2 className="text-3xl font-bold tracking-tight mb-2 uppercase">Logs de Auditoria</h2>
+					<h2 className="text-3xl font-bold tracking-tight mb-2 uppercase text-foreground">Logs de Auditoria</h2>
 					<p className="text-muted-foreground text-sm font-medium italic">
 						Monitore o histórico de requisições e atividade da API.
 					</p>
@@ -145,7 +170,7 @@ export default function LogsPage() {
 					<Button
 						variant="outline"
 						size="icon"
-						onClick={fetchLogs}
+						onClick={() => fetchLogs(currentPage)}
 						disabled={loading}
 						className="rounded-xl border-border-subtle cursor-pointer"
 					>
@@ -161,7 +186,7 @@ export default function LogsPage() {
 			</div>
 
 			<div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-				<Card className="lg:col-span-3 bg-surface border-border-subtle rounded-[32px] overflow-hidden shadow-sm">
+				<Card className="lg:col-span-3 bg-surface border-border-subtle rounded-[32px] overflow-hidden shadow-sm border text-left">
 					<div className="p-6 border-b border-border-subtle bg-background/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
 						<div className="relative flex-1">
 							<Search
@@ -169,7 +194,7 @@ export default function LogsPage() {
 								size={18}
 							/>
 							<Input
-								placeholder="Buscar por endpoint, IP ou ID..."
+								placeholder="Buscar nesta página..."
 								className="pl-12 bg-background border-border-subtle rounded-2xl italic"
 								value={searchTerm}
 								onChange={(e) => setSearchTerm(e.target.value)}
@@ -191,19 +216,19 @@ export default function LogsPage() {
 						<Table>
 							<TableHeader>
 								<TableRow className="border-b border-border-subtle bg-background/50 hover:bg-background/50">
-									<TableHead className="px-8 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+									<TableHead className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
 										Método / Status
 									</TableHead>
-									<TableHead className="px-8 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+									<TableHead className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
 										Endpoint
 									</TableHead>
-									<TableHead className="px-8 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+									<TableHead className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
 										Origem
 									</TableHead>
-									<TableHead className="px-8 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+									<TableHead className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
 										Data / Hora
 									</TableHead>
-									<TableHead className="px-8 text-right text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+									<TableHead className="px-8 py-5 text-right text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
 										Ações
 									</TableHead>
 								</TableRow>
@@ -211,10 +236,10 @@ export default function LogsPage() {
 							<TableBody>
 								{loading && logs.length === 0 ? (
 									<TableRow>
-										<TableCell colSpan={5} className="h-48 text-center">
+										<TableCell colSpan={5} className="h-48 text-center border-none">
 											<div className="flex flex-col items-center justify-center gap-3 text-muted-foreground font-medium">
 												<Loader2 className="animate-spin text-primary" size={32} />
-												<span className="italic">Sincronizando auditoria...</span>
+												<span className="italic uppercase text-[10px] tracking-widest font-black">Sincronizando auditoria...</span>
 											</div>
 										</TableCell>
 									</TableRow>
@@ -222,9 +247,9 @@ export default function LogsPage() {
 									<TableRow>
 										<TableCell
 											colSpan={5}
-											className="h-48 text-center text-muted-foreground italic"
+											className="h-48 text-center text-muted-foreground italic border-none"
 										>
-											Nenhum log encontrado para os critérios selecionados.
+											Nenhum log encontrado para os critérios selecionados nesta página.
 										</TableCell>
 									</TableRow>
 								) : (
@@ -255,7 +280,7 @@ export default function LogsPage() {
 													{log.endpoint}
 												</p>
 												<p className="text-[9px] text-muted-foreground uppercase tracking-tighter">
-													ID: {log.id}
+													ID: {log.id.split('-')[0]}...
 												</p>
 											</TableCell>
 											<TableCell className="px-8 py-6 text-left">
@@ -283,7 +308,7 @@ export default function LogsPage() {
 												<Button
 													variant="ghost"
 													size="icon"
-													className="text-muted-foreground hover:text-primary cursor-pointer"
+													className="text-muted-foreground hover:text-primary cursor-pointer h-10 w-10 rounded-xl"
 												>
 													<Eye size={18} />
 												</Button>
@@ -294,27 +319,62 @@ export default function LogsPage() {
 							</TableBody>
 						</Table>
 					</div>
+					
+					{/* Footer com Paginação */}
+					<div className="p-6 border-t border-border-subtle bg-background/20 flex items-center justify-between">
+						<p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+							Mostrando {logs.length} de {totalRecords} logs
+						</p>
+						
+						<div className="flex items-center gap-2">
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => fetchLogs(currentPage - 1)}
+								disabled={currentPage === 1 || loading}
+								className="h-9 px-4 rounded-xl border-border-subtle cursor-pointer gap-2 uppercase text-[9px] font-black tracking-widest"
+							>
+								<ChevronLeft size={14} /> Anterior
+							</Button>
+							
+							<div className="flex items-center gap-1 mx-2">
+								<span className="text-xs font-bold text-foreground">{currentPage}</span>
+								<span className="text-xs text-muted-foreground italic">de</span>
+								<span className="text-xs font-bold text-foreground">{totalPages}</span>
+							</div>
+							
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => fetchLogs(currentPage + 1)}
+								disabled={currentPage === totalPages || loading}
+								className="h-9 px-4 rounded-xl border-border-subtle cursor-pointer gap-2 uppercase text-[9px] font-black tracking-widest"
+							>
+								Próximo <ChevronRight size={14} />
+							</Button>
+						</div>
+					</div>
 				</Card>
 
 				<div className="space-y-6 text-left">
-					<Card className="bg-surface border-border-subtle rounded-3xl p-6">
-						<CardHeader className="p-0 mb-6">
-							<CardTitle className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+					<Card className="bg-surface border-border-subtle rounded-3xl p-6 border shadow-sm text-left">
+						<CardHeader className="p-0 mb-6 text-left">
+							<CardTitle className="text-xs font-bold uppercase tracking-widest flex items-center gap-2 text-left">
 								<Filter size={14} className="text-primary" /> Visão Geral
 							</CardTitle>
 						</CardHeader>
-						<CardContent className="p-0 space-y-4">
-							<div className="p-4 bg-background/50 rounded-2xl border border-border-subtle hover:border-primary/30 transition-all cursor-pointer group">
-								<p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 group-hover:text-primary">
-									Erros Recentes
+						<CardContent className="p-0 space-y-4 text-left">
+							<div className="p-4 bg-background/50 rounded-2xl border border-border-subtle hover:border-primary/30 transition-all cursor-pointer group text-left">
+								<p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 group-hover:text-primary text-left">
+									Anomalias Detectadas
 								</p>
-								<p className="text-2xl font-bold text-danger">{stats.errors}</p>
+								<p className="text-2xl font-bold text-danger text-left">--</p>
 							</div>
-							<div className="p-4 bg-background/50 rounded-2xl border border-border-subtle">
-								<p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">
-									Total de Requisições
+							<div className="p-4 bg-background/50 rounded-2xl border border-border-subtle text-left">
+								<p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 text-left">
+									Total de Registros
 								</p>
-								<p className="text-2xl font-bold text-foreground">{stats.total}</p>
+								<p className="text-2xl font-bold text-foreground text-left">{totalRecords}</p>
 							</div>
 						</CardContent>
 					</Card>

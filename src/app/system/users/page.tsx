@@ -9,6 +9,7 @@ import {
 	Settings,
 	Loader2,
 	RefreshCw,
+	User as UserIcon,
 } from 'lucide-react';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { notFound } from 'next/navigation';
@@ -50,6 +51,11 @@ interface ApiResponse<T> {
 	errors: any[];
 }
 
+interface AppUser {
+	id: string;
+	isAdmin: boolean;
+}
+
 export default function UsersPage() {
 	const [users, setUsers] = useState<User[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -59,14 +65,16 @@ export default function UsersPage() {
 	const { data: session, isPending: isSessionLoading } = authClient.useSession();
 	const { toast } = useToast();
 
+	const currentUser = session?.user as AppUser | undefined;
+
 	/**
 	 * Proteção de Rota: Se não for admin, 404 stealth
 	 */
 	useEffect(() => {
-		if (!isSessionLoading && session && (session.user as any).isAdmin) {
+		if (!isSessionLoading && currentUser && !currentUser.isAdmin) {
 			notFound();
 		}
-	}, [session, isSessionLoading]);
+	}, [currentUser, isSessionLoading]);
 
 	/**
 	 * Busca de usuários com tratamento de erro exaustivo.
@@ -99,16 +107,16 @@ export default function UsersPage() {
 	}, [toast]);
 
 	useEffect(() => {
-		if (!isSessionLoading && session && (session.user as any).isAdmin) {
+		if (!isSessionLoading && currentUser?.isAdmin) {
 			fetchUsers();
 		}
-	}, [fetchUsers, isSessionLoading, session]);
+	}, [fetchUsers, isSessionLoading, currentUser]);
 
 	/**
 	 * Deleção de usuário com proteção contra auto-deleção e feedback de loading.
 	 */
 	const handleDeleteUser = async (id: string, name: string) => {
-		if (id === session?.user.id) {
+		if (id === currentUser?.id) {
 			toast({
 				variant: 'destructive',
 				title: 'Operação Bloqueada',
@@ -203,7 +211,7 @@ export default function UsersPage() {
 						<RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
 					</Button>
 
-					{(session?.user as any).isAdmin && (
+					{currentUser?.isAdmin && (
 						<Button className="gap-2 uppercase font-black tracking-widest text-[10px] px-6 cursor-pointer">
 							<UserPlus size={18} /> Convidar Usuário
 						</Button>
@@ -287,7 +295,7 @@ export default function UsersPage() {
 												<div className="text-left">
 													<div className="flex items-center gap-2">
 														<p className="text-sm font-bold text-foreground">{user.name}</p>
-														{user.id === session?.user.id && (
+														{user.id === currentUser?.id && (
 															<Badge className="bg-primary/20 text-primary border-none text-[8px] h-4 px-1">
 																VOCÊ
 															</Badge>
@@ -330,9 +338,8 @@ export default function UsersPage() {
 													<Settings size={18} />
 												</Button>
 
-												{session?.user &&
-													(session.user as any).isAdmin &&
-													user.id !== session?.user.id && (
+												{currentUser?.isAdmin &&
+													user.id !== currentUser?.id && (
 														<Button
 															variant="ghost"
 															size="icon"

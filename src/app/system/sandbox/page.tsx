@@ -17,7 +17,7 @@ import {
 	Hash,
 	ChevronRight,
 	Database,
-	Mail
+	Mail,
 } from 'lucide-react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button } from '@/src/components/ui/button';
@@ -55,9 +55,18 @@ interface Template {
 	subject_template: string;
 }
 
+interface AppUser {
+	id: string;
+	name: string;
+	email: string;
+	isAdmin: boolean;
+}
+
 export default function SandboxPage() {
 	const { data: session, isPending: isSessionLoading } = authClient.useSession();
 	const { toast } = useToast();
+
+	const user = session?.user as AppUser | undefined;
 
 	// Dados do Banco
 	const [services, setServices] = useState<Service[]>([]);
@@ -86,16 +95,16 @@ export default function SandboxPage() {
 	 * Proteção de Rota
 	 */
 	useEffect(() => {
-		if (!isSessionLoading && session && !session.user.isAdmin) {
+		if (!isSessionLoading && user && !user.isAdmin) {
 			notFound();
 		}
-	}, [session, isSessionLoading]);
+	}, [user, isSessionLoading]);
 
 	/**
 	 * Carga Inicial: Serviços e Templates
 	 */
 	useEffect(() => {
-		if (!isSessionLoading && session?.user.isAdmin) {
+		if (!isSessionLoading && user?.isAdmin) {
 			const fetchData = async () => {
 				setLoadingData(true);
 				try {
@@ -121,7 +130,7 @@ export default function SandboxPage() {
 			};
 			fetchData();
 		}
-	}, [session, isSessionLoading, toast]);
+	}, [user, isSessionLoading, toast]);
 
 	/**
 	 * Carga de API Keys ao selecionar Serviço
@@ -487,8 +496,9 @@ export default function SandboxPage() {
 							</CardTitle>
 							{responseLog && (
 								<Badge
-									className={`${responseLog.status < 400 ? 'bg-success/20 text-success' : 'bg-danger/20 text-danger'
-										} border-none text-[10px] font-black uppercase px-3 py-1`}
+									className={`${
+										responseLog.status < 400 ? 'bg-success/20 text-success' : 'bg-danger/20 text-danger'
+									} border-none text-[10px] font-black uppercase px-3 py-1`}
 								>
 									HTTP {responseLog.status || 'ERR'}
 								</Badge>

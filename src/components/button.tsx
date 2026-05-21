@@ -4,6 +4,7 @@ interface ButtonProps {
 	containerClassName?: string;
 	variant?: 'primary' | 'secondary' | 'outline' | 'danger';
 	onClick?: () => void;
+	disabled?: boolean;
 }
 
 export default function Button({
@@ -12,6 +13,7 @@ export default function Button({
 	containerClassName = '',
 	variant = 'secondary',
 	onClick,
+	disabled = false,
 }: ButtonProps) {
 	const variants = {
 		primary: 'bg-primary text-white hover:bg-primary-hover shadow-lg shadow-primary/20',
@@ -22,8 +24,11 @@ export default function Button({
 
 	return (
 		<button
-			className={`flex flex-row items-center gap-2.5 justify-center cursor-pointer h-12 px-6 rounded-xl font-bold text-xs uppercase tracking-widest transition-all duration-300 ${variants[variant]} ${containerClassName}`}
+			className={`flex flex-row items-center gap-2.5 justify-center cursor-pointer h-12 px-6 rounded-xl font-bold text-xs uppercase tracking-widest transition-all duration-300 ${variants[variant]} ${containerClassName} ${
+				disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
+			}`}
 			onClick={onClick}
+			disabled={disabled}
 		>
 			{labelIcon && (
 				<span className="opacity-80 group-hover:scale-110 transition-transform">{labelIcon}</span>
