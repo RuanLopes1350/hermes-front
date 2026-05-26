@@ -92,15 +92,6 @@ export default function SandboxPage() {
 	const [responseLog, setResponseLog] = useState<any>(null);
 
 	/**
-	 * Proteção de Rota
-	 */
-	useEffect(() => {
-		if (!isSessionLoading && user && !user.isAdmin) {
-			notFound();
-		}
-	}, [user, isSessionLoading]);
-
-	/**
 	 * Carga Inicial: Serviços e Templates
 	 */
 	useEffect(() => {

@@ -26,7 +26,7 @@ export default function LeftPanel() {
 	const pathname = usePathname();
 	const [mounted, setMounted] = useState(false);
 	const { data: session } = authClient.useSession();
-	
+
 	const user = session?.user as AppUser | undefined;
 	const isAdmin = Boolean(user?.isAdmin);
 
@@ -62,22 +62,20 @@ export default function LeftPanel() {
 
 					<Link
 						href="/system/dashboard"
-						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-							isActive('dashboard')
+						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('dashboard')
 								? 'bg-primary text-white shadow-lg shadow-primary/20'
 								: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
-						}`}
+							}`}
 					>
 						<LayoutDashboard size={18} /> Dashboard
 					</Link>
 
 					<Link
 						href="/system/services"
-						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-							isActive('services')
+						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('services')
 								? 'bg-primary text-white shadow-lg shadow-primary/20'
 								: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
-						}`}
+							}`}
 					>
 						<GrServices size={18} /> Serviços
 					</Link>
@@ -88,27 +86,26 @@ export default function LeftPanel() {
 
 					<Link
 						href="/system/templates"
-						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-							isActive('templates')
+						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('templates')
 								? 'bg-primary text-white shadow-lg shadow-primary/20'
 								: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
-						}`}
+							}`}
 					>
 						<FileText size={18} /> Templates
+					</Link>
+					<Link
+						href="/system/sandbox"
+						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('sandbox')
+								? 'bg-primary text-white shadow-lg shadow-primary/20'
+								: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
+							}`}
+					>
+						<SquareTerminal size={18} /> Sandbox
 					</Link>
 
 					{isAdmin && (
 						<>
-							<Link
-								href="/system/sandbox"
-								className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-									isActive('sandbox')
-										? 'bg-primary text-white shadow-lg shadow-primary/20'
-										: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
-								}`}
-							>
-								<SquareTerminal size={18} /> Sandbox
-							</Link>
+
 
 							<p className="text-[10px] font-bold text-text-secondary uppercase px-3 mt-6 mb-2 tracking-widest text-left">
 								Administração
@@ -116,11 +113,10 @@ export default function LeftPanel() {
 
 							<Link
 								href="/system/users"
-								className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-									isActive('users')
+								className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('users')
 										? 'bg-primary text-white shadow-lg shadow-primary/20'
 										: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
-								}`}
+									}`}
 							>
 								<Users size={18} /> Usuários
 							</Link>
@@ -131,11 +127,10 @@ export default function LeftPanel() {
 				<div className="flex flex-col gap-2 mt-auto pt-6 border-t border-border-subtle/50 text-left">
 					<Link
 						href="/system/profile"
-						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-							isActive('profile')
+						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('profile')
 								? 'bg-primary text-white'
 								: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
-						}`}
+							}`}
 					>
 						<div className="w-6 h-6 rounded-full overflow-hidden border border-white/10">
 							<img
