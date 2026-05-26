@@ -94,34 +94,34 @@ export default function SandboxPage() {
 	/**
 	 * Carga Inicial: Serviços e Templates
 	 */
-	useEffect(() => {
-		if (!isSessionLoading && user?.isAdmin) {
-			const fetchData = async () => {
-				setLoadingData(true);
-				try {
-					const [srvRes, tmplRes] = await Promise.all([
-						apiFetch('/api/services'),
-						apiFetch('/api/templates'),
-					]);
+	// useEffect(() => {
+	// 	if (!isSessionLoading && user?.isAdmin) {
+	// 		const fetchData = async () => {
+	// 			setLoadingData(true);
+	// 			try {
+	// 				const [srvRes, tmplRes] = await Promise.all([
+	// 					apiFetch('/api/services'),
+	// 					apiFetch('/api/templates'),
+	// 				]);
 
-					const srvData = await srvRes.json();
-					const tmplData = await tmplRes.json();
+	// 				const srvData = await srvRes.json();
+	// 				const tmplData = await tmplRes.json();
 
-					setServices(srvData.data || []);
-					setTemplates(tmplData.data || []);
-				} catch (err) {
-					toast({
-						variant: 'destructive',
-						title: 'Erro de Carga',
-						description: 'Não foi possível carregar os dados iniciais.',
-					});
-				} finally {
-					setLoadingData(false);
-				}
-			};
-			fetchData();
-		}
-	}, [user, isSessionLoading, toast]);
+	// 				setServices(srvData.data || []);
+	// 				setTemplates(tmplData.data || []);
+	// 			} catch (err) {
+	// 				toast({
+	// 					variant: 'destructive',
+	// 					title: 'Erro de Carga',
+	// 					description: 'Não foi possível carregar os dados iniciais.',
+	// 				});
+	// 			} finally {
+	// 				setLoadingData(false);
+	// 			}
+	// 		};
+	// 		fetchData();
+	// 	}
+	// }, [user, isSessionLoading, toast]);
 
 	/**
 	 * Carga de API Keys ao selecionar Serviço
