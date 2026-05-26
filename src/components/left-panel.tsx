@@ -110,17 +110,6 @@ export default function LeftPanel() {
 								<SquareTerminal size={18} /> Sandbox
 							</Link>
 
-							<Link
-								href="/system/logs"
-								className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-									isActive('logs')
-										? 'bg-primary text-white shadow-lg shadow-primary/20'
-										: 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
-								}`}
-							>
-								<History size={18} /> Logs
-							</Link>
-
 							<p className="text-[10px] font-bold text-text-secondary uppercase px-3 mt-6 mb-2 tracking-widest text-left">
 								Administração
 							</p>

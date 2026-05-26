@@ -12,7 +12,6 @@ import {
 	Server,
 	Layers,
 	Loader2,
-	Terminal,
 	Zap,
 	Database,
 	Key,
@@ -87,7 +86,7 @@ export default function DashboardPage() {
 		}
 	};
 
-	if (isSessionLoading || loading) {
+	if (isSessionLoading || loading || !data || !data.summary) {
 		return (
 			<div className="h-screen flex items-center justify-center -mt-20">
 				<div className="flex flex-col items-center gap-4">
@@ -102,8 +101,8 @@ export default function DashboardPage() {
 
 	// Configuração comum para os gráficos ECharts
 	const getLatencyOption = (latencyData: any[]) => {
-		const dates = latencyData.map(d => new Date(d.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }));
-		const values = latencyData.map(d => Number(d.avg_latency).toFixed(2));
+		const dates = (latencyData || []).map(d => new Date(d.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }));
+		const values = (latencyData || []).map(d => Number(d.avg_latency || 0).toFixed(2));
 
 		return {
 			backgroundColor: 'transparent',
@@ -153,18 +152,22 @@ export default function DashboardPage() {
 		/**
 		 * DASHBOARD ADMINISTRADOR (INFRA)
 		 */
+		const totalSent = Number(data.summary.totalSent || 0);
+		const totalFailed = Number(data.summary.totalFailed || 0);
+		const totalAttempts = totalSent + totalFailed;
+		
 		const adminStats = [
 			{
 				label: 'E-mails Disparados',
-				value: data.summary.totalSent.toLocaleString(),
+				value: totalSent.toLocaleString('pt-BR'),
 				icon: Zap,
 				color: 'text-success',
 				bg: 'bg-success/10',
 			},
 			{
 				label: 'Taxa de Falha',
-				value: data.summary.totalSent > 0
-					? ((data.summary.totalFailed / (data.summary.totalSent + data.summary.totalFailed)) * 100).toFixed(2) + '%'
+				value: totalAttempts > 0 
+					? ((totalFailed / totalAttempts) * 100).toFixed(2) + '%'
 					: '0%',
 				icon: AlertCircle,
 				color: 'text-danger',
@@ -172,14 +175,14 @@ export default function DashboardPage() {
 			},
 			{
 				label: 'Usuários Ativos',
-				value: data.summary.totalUsers,
+				value: (data.summary.totalUsers || 0).toLocaleString('pt-BR'),
 				icon: Users,
 				color: 'text-primary',
 				bg: 'bg-primary/10',
 			},
 			{
 				label: 'Serviços Conectados',
-				value: data.summary.totalServices,
+				value: (data.summary.totalServices || 0).toLocaleString('pt-BR'),
 				icon: Server,
 				color: 'text-foreground',
 				bg: 'bg-white/5',
@@ -237,16 +240,16 @@ export default function DashboardPage() {
 								<span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Live Monitor</span>
 							</div>
 						</div>
-
+						
 						<div className="flex-1 min-h-[300px]">
-							{data.latency.length === 0 ? (
+							{(!data.latency || data.latency.length === 0) ? (
 								<div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground/30 italic gap-3">
 									<Activity size={48} />
 									<p className="text-xs uppercase font-black tracking-widest">Sem dados de latência</p>
 								</div>
 							) : (
-								<ReactECharts
-									option={getLatencyOption(data.latency)}
+								<ReactECharts 
+									option={getLatencyOption(data.latency)} 
 									style={{ height: '300px', width: '100%' }}
 									opts={{ renderer: 'svg' }}
 								/>
@@ -264,13 +267,13 @@ export default function DashboardPage() {
 								Processamento
 							</CardTitle>
 						</CardHeader>
-
+						
 						<CardContent className="p-0 space-y-6">
 							<div className="space-y-4">
 								{[
-									{ label: 'Aguardando na Fila', value: data.queue.waiting, color: 'bg-primary' },
-									{ label: 'Em Processamento', value: data.queue.active, color: 'bg-success' },
-									{ label: 'Falhas Críticas', value: data.queue.failed, color: 'bg-danger' },
+									{ label: 'Aguardando na Fila', value: data.queue?.waiting || 0, color: 'bg-primary' },
+									{ label: 'Em Processamento', value: data.queue?.active || 0, color: 'bg-success' },
+									{ label: 'Falhas Críticas', value: data.queue?.failed || 0, color: 'bg-danger' },
 								].map((item, i) => (
 									<div key={i} className="space-y-2 p-5 bg-background/40 rounded-3xl border border-border-subtle/50">
 										<div className="flex justify-between items-center mb-1">
@@ -285,7 +288,7 @@ export default function DashboardPage() {
 									</div>
 								))}
 							</div>
-
+							
 							<div className="pt-4 p-6 bg-primary/5 border border-primary/20 rounded-3xl italic text-[11px] text-muted-foreground leading-relaxed">
 								O Hermes utiliza instâncias de workers isolados via BullMQ para garantir entrega assíncrona.
 							</div>
@@ -310,7 +313,7 @@ export default function DashboardPage() {
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{data.allServices.map((srv: any) => (
+								{(data.allServices || []).map((srv: any) => (
 									<TableRow key={srv.id} className="hover:bg-white/5 border-b border-border-subtle/30 transition-colors">
 										<TableCell className="px-8 py-5">
 											<div className="flex flex-col">
@@ -332,82 +335,38 @@ export default function DashboardPage() {
 						</Table>
 					</div>
 				</Card>
-
-				{/* Tabela de Auditoria Global */}
-				<Card className="bg-surface border-border-subtle rounded-[40px] overflow-hidden border shadow-sm text-left">
-					<div className="p-8 border-b border-border-subtle bg-background/30 flex justify-between items-center">
-						<CardTitle className="text-lg font-bold uppercase italic tracking-tighter text-foreground flex items-center gap-2">
-							<Terminal size={18} className="text-primary" /> Logs
-						</CardTitle>
-						<Link href="/system/logs">
-							<Button variant="outline" className="px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-border-subtle hover:bg-white/5 h-10">
-								Ver Todos os Logs
-							</Button>
-						</Link>
-					</div>
-					<div className="overflow-x-auto">
-						<Table>
-							<TableHeader className="bg-background/50">
-								<TableRow className="border-b border-border-subtle/30">
-									<TableHead className="px-8 text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">Método</TableHead>
-									<TableHead className="px-8 text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">Endpoint</TableHead>
-									<TableHead className="px-8 text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">Status</TableHead>
-									<TableHead className="px-8 text-right text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">Data/Hora</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{data.recentLogs.map((log: any) => (
-									<TableRow key={log.id} className="hover:bg-white/5 border-b border-border-subtle/30 transition-colors">
-										<TableCell className="px-8 py-5">
-											<Badge variant="outline" className="bg-background border-border-subtle font-black text-[9px] uppercase px-2 py-0.5">
-												{log.method}
-											</Badge>
-										</TableCell>
-										<TableCell className="px-8 py-5 font-mono text-xs text-foreground/70">{log.endpoint}</TableCell>
-										<TableCell className="px-8 py-5">
-											<span className={`text-[10px] font-bold uppercase tracking-widest ${log.status_code >= 400 ? 'text-danger' : 'text-success'}`}>
-												HTTP {log.status_code}
-											</span>
-										</TableCell>
-										<TableCell className="px-8 py-5 text-right text-muted-foreground text-xs font-mono">
-											{new Date(log.createdAt).toLocaleString('pt-BR')}
-										</TableCell>
-									</TableRow>
-								))}
-							</TableBody>
-						</Table>
-					</div>
-				</Card>
 			</div>
 		);
 	}
 
-	//  DASHBOARD USUÁRIO (OPERACIONAL)
+	/**
+	 * DASHBOARD USUÁRIO (OPERACIONAL)
+	 */
 	const userStats = [
 		{
 			label: 'Minha Vazão (Envios)',
-			value: data.summary.sent.toLocaleString(),
+			value: (Number(data.summary.sent || 0)).toLocaleString('pt-BR'),
 			icon: Mail,
 			color: 'text-primary',
 			bg: 'bg-primary/10',
 		},
 		{
 			label: 'Pendentes / Retentativa',
-			value: data.summary.pending,
+			value: data.summary.pending || 0,
 			icon: Clock,
 			color: 'text-warning',
 			bg: 'bg-warning/10',
 		},
 		{
 			label: 'Projetos Ativos',
-			value: data.summary.services,
+			value: data.summary.services || 0,
 			icon: Server,
 			color: 'text-foreground',
 			bg: 'bg-white/5',
 		},
 		{
 			label: 'Templates Criados',
-			value: data.summary.templates,
+			value: data.summary.templates || 0,
 			icon: Layers,
 			color: 'text-success',
 			bg: 'bg-success/10',
@@ -454,16 +413,16 @@ export default function DashboardPage() {
 					<CardTitle className="text-xl font-bold uppercase italic tracking-tighter text-foreground mb-10">
 						Performance de Entrega (Latência)
 					</CardTitle>
-
+					
 					<div className="flex-1 min-h-[300px]">
-						{data.latency.length === 0 ? (
+						{(!data.latency || data.latency.length === 0) ? (
 							<div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground/30 italic gap-3">
 								<TrendingUp size={48} />
 								<p className="text-xs uppercase font-black tracking-widest">Aguardando dados de despacho</p>
 							</div>
 						) : (
-							<ReactECharts
-								option={getLatencyOption(data.latency)}
+							<ReactECharts 
+								option={getLatencyOption(data.latency)} 
 								style={{ height: '300px', width: '100%' }}
 								opts={{ renderer: 'svg' }}
 							/>
@@ -481,9 +440,9 @@ export default function DashboardPage() {
 							Top Templates
 						</CardTitle>
 					</CardHeader>
-
+					
 					<CardContent className="p-0 space-y-5">
-						{data.topTemplates.length === 0 ? (
+						{(!data.topTemplates || data.topTemplates.length === 0) ? (
 							<div className="py-20 text-center opacity-20 italic text-xs uppercase font-bold tracking-widest">
 								Aguardando Dados...
 							</div>
@@ -527,9 +486,9 @@ export default function DashboardPage() {
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{data.recentEmails.length === 0 ? (
+							{(!data.recentEmails || data.recentEmails.length === 0) ? (
 								<TableRow>
-									<TableCell colSpan={4} className="h-40 text-center text-muted-foreground italic text-xs uppercase font-bold tracking-widest opacity-30">
+									<TableCell colSpan={4} className="h-40 text-center text-muted-foreground italic text-xs uppercase font-bold tracking-widest opacity-30 border-none">
 										Nenhum e-mail enviado recentemente.
 									</TableCell>
 								</TableRow>
@@ -539,8 +498,9 @@ export default function DashboardPage() {
 										<TableCell className="px-8 py-5 font-bold text-foreground italic text-xs">{mail.recipient}</TableCell>
 										<TableCell className="px-8 py-5 text-xs text-muted-foreground truncate max-w-[200px]">{mail.subject}</TableCell>
 										<TableCell className="px-8 py-5">
-											<Badge className={`${mail.status === 'sent' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
-												} border-none font-black text-[9px] uppercase px-2 py-0.5`}>
+											<Badge className={`${
+												mail.status === 'sent' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
+											} border-none font-black text-[9px] uppercase px-2 py-0.5`}>
 												{mail.status}
 											</Badge>
 										</TableCell>

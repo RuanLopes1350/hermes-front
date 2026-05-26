@@ -20,6 +20,7 @@ import {
 	Check,
 	AlertCircle,
 	Key,
+	ChevronRight,
 } from 'lucide-react';
 import { FaGoogle } from 'react-icons/fa';
 import Link from 'next/link';
@@ -167,6 +168,11 @@ export default function ServiceDetailsPage() {
 			return { ...cred, key };
 		});
 	}, [credentials, apiKeys]);
+
+	const handleAuthorizeGoogle = (credId: string) => {
+		const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+		window.location.href = `${apiUrl}/api/services/${params.id}/credentials/${credId}/authorize`;
+	};
 
 	const handleSaveService = async () => {
 		setSaving(true);
@@ -348,7 +354,7 @@ export default function ServiceDetailsPage() {
 										Credenciais
 									</CardTitle>
 									<p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1 text-left">
-										Conexões SMTP com Chaves de API vinculadas
+										Conexões vinculadas
 									</p>
 								</div>
 							</div>
@@ -389,11 +395,18 @@ export default function ServiceDetailsPage() {
 															<h4 className="text-lg font-bold text-foreground text-left">
 																{conn.name}
 															</h4>
-															<Badge className="bg-success/10 text-success border-none text-[8px] uppercase tracking-widest">
-																{conn.auth_type === 'oauth2' && !conn.refresh_token
-																	? 'Aguardando Google'
-																	: 'Pronto'}
-															</Badge>
+															{conn.auth_type === 'oauth2' && !conn.refresh_token ? (
+																<button
+																	onClick={() => handleAuthorizeGoogle(conn.id)}
+																	className="bg-danger/10 text-danger border-none text-[8px] uppercase tracking-widest font-bold px-2 py-0.5 rounded cursor-pointer hover:bg-danger hover:text-white transition-all flex items-center gap-1"
+																>
+																	<AlertCircle size={10} /> Aguardando Google (Clique aqui)
+																</button>
+															) : (
+																<Badge className="bg-success/10 text-success border-none text-[8px] uppercase tracking-widest">
+																	Pronto
+																</Badge>
+															)}
 														</div>
 														<p className="text-[11px] text-muted-foreground italic font-medium text-left">
 															{conn.login}
@@ -621,30 +634,21 @@ export default function ServiceDetailsPage() {
 												</div>
 											) : (
 												<div className="space-y-6 text-left">
-													<div className="space-y-2 text-left">
-														<label className="text-[10px] font-bold text-muted-foreground uppercase px-1 font-mono tracking-tighter text-left">
-															Google Client ID
-														</label>
-														<Input
-															value={formData.clientId}
-															onChange={(e) =>
-																setFormData({ ...formData, clientId: e.target.value })
-															}
-															className="bg-background border-border-subtle rounded-xl px-4 py-6 text-sm font-mono focus:border-primary h-12"
-														/>
-													</div>
-													<div className="space-y-2 text-left">
-														<label className="text-[10px] font-bold text-muted-foreground uppercase px-1 font-mono tracking-tighter text-left">
-															Google Client Secret
-														</label>
-														<Input
-															type="password"
-															value={formData.clientSecret}
-															onChange={(e) =>
-																setFormData({ ...formData, clientSecret: e.target.value })
-															}
-															className="bg-background border-border-subtle rounded-xl px-4 py-6 text-sm font-mono focus:border-primary h-12"
-														/>
+													<div className="p-6 bg-primary/5 border border-primary/20 rounded-3xl mb-4">
+														<div className="flex gap-4">
+															<div className="p-3 bg-primary/10 rounded-2xl h-fit">
+																<FaGoogle className="text-primary" size={20} />
+															</div>
+															<div>
+																<h4 className="font-bold text-sm text-foreground uppercase tracking-tight mb-1">
+																	Conexão Simplificada
+																</h4>
+																<p className="text-muted-foreground text-[11px] italic leading-relaxed">
+																	O Hermes utilizará as credenciais globais da infraestrutura. Você
+																	precisará apenas autorizar o acesso na próxima etapa.
+																</p>
+															</div>
+														</div>
 													</div>
 												</div>
 											)}
