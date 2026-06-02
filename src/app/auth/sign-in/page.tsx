@@ -25,13 +25,16 @@ export default function SignInPage() {
 		setError('');
 
 		try {
-			const { error: authError } = await authClient.signIn.email({
+			const { data, error: authError } = await authClient.signIn.email({
 				email,
 				password,
 			});
 
 			if (authError) {
 				setError(authError.message || 'Erro ao realizar login.');
+			} else if ((data?.user as any)?.isActive === false) {
+				await authClient.signOut();
+				setError('Sua conta foi suspensa pelo administrador. Contate o suporte.');
 			} else {
 				router.push('/system/dashboard');
 			}

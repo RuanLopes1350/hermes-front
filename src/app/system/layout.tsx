@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { authClient } from '@/src/lib/auth-client';
 import { Loader2, LogOut, Settings, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
@@ -19,6 +20,7 @@ interface AppUser {
 	id: string;
 	name: string;
 	isAdmin: boolean;
+	isActive: boolean;
 }
 
 export default function SystemLayout({ children }: { children: React.ReactNode }) {
@@ -34,6 +36,12 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 		{ name: 'Templates', path: '/system/templates' },
 		{ name: 'Sandbox', path: '/system/sandbox' },
 	];
+
+	useEffect(() => {
+		if (user && user.isActive === false) {
+			authClient.signOut({ fetchOptions: { onSuccess: () => router.push('/auth/sign-in') }});
+		}
+	}, [user, router]);
 
 	if (isPending) {
 		return (
@@ -51,12 +59,12 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 					
 					{/* Left: Brand & Links */}
 					<div className="flex items-center gap-8">
-						<Link href="/system/dashboard" className="flex items-center gap-2 cursor-pointer group">
-							<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20">
+						<div className="flex items-center gap-2 group">
+							<div className="flex h-8 w-8 items-center justify-center rounded-lg">
 								<img src="/hermes-icon.svg" alt="Hermes Icon" className="h-5 w-5" />
 							</div>
 							<span className="font-bold text-lg tracking-tight hidden sm:inline-block transition-colors group-hover:text-primary">Hermes</span>
-						</Link>
+						</div>
 						
 						<nav className="hidden md:flex items-center space-x-1">
 							{navItems.map((item) => {

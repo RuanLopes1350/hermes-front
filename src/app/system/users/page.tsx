@@ -1,6 +1,6 @@
 'use client';
 
-import { Users, UserPlus, Shield, Search, Trash2, Loader2, RefreshCw } from 'lucide-react';
+import { Users, Shield, Search, Trash2, Loader2, RefreshCw, MoreVertical, Ban, CheckCircle2, UserCog } from 'lucide-react';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { notFound } from 'next/navigation';
 import { Button } from '@/src/components/ui/button';
@@ -11,12 +11,21 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/src
 import { apiFetch } from '@/src/lib/api';
 import { authClient } from '@/src/lib/auth-client';
 import { useToast } from '@/src/hooks/use-toast';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '@/src/components/ui/dropdown-menu';
 
 interface User {
 	id: string;
 	name: string;
 	email: string;
 	isAdmin: boolean | null;
+	isActive: boolean | null;
 	createdAt: string;
 }
 
@@ -85,6 +94,31 @@ export default function UsersPage() {
 		}
 	};
 
+	const handleUpdateUser = async (id: string, name: string, payload: { isAdmin?: boolean, isActive?: boolean }) => {
+		if (id === currentUser?.id) {
+			toast({ variant: 'destructive', title: 'Operação Bloqueada', description: 'Você não pode alterar suas próprias permissões/status.' });
+			return;
+		}
+
+		try {
+			setIsActionInProgress(true);
+			const response = await apiFetch(`/api/users/${id}/admin`, { 
+				method: 'PATCH',
+				body: JSON.stringify(payload)
+			});
+			const result = await response.json();
+
+			if (!response.ok || result.error) throw new Error();
+
+			toast({ title: 'Sucesso', description: `Usuário atualizado com sucesso.` });
+			setUsers((prev) => prev.map((u) => u.id === id ? { ...u, ...payload } : u));
+		} catch (error: any) {
+			toast({ variant: 'destructive', title: 'Erro', description: 'Falha ao atualizar usuário.' });
+		} finally {
+			setIsActionInProgress(false);
+		}
+	};
+
 	const filteredUsers = useMemo(() => {
 		const lowerSearch = searchTerm.toLowerCase().trim();
 		if (!lowerSearch) return users;
@@ -106,11 +140,8 @@ export default function UsersPage() {
 					<p className="text-sm text-muted-foreground">Gerencie o acesso à infraestrutura Hermes.</p>
 				</div>
 				<div className="flex items-center gap-2">
-					<Button variant="outline" size="icon" onClick={fetchUsers} disabled={loading}>
+					<Button variant="outline" size="icon" onClick={fetchUsers} disabled={loading} className="cursor-pointer">
 						<RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-					</Button>
-					<Button className="cursor-pointer">
-						<UserPlus className="mr-2 h-4 w-4" /> Convidar Usuário
 					</Button>
 				</div>
 			</div>
@@ -139,7 +170,8 @@ export default function UsersPage() {
 							<TableHeader>
 								<TableRow>
 									<TableHead>Usuário</TableHead>
-									<TableHead>Nível de Acesso</TableHead>
+									<TableHead>Status</TableHead>
+									<TableHead>Acesso</TableHead>
 									<TableHead>Data de Entrada</TableHead>
 									<TableHead className="text-right">Ações</TableHead>
 								</TableRow>
@@ -147,11 +179,11 @@ export default function UsersPage() {
 							<TableBody>
 								{loading && users.length === 0 ? (
 									<TableRow>
-										<TableCell colSpan={4} className="h-32 text-center text-muted-foreground">Carregando usuários...</TableCell>
+										<TableCell colSpan={5} className="h-32 text-center text-muted-foreground">Carregando usuários...</TableCell>
 									</TableRow>
 								) : filteredUsers.length === 0 ? (
 									<TableRow>
-										<TableCell colSpan={4} className="h-32 text-center text-muted-foreground">Nenhum usuário encontrado.</TableCell>
+										<TableCell colSpan={5} className="h-32 text-center text-muted-foreground">Nenhum usuário encontrado.</TableCell>
 									</TableRow>
 								) : (
 									filteredUsers.map((user) => (
@@ -162,6 +194,13 @@ export default function UsersPage() {
 													{user.id === currentUser?.id && <Badge variant="secondary" className="text-[10px]">Você</Badge>}
 												</div>
 												<div className="text-sm text-muted-foreground">{user.email}</div>
+											</TableCell>
+											<TableCell>
+												{user.isActive !== false ? (
+													<Badge className="bg-emerald-500 hover:bg-emerald-600 cursor-default">Ativa</Badge>
+												) : (
+													<Badge variant="destructive" className="cursor-default">Suspensa</Badge>
+												)}
 											</TableCell>
 											<TableCell>
 												{user.isAdmin ? (
@@ -177,15 +216,45 @@ export default function UsersPage() {
 											</TableCell>
 											<TableCell className="text-right">
 												{user.id !== currentUser?.id && (
-													<Button
-														variant="ghost"
-														size="icon"
-														onClick={() => handleDeleteUser(user.id, user.name)}
-														disabled={isActionInProgress}
-														className="text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer"
-													>
-														<Trash2 className="h-4 w-4" />
-													</Button>
+													<DropdownMenu>
+														<DropdownMenuTrigger asChild>
+															<Button variant="ghost" className="h-8 w-8 p-0 cursor-pointer">
+																<MoreVertical className="h-4 w-4" />
+															</Button>
+														</DropdownMenuTrigger>
+														<DropdownMenuContent align="end">
+															<DropdownMenuLabel>Ações Administrativas</DropdownMenuLabel>
+															<DropdownMenuSeparator />
+															
+															<DropdownMenuItem 
+																className="cursor-pointer"
+																onClick={() => handleUpdateUser(user.id, user.name, { isAdmin: !user.isAdmin })}
+															>
+																<UserCog className="mr-2 h-4 w-4" />
+																{user.isAdmin ? 'Remover privilégios Admin' : 'Promover a Admin'}
+															</DropdownMenuItem>
+
+															<DropdownMenuItem 
+																className="cursor-pointer"
+																onClick={() => handleUpdateUser(user.id, user.name, { isActive: user.isActive === false ? true : false })}
+															>
+																{user.isActive !== false ? (
+																	<><Ban className="mr-2 h-4 w-4 text-amber-500" /> <span className="text-amber-500">Suspender Conta</span></>
+																) : (
+																	<><CheckCircle2 className="mr-2 h-4 w-4 text-emerald-500" /> <span className="text-emerald-500">Ativar Conta</span></>
+																)}
+															</DropdownMenuItem>
+
+															<DropdownMenuSeparator />
+															<DropdownMenuItem 
+																className="text-destructive focus:text-destructive cursor-pointer"
+																onClick={() => handleDeleteUser(user.id, user.name)}
+															>
+																<Trash2 className="mr-2 h-4 w-4" />
+																Excluir Permanentemente
+															</DropdownMenuItem>
+														</DropdownMenuContent>
+													</DropdownMenu>
 												)}
 											</TableCell>
 										</TableRow>
