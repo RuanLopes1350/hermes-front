@@ -46,6 +46,27 @@ export default function DashboardPage() {
 	useEffect(() => {
 		if (session) {
 			fetchDashboardData();
+
+			const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1350';
+			const eventSource = new EventSource(`${API_URL}/api/dashboard/stream`, { withCredentials: true });
+
+			eventSource.onmessage = (event) => {
+				try {
+					const queueData = JSON.parse(event.data);
+					setData((prev: any) => {
+						if (!prev) return prev;
+						return { ...prev, queue: queueData };
+					});
+				} catch (e) {}
+			};
+
+			eventSource.onerror = (error) => {
+				console.error('SSE Conexão perdida. Tentando reconectar...', error);
+			};
+
+			return () => {
+				eventSource.close();
+			};
 		}
 	}, [session]);
 

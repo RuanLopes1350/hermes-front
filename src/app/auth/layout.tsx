@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Documentacao, Status, Privacidade, Version } from '@/src/constants/links';
+import { ThemeToggle } from '@/src/components/theme-toggle';
 
 export const metadata: Metadata = {
 	title: 'Hermes | Autenticação',
@@ -11,7 +12,10 @@ export default function AuthLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<main className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 p-6 w-full relative">
+		<main className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-zinc-950 p-6 w-full relative">
+			<div className="absolute top-6 right-6">
+				<ThemeToggle />
+			</div>
 			<div className="absolute top-12 flex flex-col items-center gap-2">
 				<div className="bg-primary/10 p-3 rounded-2xl">
 					<img className="w-10 h-10" src="/hermes-icon1.svg" alt="Hermes Logo" />
@@ -30,6 +34,7 @@ export default function AuthLayout({
 					<a href={Privacidade} target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">Privacidade</a>
 				</div>
 				<p>Hermes - v{Version}</p>
+				<p>© {new Date().getFullYear()} Hermes. Todos os direitos reservados.</p>
 			</div>
 		</main>
 	);

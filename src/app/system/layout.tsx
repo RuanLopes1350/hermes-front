@@ -15,6 +15,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/src/components/ui/dropdown-menu';
 import { Button } from '@/src/components/ui/button';
+import { ThemeToggle } from '@/src/components/theme-toggle';
 
 interface AppUser {
 	id: string;
@@ -88,6 +89,7 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 
 					{/* Right: Actions & Profile */}
 					<div className="flex items-center gap-4">
+						<ThemeToggle />
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button variant="ghost" className="relative h-9 rounded-full pl-2 pr-4 border border-border/50 hover:bg-secondary/50 cursor-pointer">
