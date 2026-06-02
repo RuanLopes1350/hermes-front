@@ -30,6 +30,7 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 	const navItems = [
 		{ name: 'Dashboard', path: '/system/dashboard' },
 		{ name: 'Serviços', path: '/system/services' },
+		{ name: 'E-mails', path: '/system/emails' },
 		{ name: 'Templates', path: '/system/templates' },
 		{ name: 'Sandbox', path: '/system/sandbox' },
 	];

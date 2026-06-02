@@ -29,7 +29,7 @@ export default function AuthLayout({
 					<a href={Status} target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">Status API</a>
 					<a href={Privacidade} target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">Privacidade</a>
 				</div>
-				<p>Hermes Infrastructure © 2026 — v{Version}</p>
+				<p>Hermes - v{Version}</p>
 			</div>
 		</main>
 	);
