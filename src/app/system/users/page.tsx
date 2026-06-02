@@ -1,54 +1,23 @@
 'use client';
 
-import {
-	Users,
-	UserPlus,
-	Shield,
-	Search,
-	Trash2,
-	Settings,
-	Loader2,
-	RefreshCw,
-	User as UserIcon,
-} from 'lucide-react';
+import { Users, UserPlus, Shield, Search, Trash2, Loader2, RefreshCw } from 'lucide-react';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { notFound } from 'next/navigation';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { Badge } from '@/src/components/ui/badge';
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from '@/src/components/ui/table';
-import { Card } from '@/src/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/src/components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/src/components/ui/card';
 import { apiFetch } from '@/src/lib/api';
 import { authClient } from '@/src/lib/auth-client';
 import { useToast } from '@/src/hooks/use-toast';
 
-/**
- * Interface rigorosa baseada no schema do Drizzle e CommonResponse da API.
- */
 interface User {
 	id: string;
 	name: string;
 	email: string;
-	emailVerified: boolean;
 	isAdmin: boolean | null;
-	image?: string | null;
 	createdAt: string;
-	updatedAt: string;
-}
-
-interface ApiResponse<T> {
-	error: boolean;
-	code: number;
-	message: string | null;
-	data: T;
-	errors: any[];
 }
 
 interface AppUser {
@@ -62,44 +31,25 @@ export default function UsersPage() {
 	const [isActionInProgress, setIsActionInProgress] = useState(false);
 	const [searchTerm, setSearchTerm] = useState('');
 
-	const { data: session, isPending: isSessionLoading } = authClient.useSession();
+	const { data: session, isPending } = authClient.useSession();
 	const { toast } = useToast();
-
 	const currentUser = session?.user as AppUser | undefined;
 
-	/**
-	 * Proteção de Rota: Se não for admin, 404 stealth
-	 */
 	useEffect(() => {
-		if (!isSessionLoading && currentUser && !currentUser.isAdmin) {
+		if (!isPending && currentUser && !currentUser.isAdmin) {
 			notFound();
 		}
-	}, [currentUser, isSessionLoading]);
+	}, [currentUser, isPending]);
 
-	/**
-	 * Busca de usuários com tratamento de erro exaustivo.
-	 */
 	const fetchUsers = useCallback(async () => {
 		try {
 			setLoading(true);
 			const response = await apiFetch('/api/users');
-
-			// Tenta dar parse no JSON independente do status HTTP
-			const result: ApiResponse<User[]> = await response.json();
-
-			if (!response.ok || result.error) {
-				throw new Error(result.message || `Erro ${response.status}: Falha ao buscar usuários.`);
-			}
-
-			// Garante que data seja um array antes de setar
+			const result = await response.json();
+			if (!response.ok || result.error) throw new Error();
 			setUsers(Array.isArray(result.data) ? result.data : []);
 		} catch (error: any) {
-			console.error('Falha na integração /api/users:', error);
-			toast({
-				variant: 'destructive',
-				title: 'Erro de Sincronização',
-				description: error.message || 'Não foi possível carregar a lista de usuários.',
-			});
+			toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível carregar usuários.' });
 			setUsers([]);
 		} finally {
 			setLoading(false);
@@ -107,261 +57,144 @@ export default function UsersPage() {
 	}, [toast]);
 
 	useEffect(() => {
-		if (!isSessionLoading && currentUser?.isAdmin) {
+		if (!isPending && currentUser?.isAdmin) {
 			fetchUsers();
 		}
-	}, [fetchUsers, isSessionLoading, currentUser]);
+	}, [fetchUsers, isPending, currentUser]);
 
-	/**
-	 * Deleção de usuário com proteção contra auto-deleção e feedback de loading.
-	 */
 	const handleDeleteUser = async (id: string, name: string) => {
 		if (id === currentUser?.id) {
-			toast({
-				variant: 'destructive',
-				title: 'Operação Bloqueada',
-				description:
-					'Por segurança, você não pode remover sua própria conta administrativa por aqui.',
-			});
+			toast({ variant: 'destructive', title: 'Operação Bloqueada', description: 'Você não pode remover sua própria conta.' });
 			return;
 		}
-
-		if (
-			!confirm(
-				`Confirmar exclusão de "${name}"? Esta ação removerá permanentemente o acesso deste usuário.`,
-			)
-		) {
-			return;
-		}
+		if (!confirm(`Confirmar exclusão de "${name}"?`)) return;
 
 		try {
 			setIsActionInProgress(true);
-			const response = await apiFetch(`/api/users/${id}`, {
-				method: 'DELETE',
-			});
+			const response = await apiFetch(`/api/users/${id}`, { method: 'DELETE' });
+			const result = await response.json();
 
-			const result: ApiResponse<any> = await response.json();
+			if (!response.ok || result.error) throw new Error();
 
-			if (!response.ok || result.error) {
-				throw new Error(result.message || 'Falha ao processar exclusão no servidor.');
-			}
-
-			toast({
-				title: 'Usuário Excluído',
-				description: `O perfil de ${name} foi removido com sucesso.`,
-			});
-
-			// Atualização do estado após sucesso
+			toast({ title: 'Sucesso', description: `O usuário foi removido com sucesso.` });
 			setUsers((prev) => prev.filter((u) => u.id !== id));
 		} catch (error: any) {
-			toast({
-				variant: 'destructive',
-				title: 'Erro na Exclusão',
-				description: error.message || 'Ocorreu um erro ao tentar remover o usuário.',
-			});
+			toast({ variant: 'destructive', title: 'Erro', description: 'Falha ao excluir usuário.' });
 		} finally {
 			setIsActionInProgress(false);
 		}
 	};
 
-	/**
-	 * Filtro memorizado para performance.
-	 */
 	const filteredUsers = useMemo(() => {
 		const lowerSearch = searchTerm.toLowerCase().trim();
 		if (!lowerSearch) return users;
-
-		return users.filter(
-			(user) =>
-				user.name.toLowerCase().includes(lowerSearch) ||
-				user.email.toLowerCase().includes(lowerSearch) ||
-				user.id.toLowerCase().includes(lowerSearch),
+		return users.filter(user =>
+			user.name.toLowerCase().includes(lowerSearch) ||
+			user.email.toLowerCase().includes(lowerSearch)
 		);
 	}, [users, searchTerm]);
 
-	if (isSessionLoading) {
-		return (
-			<div className="flex items-center justify-center h-full">
-				<Loader2 className="animate-spin text-primary" size={32} />
-			</div>
-		);
+	if (isPending) {
+		return <div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 	}
 
 	return (
-		<div className="space-y-12 text-left">
-			{/* Header com ações globais */}
-			<div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+		<div className="space-y-6 animate-in fade-in duration-500">
+			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 				<div>
-					<h2 className="text-3xl font-bold tracking-tight mb-2 uppercase text-foreground">
-						Gestão de Usuários
-					</h2>
-					<p className="text-muted-foreground text-sm font-medium italic">
-						Visualizando {users.length} usuários registrados na plataforma.
-					</p>
+					<h2 className="text-2xl font-bold tracking-tight">Gestão de Usuários</h2>
+					<p className="text-sm text-muted-foreground">Gerencie o acesso à infraestrutura Hermes.</p>
 				</div>
-
-				<div className="flex items-center gap-3">
-					<Button
-						variant="outline"
-						size="icon"
-						onClick={fetchUsers}
-						disabled={loading}
-						className="rounded-xl border-border-subtle cursor-pointer"
-					>
-						<RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+				<div className="flex items-center gap-2">
+					<Button variant="outline" size="icon" onClick={fetchUsers} disabled={loading}>
+						<RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
 					</Button>
-
-					{currentUser?.isAdmin && (
-						<Button className="gap-2 uppercase font-black tracking-widest text-[10px] px-6 cursor-pointer">
-							<UserPlus size={18} /> Convidar Usuário
-						</Button>
-					)}
+					<Button className="cursor-pointer">
+						<UserPlus className="mr-2 h-4 w-4" /> Convidar Usuário
+					</Button>
 				</div>
 			</div>
 
-			{/* Container da Tabela */}
-			<Card className="bg-surface border-border-subtle rounded-[32px] overflow-hidden shadow-sm border">
-				<div className="p-6 border-b border-border-subtle bg-background/30 flex items-center justify-between gap-4">
-					<div className="relative flex-1 max-w-md">
-						<Search
-							className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-							size={18}
-						/>
-						<Input
-							placeholder="Buscar por nome, e-mail ou ID..."
-							value={searchTerm}
-							onChange={(e) => setSearchTerm(e.target.value)}
-							disabled={loading && users.length === 0}
-							className="bg-background border-border-subtle rounded-2xl pl-12 pr-6 py-6 italic h-12"
-						/>
+			<Card>
+				<CardHeader className="pb-3">
+					<div className="flex items-center justify-between">
+						<div>
+							<CardTitle>Base de Usuários</CardTitle>
+							<CardDescription>Visualizando {users.length} membros registrados.</CardDescription>
+						</div>
+						<div className="relative w-64">
+							<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+							<Input
+								placeholder="Buscar por nome ou e-mail..."
+								value={searchTerm}
+								onChange={(e) => setSearchTerm(e.target.value)}
+								className="pl-8"
+							/>
+						</div>
 					</div>
-				</div>
-
-				<div className="overflow-x-auto">
-					<Table>
-						<TableHeader className="bg-background/50">
-							<TableRow className="border-b border-border-subtle/30">
-								<TableHead className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
-									Identificação
-								</TableHead>
-								<TableHead className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
-									Permissões
-								</TableHead>
-								<TableHead className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
-									Membro desde
-								</TableHead>
-								<TableHead className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] text-right">
-									Ações
-								</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{loading && users.length === 0 ? (
+				</CardHeader>
+				<CardContent>
+					<div className="rounded-md border">
+						<Table>
+							<TableHeader>
 								<TableRow>
-									<TableCell colSpan={4} className="h-48 text-center">
-										<div className="flex flex-col items-center justify-center gap-3 text-muted-foreground">
-											<Loader2 className="animate-spin text-primary" size={32} />
-											<span className="italic">Carregando usuários...</span>
-										</div>
-									</TableCell>
+									<TableHead>Usuário</TableHead>
+									<TableHead>Nível de Acesso</TableHead>
+									<TableHead>Data de Entrada</TableHead>
+									<TableHead className="text-right">Ações</TableHead>
 								</TableRow>
-							) : filteredUsers.length === 0 ? (
-								<TableRow>
-									<TableCell colSpan={4} className="h-48 text-center text-muted-foreground italic">
-										{searchTerm
-											? 'Nenhum resultado para sua busca.'
-											: 'Nenhum usuário encontrado na base de dados.'}
-									</TableCell>
-								</TableRow>
-							) : (
-								filteredUsers.map((user) => (
-									<TableRow
-										key={user.id}
-										className="hover:bg-white/5 transition-colors group border-b border-border-subtle/30"
-									>
-										<TableCell className="px-8 py-6">
-											<div className="flex items-center gap-4">
-												<div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold overflow-hidden border border-primary/20">
-													{user.image ? (
-														<img
-															src={user.image}
-															alt={user.name}
-															className="w-full h-full object-cover"
-														/>
-													) : (
-														user.name.charAt(0).toUpperCase()
-													)}
-												</div>
-												<div className="text-left">
-													<div className="flex items-center gap-2">
-														<p className="text-sm font-bold text-foreground">{user.name}</p>
-														{user.id === currentUser?.id && (
-															<Badge className="bg-primary/20 text-primary border-none text-[8px] h-4 px-1">
-																VOCÊ
-															</Badge>
-														)}
-													</div>
-													<p className="text-[10px] text-muted-foreground italic">{user.email}</p>
-												</div>
-											</div>
-										</TableCell>
-										<TableCell className="px-8 py-6 text-left">
-											{user.isAdmin ? (
-												<Badge className="bg-primary/10 text-primary border-none text-[10px] font-bold uppercase gap-1.5 px-3 py-1">
-													<Shield size={12} /> Administrador
-												</Badge>
-											) : (
-												<Badge
-													variant="outline"
-													className="bg-white/5 text-muted-foreground border-border-subtle text-[10px] font-bold uppercase px-3 py-1"
-												>
-													Membro
-												</Badge>
-											)}
-										</TableCell>
-										<TableCell className="px-8 py-6 text-left">
-											<span className="text-xs font-mono text-muted-foreground">
-												{new Date(user.createdAt).toLocaleDateString('pt-BR', {
-													day: '2-digit',
-													month: 'long',
-													year: 'numeric',
-												})}
-											</span>
-										</TableCell>
-										<TableCell className="px-8 py-6 text-right">
-											<div className="flex items-center justify-end gap-2">
-												<Button
-													variant="ghost"
-													size="icon"
-													className="text-muted-foreground hover:text-foreground hover:bg-white/10 cursor-pointer"
-												>
-													<Settings size={18} />
-												</Button>
-
-												{currentUser?.isAdmin &&
-													user.id !== currentUser?.id && (
-														<Button
-															variant="ghost"
-															size="icon"
-															onClick={() => handleDeleteUser(user.id, user.name)}
-															disabled={isActionInProgress}
-															className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
-														>
-															{isActionInProgress ? (
-																<Loader2 size={16} className="animate-spin" />
-															) : (
-																<Trash2 size={18} />
-															)}
-														</Button>
-													)}
-											</div>
-										</TableCell>
+							</TableHeader>
+							<TableBody>
+								{loading && users.length === 0 ? (
+									<TableRow>
+										<TableCell colSpan={4} className="h-32 text-center text-muted-foreground">Carregando usuários...</TableCell>
 									</TableRow>
-								))
-							)}
-						</TableBody>
-					</Table>
-				</div>
+								) : filteredUsers.length === 0 ? (
+									<TableRow>
+										<TableCell colSpan={4} className="h-32 text-center text-muted-foreground">Nenhum usuário encontrado.</TableCell>
+									</TableRow>
+								) : (
+									filteredUsers.map((user) => (
+										<TableRow key={user.id}>
+											<TableCell>
+												<div className="font-medium flex items-center gap-2">
+													{user.name}
+													{user.id === currentUser?.id && <Badge variant="secondary" className="text-[10px]">Você</Badge>}
+												</div>
+												<div className="text-sm text-muted-foreground">{user.email}</div>
+											</TableCell>
+											<TableCell>
+												{user.isAdmin ? (
+													<Badge className="bg-primary text-primary-foreground hover:bg-primary/90 flex w-fit items-center gap-1 cursor-default">
+														<Shield className="h-3 w-3" /> Admin
+													</Badge>
+												) : (
+													<Badge variant="outline" className="cursor-default">Membro</Badge>
+												)}
+											</TableCell>
+											<TableCell className="text-sm text-muted-foreground">
+												{new Date(user.createdAt).toLocaleDateString('pt-BR')}
+											</TableCell>
+											<TableCell className="text-right">
+												{user.id !== currentUser?.id && (
+													<Button
+														variant="ghost"
+														size="icon"
+														onClick={() => handleDeleteUser(user.id, user.name)}
+														disabled={isActionInProgress}
+														className="text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer"
+													>
+														<Trash2 className="h-4 w-4" />
+													</Button>
+												)}
+											</TableCell>
+										</TableRow>
+									))
+								)}
+							</TableBody>
+						</Table>
+					</div>
+				</CardContent>
 			</Card>
 		</div>
 	);

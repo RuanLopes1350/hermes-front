@@ -50,44 +50,39 @@ export function ConfirmModal({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={(open) => !loading && !open && onClose()}>
-			<DialogContent className="bg-surface border-border-subtle rounded-4xl max-w-md p-0 overflow-hidden shadow-2xl">
-				<DialogHeader className="p-8 bg-background/30 text-center border-b border-border-subtle">
-					<div
-						className={cn(
-							'w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4',
-							variant === 'danger' ? 'bg-danger/10 text-danger' : 'bg-primary/10 text-primary',
-						)}
-					>
-						<AlertTriangle size={32} />
+			<DialogContent className="sm:max-w-[425px]">
+				<DialogHeader>
+					<div className="flex items-center gap-4 mb-2">
+						<div
+							className={cn(
+								'flex h-10 w-10 items-center justify-center rounded-full',
+								variant === 'danger' ? 'bg-red-100 text-red-600' : 'bg-primary/10 text-primary',
+							)}
+						>
+							<AlertTriangle className="h-5 w-5" />
+						</div>
+						<DialogTitle>{title}</DialogTitle>
 					</div>
-					<DialogTitle className="text-xl font-bold italic uppercase tracking-tight text-foreground">
-						{title}
-					</DialogTitle>
-					<DialogDescription className="text-muted-foreground text-sm mt-2 italic px-4">
-						{description}
-					</DialogDescription>
+					<DialogDescription>{description}</DialogDescription>
 				</DialogHeader>
 
-				<DialogFooter className="p-8 bg-background/30 flex flex-col gap-3 sm:flex-col">
+				<DialogFooter className="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 gap-2 sm:gap-0">
+					<Button
+						variant="outline"
+						onClick={onClose}
+						disabled={loading}
+						className="cursor-pointer"
+					>
+						{cancelText}
+					</Button>
 					<Button
 						onClick={handleConfirm}
 						disabled={loading}
-						className={cn(
-							'w-full py-6 rounded-xl text-xs font-black uppercase tracking-[0.2em] shadow-lg transition-all cursor-pointer',
-							variant === 'danger'
-								? 'bg-danger text-white hover:bg-danger/90 shadow-danger/20'
-								: 'bg-primary text-white hover:bg-primary-hover shadow-primary/20',
-						)}
+						variant={variant === 'danger' ? 'destructive' : 'default'}
+						className="cursor-pointer"
 					>
-						{loading ? <Loader2 className="animate-spin" size={18} /> : confirmText}
-					</Button>
-					<Button
-						variant="ghost"
-						onClick={onClose}
-						disabled={loading}
-						className="cursor-pointer w-full py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground"
-					>
-						{cancelText}
+						{loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+						{confirmText}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

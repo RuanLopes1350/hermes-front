@@ -3,24 +3,16 @@
 import {
 	ArrowLeft,
 	Settings,
-	Code,
 	Copy,
-	Save,
 	Trash2,
-	RefreshCw,
 	Loader2,
 	CheckCircle2,
-	Globe,
-	Mail,
-	Bell,
-	KeyRound,
-	Plus,
-	Settings2,
 	Shield,
 	Check,
 	AlertCircle,
-	Key,
-	ChevronRight,
+	KeyRound,
+	Plus,
+	Settings2,
 } from 'lucide-react';
 import { FaGoogle } from 'react-icons/fa';
 import Link from 'next/link';
@@ -30,7 +22,7 @@ import { apiFetch } from '@/src/lib/api';
 import { useToast } from '@/src/hooks/use-toast';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/src/components/ui/card';
 import {
 	Dialog,
 	DialogContent,
@@ -41,7 +33,6 @@ import {
 } from '@/src/components/ui/dialog';
 import { Badge } from '@/src/components/ui/badge';
 import { ConfirmModal } from '@/src/components/ui/confirm-modal';
-import { CustomSelect } from '@/src/components/ui/custom-select';
 import {
 	Select,
 	SelectContent,
@@ -50,85 +41,34 @@ import {
 	SelectValue,
 } from '@/src/components/ui/select';
 
-interface ServiceSettings {
-	timezone: string;
-	defaultSenderName: string;
-	replyTo: string;
-	notifyOnFailure: boolean;
-	defaultPriority: 'high' | 'medium' | 'low';
-}
-
-interface Service {
-	id: string;
-	name: string;
-	settings: ServiceSettings | any;
-	createdAt: string;
-	updatedAt: string;
-}
-
-interface ApiKey {
-	id: string;
-	name: string;
-	prefix: string;
-	is_active: boolean;
-	credential_id: string;
-	createdAt: string;
-}
-
-interface Credential {
-	id: string;
-	name: string;
-	auth_type: 'plain' | 'oauth2';
-	login: string;
-	smtp_host: string;
-	refresh_token?: string | null;
-}
-
-const DEFAULT_SETTINGS: ServiceSettings = {
-	timezone: 'America/Sao_Paulo',
-	defaultSenderName: '',
-	replyTo: '',
-	notifyOnFailure: true,
-	defaultPriority: 'medium',
-};
-
 export default function ServiceDetailsPage() {
 	const params = useParams();
 	const router = useRouter();
 	const { toast } = useToast();
 
-	const [service, setService] = useState<Service | null>(null);
-	const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
-	const [credentials, setCredentials] = useState<Credential[]>([]);
+	const [service, setService] = useState<any>(null);
+	const [apiKeys, setApiKeys] = useState<any[]>([]);
+	const [credentials, setCredentials] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-	// Estados editáveis do serviço
 	const [editName, setEditName] = useState('');
-	const [editSettings, setEditSettings] = useState<ServiceSettings>(DEFAULT_SETTINGS);
+	const [editSettings, setEditSettings] = useState<any>({});
 
-	// Estados de Conexão Unificada
+	// Modals
 	const [showConnModal, setShowConnModal] = useState(false);
 	const [selectedType, setSelectedType] = useState<'plain' | 'oauth2' | null>(null);
 	const [formData, setFormData] = useState({
-		name: '',
-		login: '',
-		smtpHost: '',
-		smtpPort: '',
-		smtpSecure: true,
-		passkey: '',
-		clientId: '',
-		clientSecret: '',
+		name: '', login: '', smtpHost: '', smtpPort: '', smtpSecure: true, passkey: '', clientId: '', clientSecret: '',
 	});
 	const [generatedKey, setGeneratedKey] = useState<any>(null);
 	const [submitting, setSubmitting] = useState(false);
 	const [error, setError] = useState('');
 	const [copied, setCopied] = useState(false);
 
-	// Estado para exclusão unificada
 	const [showDeleteCredModal, setShowDeleteCredModal] = useState(false);
-	const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null);
+	const [itemToDelete, setItemToDelete] = useState<any>(null);
 
 	const fetchData = useCallback(async () => {
 		try {
@@ -143,15 +83,15 @@ export default function ServiceDetailsPage() {
 			const keysData = await keysRes.json();
 			const credsData = await credsRes.json();
 
-			if (!svcRes.ok) throw new Error(svcData.message || 'Erro ao carregar serviço.');
+			if (!svcRes.ok) throw new Error(svcData.message);
 
 			setService(svcData.data);
 			setEditName(svcData.data.name);
-			setEditSettings({ ...DEFAULT_SETTINGS, ...(svcData.data.settings || {}) });
+			setEditSettings(svcData.data.settings || {});
 			setApiKeys(keysData.data || []);
 			setCredentials(credsData.data || []);
 		} catch (error: any) {
-			toast({ variant: 'destructive', title: 'Erro', description: error.message });
+			toast({ variant: 'destructive', title: 'Erro', description: 'Falha ao carregar detalhes do serviço.' });
 		} finally {
 			setLoading(false);
 		}
@@ -161,7 +101,6 @@ export default function ServiceDetailsPage() {
 		if (params.id) fetchData();
 	}, [params.id, fetchData]);
 
-	// UNIFICAÇÃO REAL: Agrupa por Credencial
 	const unifiedConnections = useMemo(() => {
 		return credentials.map((cred) => {
 			const key = apiKeys.find((k) => k.credential_id === cred.id);
@@ -181,12 +120,10 @@ export default function ServiceDetailsPage() {
 				method: 'PATCH',
 				body: JSON.stringify({ name: editName, settings: editSettings }),
 			});
-			const result = await response.json();
-			if (!response.ok) throw new Error(result.message);
-			toast({ title: 'Sucesso', description: 'Configurações salvas.' });
-			setService(result.data);
-		} catch (error: any) {
-			toast({ variant: 'destructive', title: 'Erro', description: error.message });
+			if (!response.ok) throw new Error();
+			toast({ title: 'Sucesso', description: 'Serviço atualizado.' });
+		} catch {
+			toast({ variant: 'destructive', title: 'Erro', description: 'Falha ao salvar.' });
 		} finally {
 			setSaving(false);
 		}
@@ -194,9 +131,9 @@ export default function ServiceDetailsPage() {
 
 	const handleDeleteService = async () => {
 		try {
-			const response = await apiFetch(`/api/services/${params.id}`, { method: 'DELETE' });
-			if (response.ok) router.push('/system/services');
-		} catch (err) { }
+			const res = await apiFetch(`/api/services/${params.id}`, { method: 'DELETE' });
+			if (res.ok) router.push('/system/services');
+		} catch {}
 	};
 
 	const handleCreateConnection = async () => {
@@ -209,42 +146,29 @@ export default function ServiceDetailsPage() {
 				body: JSON.stringify({ ...formData, authType: selectedType }),
 			});
 			const result = await response.json();
-			if (!response.ok) throw new Error(result.message || 'Erro ao criar conexão.');
-
+			if (!response.ok) throw new Error(result.message);
 			setGeneratedKey(result.data.initial_api_key);
 			fetchData();
 		} catch (error: any) {
-			setError(error.message);
+			setError(error.message || 'Erro ao criar conexão');
 		} finally {
 			setSubmitting(false);
 		}
 	};
 
-	const confirmDeleteConnection = (id: string, name: string) => {
-		setItemToDelete({ id, name });
-		setShowDeleteCredModal(true);
-	};
-
 	const handleDeleteConnection = async () => {
 		if (!itemToDelete) return;
 		try {
-			const response = await apiFetch(`/api/services/${params.id}/credentials/${itemToDelete.id}`, {
-				method: 'DELETE',
-			});
-			if (!response.ok) throw new Error('Falha ao remover.');
-			toast({ title: 'Removido com Sucesso' });
+			const response = await apiFetch(`/api/services/${params.id}/credentials/${itemToDelete.id}`, { method: 'DELETE' });
+			if (!response.ok) throw new Error();
+			toast({ title: 'Sucesso', description: 'Conexão removida.' });
 			fetchData();
-		} catch (error: any) {
-			toast({ variant: 'destructive', title: 'Erro', description: error.message });
+		} catch {
+			toast({ variant: 'destructive', title: 'Erro', description: 'Falha ao remover.' });
 		} finally {
 			setItemToDelete(null);
 			setShowDeleteCredModal(false);
 		}
-	};
-
-	const copyToClipboard = (text: string, msg = 'Copiado!') => {
-		navigator.clipboard.writeText(text);
-		toast({ title: msg });
 	};
 
 	const closeModal = () => {
@@ -252,466 +176,220 @@ export default function ServiceDetailsPage() {
 		setSelectedType(null);
 		setGeneratedKey(null);
 		setError('');
-		setFormData({
-			name: '',
-			login: '',
-			smtpHost: '',
-			smtpPort: '',
-			smtpSecure: true,
-			passkey: '',
-			clientId: '',
-			clientSecret: '',
-		});
+		setFormData({ name: '', login: '', smtpHost: '', smtpPort: '', smtpSecure: true, passkey: '', clientId: '', clientSecret: '' });
 	};
 
-	if (loading)
-		return (
-			<div className="h-screen flex items-center justify-center">
-				<Loader2 className="animate-spin text-primary" size={48} />
-			</div>
-		);
+	if (loading) return <div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
 	return (
-		<div className="space-y-12 text-left pb-20">
-			{/* Header */}
-			<div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 text-left">
-				<div className="flex items-center gap-4 text-left">
-					<Link href="/system/services">
-						<Button
-							variant="outline"
-							size="icon"
-							className="h-12 w-12 rounded-2xl bg-surface border-border-subtle hover:text-primary group cursor-pointer"
-						>
-							<ArrowLeft size={20} />
-						</Button>
-					</Link>
-					<div className="text-left">
-						<div className="flex items-center gap-3 mb-1 text-left">
-							<h2 className="text-3xl font-bold uppercase text-foreground text-left">
-								{service?.name}
-							</h2>
-							<Badge className="bg-success/10 text-success border-none uppercase text-[10px]">
-								Ativo
-							</Badge>
+		<div className="space-y-6 animate-in fade-in duration-500 pb-20">
+			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+				<div className="flex items-center gap-4">
+					<Button variant="outline" size="icon" asChild className="cursor-pointer">
+						<Link href="/system/services"><ArrowLeft className="h-4 w-4" /></Link>
+					</Button>
+					<div>
+						<div className="flex items-center gap-2">
+							<h2 className="text-2xl font-bold tracking-tight">{service?.name}</h2>
+							<Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200">Ativo</Badge>
 						</div>
+						<p className="text-sm text-muted-foreground font-mono">ID: {service?.id}</p>
 					</div>
 				</div>
-				<Button
-					variant="outline"
-					onClick={() => setShowDeleteModal(true)}
-					className="bg-danger/10 text-danger border-none h-12 px-6 rounded-xl uppercase font-black text-[10px] gap-2 cursor-pointer"
-				>
-					<Trash2 size={16} /> Excluir Serviço
+				<Button variant="destructive" onClick={() => setShowDeleteModal(true)} className="cursor-pointer">
+					<Trash2 className="mr-2 h-4 w-4" /> Excluir Projeto
 				</Button>
 			</div>
 
-			<div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-left">
-				<div className="lg:col-span-2 space-y-12 text-left">
-					{/* CONFIGURAÇÕES */}
-					<Card className="bg-surface border-border-subtle rounded-[40px] p-10 border shadow-sm text-left">
-						<CardHeader className="p-0 mb-10 flex flex-row items-center gap-3 text-left">
-							<div className="p-2.5 bg-primary/10 rounded-xl text-primary">
-								<Settings size={22} />
-							</div>
-							<div className="text-left">
-								<CardTitle className="text-xl font-bold italic uppercase tracking-tighter text-left">
-									Ajustes do Projeto
-								</CardTitle>
-							</div>
+			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+				<div className="lg:col-span-2 space-y-6">
+					<Card>
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2"><Settings className="h-5 w-5" /> Configurações Básicas</CardTitle>
 						</CardHeader>
-						<CardContent className="p-0 space-y-10 text-left">
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
-								<div className="space-y-3 text-left">
-									<label className="text-[10px] font-bold text-muted-foreground uppercase px-1 text-left">
-										Nome do Serviço
-									</label>
-									<Input
-										value={editName}
-										onChange={(e) => setEditName(e.target.value)}
-										className="bg-background border-border-subtle rounded-xl px-4 py-6 text-sm focus:border-primary font-medium h-12"
-									/>
-								</div>
+						<CardContent className="space-y-4">
+							<div className="grid gap-2">
+								<label className="text-sm font-medium">Nome do Projeto</label>
+								<Input value={editName} onChange={e => setEditName(e.target.value)} />
 							</div>
-							<Button
-								onClick={handleSaveService}
-								disabled={saving}
-								className="h-14 px-12 rounded-2xl bg-primary text-white font-black uppercase text-xs cursor-pointer"
-							>
-								Salvar Alterações
+							<Button onClick={handleSaveService} disabled={saving || !editName.trim()} className="cursor-pointer">
+								{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Salvar Alterações
 							</Button>
 						</CardContent>
 					</Card>
 
-					{/* SEGURANÇA UNIFICADA */}
-					<Card className="bg-surface border-border-subtle rounded-[40px] p-10 border shadow-sm text-left">
-						<CardHeader className="p-0 mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6 text-left">
-							<div className="flex items-center gap-3 text-left">
-								<div className="p-2.5 bg-primary/10 rounded-xl text-primary">
-									<Shield size={22} />
-								</div>
-								<div className="text-left">
-									<CardTitle className="text-xl font-bold italic uppercase tracking-tighter text-left">
-										Credenciais
-									</CardTitle>
-									<p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1 text-left">
-										Conexões vinculadas
-									</p>
-								</div>
+					<Card>
+						<CardHeader className="flex flex-row items-center justify-between pb-4">
+							<div>
+								<CardTitle className="flex items-center gap-2"><Shield className="h-5 w-5" /> Credenciais de Disparo</CardTitle>
+								<CardDescription>Conexões e chaves de API vinculadas a este projeto.</CardDescription>
 							</div>
-							<Button
-								onClick={() => {
-									setGeneratedKey(null);
-									setSelectedType(null);
-									setShowConnModal(true);
-								}}
-								className="gap-2 uppercase font-black tracking-widest text-[10px] px-6 h-12 rounded-xl cursor-pointer"
-							>
-								<Plus size={16} /> Nova Conexão
+							<Button onClick={() => setShowConnModal(true)} className="cursor-pointer">
+								<Plus className="mr-2 h-4 w-4" /> Nova Conexão
 							</Button>
 						</CardHeader>
-						<CardContent className="p-0 space-y-6 text-left">
+						<CardContent className="space-y-4">
 							{unifiedConnections.length === 0 ? (
-								<div className="py-20 border border-dashed border-border-subtle rounded-4xl text-center italic text-muted-foreground text-sm">
-									Nenhuma conexão de segurança configurada.
+								<div className="text-center py-6 text-muted-foreground border-2 border-dashed rounded-lg">
+									Nenhuma credencial configurada.
 								</div>
 							) : (
-								<div className="grid grid-cols-1 gap-6 text-left">
-									{unifiedConnections.map((conn) => (
-										<div
-											key={conn.id}
-											className="p-8 bg-background/50 rounded-4xl border border-border-subtle hover:border-primary/30 transition-all group relative overflow-hidden text-left"
-										>
-											<div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 relative z-10 text-left">
-												<div className="flex items-start gap-6 text-left">
-													<div className="p-4 bg-surface rounded-2xl text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
-														{conn.auth_type === 'oauth2' ? (
-															<FaGoogle size={24} />
-														) : (
-															<Settings2 size={24} />
-														)}
-													</div>
-													<div className="space-y-1 text-left">
-														<div className="flex items-center gap-3 text-left">
-															<h4 className="text-lg font-bold text-foreground text-left">
-																{conn.name}
-															</h4>
-															{conn.auth_type === 'oauth2' && !conn.refresh_token ? (
-																<button
-																	onClick={() => handleAuthorizeGoogle(conn.id)}
-																	className="bg-danger/10 text-danger border-none text-[8px] uppercase tracking-widest font-bold px-2 py-0.5 rounded cursor-pointer hover:bg-danger hover:text-white transition-all flex items-center gap-1"
-																>
-																	<AlertCircle size={10} /> Aguardando Google (Clique aqui)
-																</button>
-															) : (
-																<Badge className="bg-success/10 text-success border-none text-[8px] uppercase tracking-widest">
-																	Pronto
-																</Badge>
-															)}
-														</div>
-														<p className="text-[11px] text-muted-foreground italic font-medium text-left">
-															{conn.login}
-														</p>
-													</div>
-												</div>
-
-												<div className="flex flex-col lg:items-end gap-3 text-left">
-													<div className="flex items-center gap-3 bg-background p-2.5 pl-5 rounded-2xl border border-border-subtle w-full max-w-sm group/key hover:border-primary/40 transition-colors text-left">
-														<div className="flex items-center gap-2 flex-1 text-left">
-															<KeyRound size={14} className="text-primary" />
-															<span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-left">
-																API KEY:
-															</span>
-															<code className="text-xs font-mono text-foreground font-bold text-left">
-																{conn.key ? `${conn.key.prefix}••••••••` : 'NÃO GERADA'}
-															</code>
-														</div>
-														<Button
-															variant="ghost"
-															size="icon"
-															onClick={() => confirmDeleteConnection(conn.id, conn.name)}
-															className="h-9 w-9 text-muted-foreground hover:text-danger hover:bg-danger/10 rounded-xl cursor-pointer"
-														>
-															<Trash2 size={18} />
-														</Button>
-													</div>
-													<p className="text-[9px] text-muted-foreground font-bold uppercase tracking-tighter px-2 text-left">
-														A chave é revogada automaticamente ao excluir o remetente.
-													</p>
-												</div>
+								unifiedConnections.map(conn => (
+									<div key={conn.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg hover:border-primary/50 transition-colors gap-4">
+										<div className="flex items-center gap-4">
+											<div className="p-3 bg-secondary rounded-md">
+												{conn.auth_type === 'oauth2' ? <FaGoogle className="h-5 w-5" /> : <Settings2 className="h-5 w-5" />}
 											</div>
-											<div className="absolute -right-10 -bottom-10 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity">
-												{conn.auth_type === 'oauth2' ? (
-													<FaGoogle size={120} />
-												) : (
-													<Shield size={120} />
-												)}
+											<div>
+												<div className="flex items-center gap-2">
+													<p className="font-semibold">{conn.name}</p>
+													{conn.auth_type === 'oauth2' && !conn.refresh_token ? (
+														<Badge variant="destructive" className="cursor-pointer" onClick={() => handleAuthorizeGoogle(conn.id)}>
+															<AlertCircle className="mr-1 h-3 w-3" /> Requer Autorização
+														</Badge>
+													) : (
+														<Badge variant="secondary">Pronto</Badge>
+													)}
+												</div>
+												<p className="text-sm text-muted-foreground">{conn.login}</p>
 											</div>
 										</div>
-									))}
-								</div>
+										<div className="flex flex-col items-end gap-2 w-full sm:w-auto">
+											<div className="flex items-center gap-2 bg-muted px-3 py-1.5 rounded-md w-full sm:w-auto">
+												<KeyRound className="h-4 w-4 text-primary" />
+												<code className="text-sm font-mono flex-1">
+													{conn.key ? `${conn.key.prefix}••••••••` : 'NÃO GERADA'}
+												</code>
+												<Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:bg-destructive/10 cursor-pointer" onClick={() => { setItemToDelete(conn); setShowDeleteCredModal(true); }}>
+													<Trash2 className="h-4 w-4" />
+												</Button>
+											</div>
+										</div>
+									</div>
+								))
 							)}
 						</CardContent>
 					</Card>
 				</div>
-
-				<div className="space-y-8 text-left">
-					<Card className="bg-surface border-border-subtle rounded-3xl p-8 border shadow-sm text-left">
-						<CardHeader className="p-0 text-left">
-							<CardTitle className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2 text-left">
-								<Code size={14} className="text-primary" /> Endpoints
-							</CardTitle>
-						</CardHeader>
-						<CardContent className="p-0 mt-6 text-left">
-							<p className="text-[10px] font-bold text-muted-foreground/60 uppercase mb-2 px-1 text-left">
-								X-Service-ID
-							</p>
-							<div className="flex items-center gap-2 p-4 bg-background rounded-xl border border-border-subtle text-left">
-								<code className="text-xs font-mono text-primary flex-1 truncate text-left">
-									{service?.id}
-								</code>
-								<Button
-									variant="ghost"
-									size="icon"
-									onClick={() => copyToClipboard(service?.id || '')}
-								>
-									<Copy size={14} />
-								</Button>
-							</div>
-						</CardContent>
-					</Card>
-				</div>
 			</div>
 
-			<Dialog open={showConnModal} onOpenChange={(open) => !open && closeModal()}>
-				<DialogContent className="bg-surface border-border-subtle w-full max-w-2xl rounded-[40px] shadow-2xl p-0 overflow-hidden text-left">
+			<Dialog open={showConnModal} onOpenChange={(o) => !o && closeModal()}>
+				<DialogContent className="sm:max-w-[600px]">
 					{!generatedKey ? (
 						<>
-							<DialogHeader className="p-10 border-b border-border-subtle bg-background/30 text-center">
-								<div className="bg-primary/10 w-16 h-16 rounded-3xl flex items-center justify-center text-primary mx-auto mb-6">
-									<Shield size={32} />
-								</div>
-								<DialogTitle className="text-2xl font-bold italic uppercase tracking-tighter text-foreground text-center">
-									Nova Conexão
-								</DialogTitle>
-								<DialogDescription className="text-muted-foreground text-sm mt-2 italic text-center">
-									Vincule um provedor de e-mail ao seu projeto.
-								</DialogDescription>
+							<DialogHeader>
+								<DialogTitle>Vincular Provedor de E-mail</DialogTitle>
+								<DialogDescription>Escolha o tipo de autenticação que deseja configurar.</DialogDescription>
 							</DialogHeader>
 
-							<div className="p-10 space-y-6 max-h-125 overflow-y-auto scrollbar-hide text-left">
-								{error && (
-									<div className="bg-danger/10 border border-danger/20 p-4 rounded-xl text-danger text-[10px] font-bold uppercase">
-										{error}
-									</div>
-								)}
+							<div className="py-4">
+								{error && <div className="p-3 mb-4 text-sm text-red-500 bg-red-50 rounded-md border border-red-200">{error}</div>}
 
 								{!selectedType ? (
-									<div className="grid grid-cols-2 gap-4 pt-4 text-left">
-										<div
-											onClick={() => setSelectedType('plain')}
-											className="p-6 border-2 border-border-subtle rounded-3xl hover:border-primary/50 cursor-pointer transition-all text-left group"
-										>
-											<Settings2 className="text-muted-foreground mb-3 group-hover:text-primary transition-colors" />
-											<h4 className="font-bold text-sm text-foreground">SMTP Padrão</h4>
-											<p className="text-[10px] text-muted-foreground mt-1 italic">
-												Outlook, SendGrid, SES...
-											</p>
+									<div className="grid grid-cols-2 gap-4">
+										<div onClick={() => setSelectedType('plain')} className="border rounded-lg p-4 cursor-pointer hover:border-primary text-center">
+											<Settings2 className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+											<h4 className="font-semibold">SMTP Padrão</h4>
+											<p className="text-xs text-muted-foreground mt-1">Usuário e senha convencionais (App Password)</p>
 										</div>
-										<div
-											onClick={() => setSelectedType('oauth2')}
-											className="p-6 border-2 border-border-subtle rounded-3xl hover:border-primary/50 cursor-pointer transition-all text-left group"
-										>
-											<FaGoogle className="text-primary mb-3" />
-											<h4 className="font-bold text-sm text-foreground">Google OAuth2</h4>
-											<p className="text-[10px] text-muted-foreground mt-1 italic">
-												Workspace, Gmail seguro...
-											</p>
+										<div onClick={() => setSelectedType('oauth2')} className="border rounded-lg p-4 cursor-pointer hover:border-primary text-center">
+											<FaGoogle className="h-8 w-8 mx-auto mb-2 text-blue-500" />
+											<h4 className="font-semibold">Google OAuth2</h4>
+											<p className="text-xs text-muted-foreground mt-1">Autorização segura para Gmail/Workspace</p>
 										</div>
 									</div>
 								) : (
-									<div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 text-left">
-										<button
-											onClick={() => setSelectedType(null)}
-											className="text-primary text-[10px] font-bold uppercase tracking-widest hover:underline cursor-pointer"
-										>
-											← Mudar Provedor
-										</button>
-
-										<div className="grid grid-cols-1 gap-6 text-left">
-											<div className="space-y-2 text-left">
-												<label className="text-[10px] font-bold text-muted-foreground uppercase px-1 text-left">
-													Nome da Conexão
-												</label>
-												<Input
-													value={formData.name}
-													onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-													className="bg-background border-border-subtle rounded-xl px-4 py-6 text-sm focus:border-primary font-medium h-12"
-													placeholder="Ex: Suporte Global"
-												/>
-											</div>
-											<div className="space-y-2 text-left">
-												<label className="text-[10px] font-bold text-muted-foreground uppercase px-1 text-left">
-													E-mail do Remetente
-												</label>
-												<Input
-													value={formData.login}
-													onChange={(e) => setFormData({ ...formData, login: e.target.value })}
-													className="bg-background border-border-subtle rounded-xl px-4 py-6 text-sm focus:border-primary font-medium h-12"
-													placeholder="contato@empresa.com"
-												/>
-											</div>
-
-											{selectedType === 'plain' ? (
-												<div className="space-y-6 text-left">
-													<div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-														<div className="md:col-span-8 space-y-2">
-															<label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">
-																Host SMTP
-															</label>
-															<Input
-																value={formData.smtpHost}
-																onChange={(e) =>
-																	setFormData({ ...formData, smtpHost: e.target.value })
-																}
-																placeholder="smtp.exemplo.com"
-																className="bg-background border-border-subtle rounded-xl px-4 h-12 text-sm focus:ring-1 focus:ring-primary italic font-medium"
-															/>
-														</div>
-														<div className="md:col-span-4 space-y-2">
-															<label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">
-																Porta
-															</label>
-															<Input
-																value={formData.smtpPort}
-																onChange={(e) =>
-																	setFormData({ ...formData, smtpPort: e.target.value })
-																}
-																placeholder="Ex: 465"
-																className="bg-background border-border-subtle rounded-xl px-4 h-12 text-sm focus:ring-1 focus:ring-primary italic font-medium text-center"
-															/>
-														</div>
-													</div>
-
-													<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-														<div className="space-y-2">
-															<label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">
-																Segurança
-															</label>
-															<Select
-																value={formData.smtpSecure ? 'ssl' : 'tls'}
-																onValueChange={(v) =>
-																	setFormData({ ...formData, smtpSecure: v === 'ssl' })
-																}
-															>
-																<SelectTrigger className="bg-background border-border-subtle rounded-xl h-12 italic font-medium text-xs">
-																	<SelectValue />
-																</SelectTrigger>
-																<SelectContent className="bg-surface border-border-subtle">
-																	<SelectItem value="ssl" className="text-xs italic">
-																		SSL/TLS (Porta 465)
-																	</SelectItem>
-																	<SelectItem value="tls" className="text-xs italic">
-																		STARTTLS (Porta 587/25)
-																	</SelectItem>
-																</SelectContent>
-															</Select>
-														</div>
-														<div className="space-y-2">
-															<label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">
-																Senha / App Password
-															</label>
-															<Input
-																type="password"
-																value={formData.passkey}
-																onChange={(e) =>
-																	setFormData({ ...formData, passkey: e.target.value })
-																}
-																placeholder="••••••••"
-																className="bg-background border-border-subtle rounded-xl px-4 h-12 text-sm focus:ring-1 focus:ring-primary"
-															/>
-														</div>
-													</div>
-												</div>
-											) : (
-												<div className="space-y-6 text-left">
-													<div className="p-6 bg-primary/5 border border-primary/20 rounded-3xl mb-4">
-														<div className="flex gap-4">
-															<div className="p-3 bg-primary/10 rounded-2xl h-fit">
-																<FaGoogle className="text-primary" size={20} />
-															</div>
-															<div>
-																<h4 className="font-bold text-sm text-foreground uppercase tracking-tight mb-1">
-																	Conexão Simplificada
-																</h4>
-																<p className="text-muted-foreground text-[11px] italic leading-relaxed">
-																	O Hermes utilizará as credenciais globais da infraestrutura. Você
-																	precisará apenas autorizar o acesso na próxima etapa.
-																</p>
-															</div>
-														</div>
-													</div>
-												</div>
-											)}
+									<div className="space-y-4">
+										<Button variant="link" onClick={() => setSelectedType(null)} className="px-0 h-auto cursor-pointer">← Voltar</Button>
+										
+										<div className="grid gap-2">
+											<label className="text-sm font-medium">Nome da Identificação</label>
+											<Input value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="Ex: Suporte" />
 										</div>
+										<div className="grid gap-2">
+											<label className="text-sm font-medium">E-mail Remetente</label>
+											<Input value={formData.login} onChange={e => setFormData({ ...formData, login: e.target.value })} placeholder="contato@empresa.com" />
+										</div>
+
+										{selectedType === 'plain' ? (
+											<div className="space-y-4">
+												<div className="grid grid-cols-3 gap-4">
+													<div className="col-span-2 grid gap-2">
+														<label className="text-sm font-medium">Host SMTP</label>
+														<Input value={formData.smtpHost} onChange={e => setFormData({ ...formData, smtpHost: e.target.value })} placeholder="smtp.gmail.com" />
+													</div>
+													<div className="grid gap-2">
+														<label className="text-sm font-medium">Porta</label>
+														<Input value={formData.smtpPort} onChange={e => setFormData({ ...formData, smtpPort: e.target.value })} placeholder="465" />
+													</div>
+												</div>
+												<div className="grid grid-cols-2 gap-4">
+													<div className="grid gap-2">
+														<label className="text-sm font-medium">Criptografia</label>
+														<Select value={formData.smtpSecure ? 'ssl' : 'tls'} onValueChange={v => setFormData({ ...formData, smtpSecure: v === 'ssl' })}>
+															<SelectTrigger><SelectValue/></SelectTrigger>
+															<SelectContent>
+																<SelectItem value="ssl">SSL (465)</SelectItem>
+																<SelectItem value="tls">STARTTLS (587)</SelectItem>
+															</SelectContent>
+														</Select>
+													</div>
+													<div className="grid gap-2">
+														<label className="text-sm font-medium">Senha / App Password</label>
+														<Input type="password" value={formData.passkey} onChange={e => setFormData({ ...formData, passkey: e.target.value })} placeholder="••••••••" />
+													</div>
+												</div>
+											</div>
+										) : (
+											<div className="bg-muted p-4 rounded-md text-sm">
+												<p className="font-semibold mb-1">Integração simplificada Google</p>
+												<p className="text-muted-foreground">Após salvar, você precisará autorizar o acesso à sua conta Google clicando no selo "Requer Autorização".</p>
+											</div>
+										)}
 									</div>
 								)}
 							</div>
-
-							<DialogFooter className="p-10 bg-background/30 border-t border-border-subtle text-left">
-								<Button
-									onClick={handleCreateConnection}
-									disabled={submitting || !selectedType || !formData.name}
-									className="w-full py-7 rounded-2xl bg-primary text-white text-xs font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/20 hover:bg-primary-hover h-14 cursor-pointer"
-								>
-									{submitting ? <Loader2 className="animate-spin" /> : 'Salvar e Gerar Acesso'}
-								</Button>
-							</DialogFooter>
+							{selectedType && (
+								<DialogFooter>
+									<Button variant="outline" onClick={closeModal} className="cursor-pointer">Cancelar</Button>
+									<Button onClick={handleCreateConnection} disabled={submitting || !formData.name} className="cursor-pointer">
+										{submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Salvar Conexão'}
+									</Button>
+								</DialogFooter>
+							)}
 						</>
 					) : (
-						<div className="p-12 text-center animate-in zoom-in duration-500">
-							<DialogTitle className="sr-only">Conexão Criada com Sucesso</DialogTitle>
-							<div className="bg-success/10 w-20 h-20 rounded-[30px] flex items-center justify-center text-success mx-auto mb-8">
-								<CheckCircle2 size={40} />
-							</div>
-							<h3 className="text-3xl font-black italic uppercase tracking-tighter text-success mb-2 text-center">
-								Conexão Criada!
-							</h3>
-							<p className="text-muted-foreground text-sm italic mb-10 text-center">
-								O Hermes gerou uma{' '}
-								<span className="text-foreground font-bold">API Key exclusiva</span> para este
-								remetente.
-							</p>
-
-							<div className="bg-background border-2 border-dashed border-success/30 rounded-3xl p-8 mb-8 relative group text-left">
-								<div className="flex items-center gap-2 mb-4 text-success font-bold text-[9px] uppercase tracking-widest text-left">
-									<KeyRound size={12} /> Seu Token de Acesso
+						<>
+							<DialogHeader className="text-center pt-6">
+								<div className="mx-auto bg-green-100 text-green-600 h-16 w-16 rounded-full flex items-center justify-center mb-4">
+									<CheckCircle2 className="h-8 w-8" />
 								</div>
-								<p className="text-xs font-mono text-foreground break-all leading-relaxed select-all text-left">
-									{generatedKey.token}
-								</p>
-								<Button
-									onClick={() => {
-										navigator.clipboard.writeText(generatedKey.token);
-										setCopied(true);
-										setTimeout(() => setCopied(false), 2000);
-									}}
-									className={
-										'cursor-pointer absolute -top-4 right-6 px-4 py-2 rounded-xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all ' +
-										(copied ? 'bg-success text-white' : 'bg-primary text-white shadow-lg')
-									}
-								>
-									{copied ? <Check size={14} /> : <Copy size={14} />}
-									{copied ? 'Copiado!' : 'Copiar'}
-								</Button>
+								<DialogTitle className="text-2xl">Conexão Estabelecida</DialogTitle>
+								<DialogDescription>A API Key abaixo é exclusiva deste remetente.</DialogDescription>
+							</DialogHeader>
+							<div className="py-6 px-4">
+								<div className="bg-slate-100 p-4 rounded-lg relative">
+									<p className="text-xs font-semibold text-slate-500 mb-2 uppercase">Token de Acesso (API Key)</p>
+									<code className="text-sm break-all text-slate-900">{generatedKey.token}</code>
+									<Button
+										size="sm"
+										className="absolute top-4 right-4 cursor-pointer"
+										onClick={() => {
+											navigator.clipboard.writeText(generatedKey.token);
+											setCopied(true);
+											setTimeout(() => setCopied(false), 2000);
+										}}
+									>
+										{copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
+										{copied ? 'Copiado' : 'Copiar'}
+									</Button>
+								</div>
+								<p className="text-sm text-red-500 mt-4 text-center font-medium">Salve este token agora! Ele não será exibido novamente.</p>
 							</div>
-
-							<Button
-								onClick={closeModal}
-								className="w-full py-7 rounded-2xl bg-surface border-2 border-border-subtle text-foreground text-xs font-black uppercase tracking-[0.2em] hover:bg-white/5 transition-all h-14 cursor-pointer"
-							>
-								Concluído
-							</Button>
-						</div>
+							<DialogFooter className="pb-6">
+								<Button className="w-full cursor-pointer" onClick={closeModal}>Entendi, concluir</Button>
+							</DialogFooter>
+						</>
 					)}
 				</DialogContent>
 			</Dialog>
@@ -721,9 +399,8 @@ export default function ServiceDetailsPage() {
 				onClose={() => setShowDeleteModal(false)}
 				onConfirm={handleDeleteService}
 				variant="danger"
-				title="Excluir Serviço?"
-				description={`O projeto "${service?.name}" e todos os seus dados serão apagados permanentemente.`}
-				confirmText="Sim, Excluir Tudo"
+				title="Excluir Projeto"
+				description={`Isto removerá permanentemente o projeto "${service?.name}" e todas as suas configurações.`}
 			/>
 
 			<ConfirmModal
@@ -731,9 +408,8 @@ export default function ServiceDetailsPage() {
 				onClose={() => setShowDeleteCredModal(false)}
 				onConfirm={handleDeleteConnection}
 				variant="danger"
-				title="Remover Conexão e Chave?"
-				description={`A conexão "${itemToDelete?.name}" e sua chave de acesso vinculada serão removidas permanentemente.`}
-				confirmText="Sim, Remover Tudo"
+				title="Remover Conexão"
+				description={`Tem certeza que deseja apagar a conexão "${itemToDelete?.name}"? A API Key vinculada perderá o acesso imediatamente.`}
 			/>
 		</div>
 	);

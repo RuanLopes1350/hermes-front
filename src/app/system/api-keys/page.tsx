@@ -16,7 +16,7 @@ import {
 	ArrowRight,
 	Shield,
 } from 'lucide-react';
-import Button from '@/src/components/button';
+
 import { useState, useEffect } from 'react';
 import { apiFetch } from '@/src/lib/api';
 
