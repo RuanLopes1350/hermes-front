@@ -205,15 +205,111 @@ export default function ServiceDetailsPage() {
 				<div className="lg:col-span-2 space-y-6">
 					<Card>
 						<CardHeader>
-							<CardTitle className="flex items-center gap-2"><Settings className="h-5 w-5" /> Configurações Básicas</CardTitle>
+							<CardTitle className="flex items-center gap-2"><Settings className="h-5 w-5" /> Configurações do Projeto</CardTitle>
 						</CardHeader>
-						<CardContent className="space-y-4">
+						<CardContent className="space-y-6">
 							<div className="grid gap-2">
 								<label className="text-sm font-medium">Nome do Projeto</label>
 								<Input value={editName} onChange={e => setEditName(e.target.value)} />
 							</div>
+
+							<div className="grid gap-2">
+								<label className="text-sm font-medium">Cópia Oculta (BCC) de Auditoria</label>
+								<p className="text-xs text-muted-foreground">Se preenchido, todos os e-mails enviados por este serviço enviarão uma cópia oculta para este endereço.</p>
+								<Input 
+									placeholder="ex: auditoria@empresa.com" 
+									value={editSettings?.auditBccEmail || ''} 
+									onChange={e => setEditSettings({ ...editSettings, auditBccEmail: e.target.value })} 
+								/>
+							</div>
+
+							<div className="border-t pt-4">
+								<h3 className="font-semibold mb-2 flex items-center gap-2"><KeyRound className="h-4 w-4" /> Rotação de Chaves e Webhooks</h3>
+								
+								<div className="space-y-4">
+									<div className="flex items-center gap-2">
+										<input 
+											type="checkbox" 
+											id="autoRotate"
+											className="h-4 w-4 rounded border-gray-300"
+											checked={editSettings?.security?.auto_rotate || false}
+											onChange={e => setEditSettings({
+												...editSettings, 
+												security: { ...editSettings?.security, auto_rotate: e.target.checked }
+											})}
+										/>
+										<label htmlFor="autoRotate" className="text-sm font-medium cursor-pointer">
+											Ativar Rotação Automática de API Keys
+										</label>
+									</div>
+
+									<div className="grid gap-2">
+										<label className="text-sm font-medium">Dias de antecedência para rotacionar (Threshold)</label>
+										<p className="text-xs text-muted-foreground">Quantos dias antes do vencimento a rotação deve ocorrer.</p>
+										<Input 
+											type="number"
+											placeholder="ex: 3"
+											value={editSettings?.security?.rotate_threshold_days || ''}
+											onChange={e => setEditSettings({
+												...editSettings, 
+												security: { ...editSettings?.security, rotate_threshold_days: Number(e.target.value) }
+											})}
+										/>
+									</div>
+
+									<div className="grid gap-2">
+										<label className="text-sm font-medium">Intervalo de Validade da Chave (Dias)</label>
+										<p className="text-xs text-muted-foreground">Nova chave expira após esse período. Padrões: 30, 60, ou 90 dias.</p>
+										<Select 
+											value={String(editSettings?.security?.rotation_interval_days || 'none')} 
+											onValueChange={(val) => setEditSettings({
+												...editSettings, 
+												security: { ...editSettings?.security, rotation_interval_days: val === 'none' ? null : Number(val) }
+											})}
+										>
+											<SelectTrigger>
+												<SelectValue placeholder="Selecione o intervalo de expiração" />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="none">Sem Expiração (Infinita)</SelectItem>
+												<SelectItem value="30">30 dias (Alta Segurança)</SelectItem>
+												<SelectItem value="60">60 dias (Padrão/Recomendado)</SelectItem>
+												<SelectItem value="90">90 dias (PCI/Compliance)</SelectItem>
+												<SelectItem value="180">180 dias (Sistemas Internos)</SelectItem>
+											</SelectContent>
+										</Select>
+									</div>
+
+									<div className="grid gap-2">
+										<label className="text-sm font-medium">URL do Webhook</label>
+										<p className="text-xs text-muted-foreground">Endpoint que receberá o POST quando uma chave for rotacionada ou expirar.</p>
+										<Input 
+											placeholder="https://api.empresa.com/hermes-webhook" 
+											value={editSettings?.notifications?.webhook_url || ''} 
+											onChange={e => setEditSettings({
+												...editSettings, 
+												notifications: { ...editSettings?.notifications, webhook_url: e.target.value }
+											})} 
+										/>
+									</div>
+
+									<div className="grid gap-2">
+										<label className="text-sm font-medium">Segredo do Webhook (HMAC SHA-256)</label>
+										<p className="text-xs text-muted-foreground">Usado para assinar o header X-Hermes-Signature.</p>
+										<Input 
+											placeholder="ex: super_secret_123" 
+											value={editSettings?.notifications?.webhook_secret || ''} 
+											onChange={e => setEditSettings({
+												...editSettings, 
+												notifications: { ...editSettings?.notifications, webhook_secret: e.target.value }
+											})} 
+										/>
+									</div>
+								</div>
+							</div>
+
 							<Button onClick={handleSaveService} disabled={saving || !editName.trim()} className="cursor-pointer">
-								{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Salvar Alterações
+								{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Salvar Configurações
 							</Button>
 						</CardContent>
 					</Card>
