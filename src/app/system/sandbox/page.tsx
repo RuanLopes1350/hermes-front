@@ -75,7 +75,7 @@ export default function SandboxPage() {
 			body: selectedTemplateId === 'none' ? body : undefined,
 			variables: Object.keys(templateVars).length > 0 ? templateVars : undefined,
 		};
-		const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/services/${selectedServiceId}/emails`;
+		const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/emails`;
 
 		setRequestLog({ method: 'POST', url, headers: { 'x-api-key': '***' }, body: payload });
 

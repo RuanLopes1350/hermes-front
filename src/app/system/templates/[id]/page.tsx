@@ -18,7 +18,7 @@ import {
 	Trash2,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { apiFetch } from '@/src/lib/api';
 import { Button } from '@/src/components/ui/button';
@@ -26,6 +26,7 @@ import { Input } from '@/src/components/ui/input';
 import { Card } from '@/src/components/ui/card';
 import { Badge } from '@/src/components/ui/badge';
 import { ConfirmModal } from '@/src/components/ui/confirm-modal';
+import { useToast } from '@/src/hooks/use-toast';
 import {
 	Select,
 	SelectContent,
@@ -45,6 +46,7 @@ export default function TemplateDetailsPage() {
 	const { id } = useParams();
 	const router = useRouter();
 	const editorRef = useRef<any>(null);
+	const { toast } = useToast();
 
 	// UI States
 	const [loading, setLoading] = useState(true);
@@ -61,8 +63,21 @@ export default function TemplateDetailsPage() {
 	const [serviceId, setServiceId] = useState<string | null>(null);
 	const [isGlobal, setIsGlobal] = useState(false);
 	const [services, setServices] = useState<Service[]>([]);
-	const [variables, setVariables] = useState<string[]>([]);
-	const [newVar, setNewVar] = useState('');
+
+	// Variáveis agora são derivadas 100% do código (sem input manual)
+	const detectedVariables = useMemo(() => {
+		if (!content) return [];
+		const matches = content.match(/\{\{\{?([^{}]+)\}?\}\}/g);
+		if (!matches) return [];
+		
+		const detected = Array.from(new Set(matches.map(m => {
+			let v = m.replace(/\{|\}/g, '').trim();
+			if (v.startsWith('#') || v.startsWith('/') || v.startsWith('!') || v === 'else') return null;
+			return v.split(' ')[0];
+		}).filter(Boolean))) as string[];
+		
+		return detected;
+	}, [content]);
 
 	// 1. CARREGAR DADOS
 	const loadData = useCallback(async () => {
@@ -82,7 +97,6 @@ export default function TemplateDetailsPage() {
 				setContent(t.html_content || '');
 				setServiceId(t.service_id);
 				setIsGlobal(t.global);
-				setVariables(t.variables || []);
 			}
 
 			if (sRes.ok) {
@@ -102,7 +116,7 @@ export default function TemplateDetailsPage() {
 			if (!mjmlCode) return;
 			setRendering(true);
 			try {
-				const previewVars = variables.reduce(
+				const previewVars = detectedVariables.reduce(
 					(acc, v) => ({ ...acc, [v]: `[${v.toUpperCase()}]` }),
 					{},
 				);
@@ -125,7 +139,7 @@ export default function TemplateDetailsPage() {
 				setRendering(false);
 			}
 		},
-		[variables],
+		[detectedVariables],
 	);
 
 	// 3. SALVAR ALTERAÇÕES
@@ -140,14 +154,15 @@ export default function TemplateDetailsPage() {
 					name,
 					subject_template: subject,
 					html_content: content,
-					variables,
+					variables: detectedVariables,
 					global: isGlobal,
 					service_id: isGlobal ? null : serviceId,
 				}),
 			});
-			alert('Template salvo!');
+			toast({ title: 'Sucesso', description: 'Template salvo com sucesso.' });
 		} catch (err) {
 			console.error('Erro ao salvar:', err);
+			toast({ variant: 'destructive', title: 'Erro', description: 'Falha ao salvar o template.' });
 		} finally {
 			setSaving(false);
 		}
@@ -238,6 +253,17 @@ export default function TemplateDetailsPage() {
 								{isGlobal ? <Globe size={10} /> : <Server size={10} />}
 								{isGlobal ? 'Global' : services.find((s) => s.id === serviceId)?.name || 'Privado'}
 							</Badge>
+						</div>
+						<div 
+							onClick={() => {
+								navigator.clipboard.writeText(id as string);
+								toast({ title: 'Copiado!', description: 'ID do template copiado para a área de transferência.' });
+							}}
+							className="flex items-center gap-1.5 mt-1 text-[10px] text-muted-foreground hover:text-primary cursor-pointer w-fit transition-colors"
+							title="Clique para copiar o ID"
+						>
+							<span className="font-mono">ID: {id}</span>
+							<Copy size={12} />
 						</div>
 					</div>
 				</div>
@@ -361,75 +387,21 @@ export default function TemplateDetailsPage() {
 								<div className="flex items-center gap-2 text-left">
 									<Variable size={14} className="text-primary" />
 									<span className="text-[10px] font-bold uppercase tracking-widest text-foreground text-left">
-										Tags Dinâmicas
+										Variáveis Detectadas
 									</span>
 								</div>
-								<Select
-									value={isGlobal ? 'global' : serviceId || ''}
-									onValueChange={(v) => {
-										if (v === 'global') {
-											setIsGlobal(true);
-											setServiceId(null);
-										} else {
-											setIsGlobal(false);
-											setServiceId(v);
-										}
-									}}
-								>
-									<SelectTrigger className="bg-background border-border-subtle h-8 w-32 text-[9px] font-bold uppercase tracking-widest rounded-lg text-left cursor-pointer">
-										<SelectValue placeholder="Escopo..." />
-									</SelectTrigger>
-									<SelectContent className="bg-surface border-border-subtle">
-										<SelectItem value="global">🌍 Global</SelectItem>
-										{services.map((s) => (
-											<SelectItem key={s.id} value={s.id}>
-												{s.name}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-
-							<div className="flex gap-2 text-left">
-								<Input
-									placeholder="Nova tag..."
-									value={newVar}
-									onChange={(e) => setNewVar(e.target.value)}
-									onKeyDown={(e) =>
-										e.key === 'Enter' &&
-										(variables.includes(newVar) ? null : setVariables([...variables, newVar]),
-										setNewVar(''))
-									}
-									className="bg-background border-border-subtle rounded-xl h-9 text-[10px] italic px-4 focus:border-primary text-left"
-								/>
-								<Button
-									size="icon"
-									className="cursor-pointer h-9 w-9 shrink-0 rounded-xl bg-primary/10 text-primary hover:bg-primary transition-all"
-									onClick={() => {
-										if (newVar && !variables.includes(newVar)) {
-											setVariables([...variables, newVar]);
-											setNewVar('');
-										}
-									}}
-								>
-									<Plus size={14} />
-								</Button>
 							</div>
 
 							<div className="flex flex-wrap gap-2 max-h-25 overflow-y-auto text-left">
-								{variables.map((tag) => (
+								{detectedVariables.length === 0 ? (
+									<span className="text-xs text-muted-foreground italic">Nenhuma variável no código.</span>
+								) : detectedVariables.map((tag) => (
 									<Badge
 										key={tag}
 										variant="outline"
 										className="bg-background/50 border-border-subtle text-primary font-mono text-[9px] gap-2 py-1.5 px-3"
 									>
 										{'{{' + tag + '}}'}
-										<button
-											onClick={() => setVariables(variables.filter((i) => i !== tag))}
-											className="text-muted-foreground hover:text-danger"
-										>
-											<X size={10} />
-										</button>
 									</Badge>
 								))}
 							</div>
