@@ -113,7 +113,7 @@ export default function SandboxPage() {
 						<CardTitle className="text-lg">Configuração da Requisição</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-6">
-						<div className="grid grid-cols-2 gap-4">
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 							<div className="space-y-2">
 								<label className="text-sm font-medium">Serviço</label>
 								<Select value={selectedServiceId} onValueChange={setSelectedServiceId}>
@@ -129,7 +129,7 @@ export default function SandboxPage() {
 							</div>
 						</div>
 
-						<div className="grid grid-cols-2 gap-4">
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 							<div className="space-y-2">
 								<label className="text-sm font-medium">Destinatário</label>
 								<Input value={recipientTo} onChange={e => setRecipientTo(e.target.value)} placeholder="email@exemplo.com" />
@@ -171,7 +171,7 @@ export default function SandboxPage() {
 							{extractedVars.length === 0 ? (
 								<div className="text-sm text-muted-foreground text-center py-6">Nenhuma variável detectada no template selecionado.</div>
 							) : (
-								<div className="grid grid-cols-2 gap-4">
+								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 									{extractedVars.map(v => (
 										<div key={v} className="space-y-2">
 											<label className="text-xs font-semibold text-primary">{v}</label>

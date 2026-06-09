@@ -219,7 +219,7 @@ export default function EmailsPage() {
 			</div>
 
 			{/* Table */}
-			<div className="rounded-xl border bg-card">
+			<div className="rounded-xl border bg-card overflow-x-auto">
 				<Table>
 					<TableHeader>
 						<TableRow>
@@ -282,7 +282,7 @@ export default function EmailsPage() {
 					</DialogHeader>
 					{selectedEmail && (
 						<div className="space-y-6 mt-4">
-							<div className="grid grid-cols-2 gap-4">
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 								<div className="space-y-1">
 									<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Status</p>
 									<div>{getStatusBadge(selectedEmail.status)}</div>

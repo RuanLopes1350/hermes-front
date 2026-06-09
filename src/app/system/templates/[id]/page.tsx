@@ -230,8 +230,8 @@ export default function TemplateDetailsPage() {
 	}
 
 	return (
-		<div className="h-[calc(100vh-140px)] flex flex-col gap-6 overflow-hidden text-left">
-			<div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+		<div className="h-[calc(100vh-140px)] flex flex-col gap-4 overflow-hidden text-left">
+			<div className="flex flex-col md:flex-row md:items-start justify-between gap-4 shrink-0">
 				<div className="flex items-center gap-4 text-left">
 					<Link href="/system/templates">
 						<Button
@@ -268,15 +268,15 @@ export default function TemplateDetailsPage() {
 					</div>
 				</div>
 
-				<div className="flex items-center gap-3 text-left">
-					<div className="flex items-center gap-2 bg-surface border border-border-subtle rounded-xl px-3 py-1 mr-2 h-10 text-left">
-						<span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-left">
+				<div className="flex flex-wrap items-center gap-2 sm:gap-3 text-left">
+					<div className="flex items-center gap-2 bg-surface border border-border-subtle rounded-xl px-3 py-1 h-10 text-left flex-1 min-w-[180px]">
+						<span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-left whitespace-nowrap">
 							Assunto:
 						</span>
 						<input
 							value={subject}
 							onChange={(e) => setSubject(e.target.value)}
-							className="bg-transparent border-none text-[11px] font-medium italic focus:ring-0 w-64 text-foreground placeholder:opacity-30"
+							className="bg-transparent border-none text-[11px] font-medium italic focus:ring-0 w-full text-foreground placeholder:opacity-30"
 							placeholder="Assunto do e-mail..."
 						/>
 					</div>
@@ -310,7 +310,7 @@ export default function TemplateDetailsPage() {
 				</div>
 			</div>
 
-			<div className="flex-1 flex gap-6 min-h-0 text-left">
+			<div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0 text-left overflow-auto lg:overflow-hidden">
 				<Card className="flex-1 bg-surface border-border-subtle rounded-4xl border overflow-hidden flex flex-col text-left">
 					<div className="p-4 border-b border-border-subtle bg-background/30 flex items-center justify-between text-left">
 						<div className="flex items-center gap-2 text-left">
@@ -350,7 +350,7 @@ export default function TemplateDetailsPage() {
 					</div>
 				</Card>
 
-				<div className="w-112.5 flex flex-col gap-6 shrink-0 text-left">
+				<div className="w-full lg:w-[450px] flex flex-col gap-4 lg:gap-6 shrink-0 text-left">
 					<Card className="flex-1 bg-surface border-border-subtle rounded-4xl border overflow-hidden flex flex-col relative text-left">
 						<div className="p-4 border-b border-border-subtle bg-background/30 flex items-center justify-between text-left">
 							<div className="flex items-center gap-2 text-left">

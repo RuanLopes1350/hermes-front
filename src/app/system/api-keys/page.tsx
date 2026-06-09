@@ -152,7 +152,7 @@ export default function ApiKeysPage() {
 									</div>
 
 									{/* Status de Uso */}
-									<div className="flex gap-12 lg:px-12 border-l border-border-subtle/50">
+									<div className="flex flex-wrap gap-6 lg:gap-12 lg:px-12 lg:border-l lg:border-border-subtle/50">
 										<div className="space-y-1">
 											<p className="text-[9px] font-black text-text-secondary uppercase tracking-[0.2em]">
 												Último Uso

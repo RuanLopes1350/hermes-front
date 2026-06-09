@@ -148,12 +148,12 @@ export default function UsersPage() {
 
 			<Card>
 				<CardHeader className="pb-3">
-					<div className="flex items-center justify-between">
+					<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
 						<div>
 							<CardTitle>Base de Usuários</CardTitle>
 							<CardDescription>Visualizando {users.length} membros registrados.</CardDescription>
 						</div>
-						<div className="relative w-64">
+						<div className="relative w-full sm:w-64 mt-2 sm:mt-0">
 							<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
 							<Input
 								placeholder="Buscar por nome ou e-mail..."
@@ -165,7 +165,7 @@ export default function UsersPage() {
 					</div>
 				</CardHeader>
 				<CardContent>
-					<div className="rounded-md border">
+					<div className="rounded-md border overflow-x-auto">
 						<Table>
 							<TableHeader>
 								<TableRow>

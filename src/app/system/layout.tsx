@@ -1,9 +1,9 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { authClient } from '@/src/lib/auth-client';
-import { Loader2, LogOut, Settings, User as UserIcon } from 'lucide-react';
+import { Loader2, LogOut, Settings, User as UserIcon, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 
 import {
@@ -27,6 +27,7 @@ interface AppUser {
 export default function SystemLayout({ children }: { children: React.ReactNode }) {
 	const pathname = usePathname();
 	const router = useRouter();
+	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 	const { data: session, isPending } = authClient.useSession();
 	const user = session?.user as AppUser | undefined;
 
@@ -137,8 +138,39 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
+
+						<Button
+							variant="ghost"
+							className="md:hidden p-2"
+							onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+						>
+							{isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+						</Button>
 					</div>
 				</div>
+
+				{/* Mobile Navigation Menu */}
+				{isMobileMenuOpen && (
+					<nav className="md:hidden border-t bg-card px-4 py-4 space-y-1">
+						{navItems.map((item) => {
+							const isActive = pathname?.startsWith(item.path);
+							return (
+								<Link
+									key={item.path}
+									href={item.path}
+									onClick={() => setIsMobileMenuOpen(false)}
+									className={`block px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+										isActive 
+											? 'bg-secondary text-secondary-foreground' 
+											: 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
+									}`}
+								>
+									{item.name}
+								</Link>
+							);
+						})}
+					</nav>
+				)}
 			</header>
 
 			{/* Main Content Viewport */}

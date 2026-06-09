@@ -12,23 +12,23 @@ export default function AuthLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<main className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-zinc-950 p-6 w-full relative">
-			<div className="absolute top-6 right-6">
+		<main className="min-h-screen flex flex-col items-center bg-slate-50 dark:bg-zinc-950 px-4 py-8 sm:py-12 w-full relative">
+			<div className="absolute top-4 right-4 sm:top-6 sm:right-6">
 				<ThemeToggle />
 			</div>
-			<div className="absolute top-12 flex flex-col items-center gap-2">
+			<div className="flex flex-col items-center gap-2 mb-8 mt-4 sm:mt-8">
 				<div className="bg-primary/10 p-3 rounded-2xl">
 					<img className="w-10 h-10" src="/hermes-icon1.svg" alt="Hermes Logo" />
 				</div>
 				<h1 className="text-2xl font-black tracking-tight">Hermes</h1>
 			</div>
 
-			<div className="flex-1 flex flex-col justify-center items-center w-full mt-20 mb-10">
+			<div className="w-full max-w-md flex-1 flex flex-col justify-center">
 				{children}
 			</div>
 
-			<div className="flex flex-col items-center gap-4 text-xs text-muted-foreground mt-auto">
-				<div className="flex items-center gap-6">
+			<div className="flex flex-col items-center gap-4 text-xs text-muted-foreground mt-8">
+				<div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
 					<a href={Documentacao} target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">Documentação</a>
 					<a href={Status} target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">Status API</a>
 					<a href={Privacidade} target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">Privacidade</a>

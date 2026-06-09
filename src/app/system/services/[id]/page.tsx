@@ -223,7 +223,7 @@ export default function ServiceDetailsPage() {
 								/>
 							</div>
 
-							<div className="border-t pt-4">
+							{/* <div className="border-t pt-4">
 								<h3 className="font-semibold mb-2 flex items-center gap-2"><KeyRound className="h-4 w-4" /> Rotação de Chaves e Webhooks</h3>
 								
 								<div className="space-y-4">
@@ -306,7 +306,7 @@ export default function ServiceDetailsPage() {
 										/>
 									</div>
 								</div>
-							</div>
+							</div> */}
 
 							<Button onClick={handleSaveService} disabled={saving || !editName.trim()} className="cursor-pointer">
 								{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Salvar Configurações
@@ -344,7 +344,9 @@ export default function ServiceDetailsPage() {
 															<AlertCircle className="mr-1 h-3 w-3" /> Requer Autorização
 														</Badge>
 													) : (
-														<Badge variant="secondary">Pronto</Badge>
+														<Badge variant="secondary" className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200">
+															<Check className="mr-1 h-3 w-3" /> Pronto
+														</Badge>
 													)}
 												</div>
 												<p className="text-sm text-muted-foreground">{conn.login}</p>
@@ -382,7 +384,7 @@ export default function ServiceDetailsPage() {
 								{error && <div className="p-3 mb-4 text-sm text-red-500 bg-red-50 rounded-md border border-red-200">{error}</div>}
 
 								{!selectedType ? (
-									<div className="grid grid-cols-2 gap-4">
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 										<div onClick={() => setSelectedType('plain')} className="border rounded-lg p-4 cursor-pointer hover:border-primary text-center">
 											<Settings2 className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
 											<h4 className="font-semibold">SMTP Padrão</h4>
@@ -409,7 +411,7 @@ export default function ServiceDetailsPage() {
 
 										{selectedType === 'plain' ? (
 											<div className="space-y-4">
-												<div className="grid grid-cols-3 gap-4">
+												<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 													<div className="col-span-2 grid gap-2">
 														<label className="text-sm font-medium">Host SMTP</label>
 														<Input value={formData.smtpHost} onChange={e => setFormData({ ...formData, smtpHost: e.target.value })} placeholder="smtp.gmail.com" />
@@ -419,7 +421,7 @@ export default function ServiceDetailsPage() {
 														<Input value={formData.smtpPort} onChange={e => setFormData({ ...formData, smtpPort: e.target.value })} placeholder="465" />
 													</div>
 												</div>
-												<div className="grid grid-cols-2 gap-4">
+												<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 													<div className="grid gap-2">
 														<label className="text-sm font-medium">Criptografia</label>
 														<Select value={formData.smtpSecure ? 'ssl' : 'tls'} onValueChange={v => setFormData({ ...formData, smtpSecure: v === 'ssl' })}>
@@ -464,12 +466,14 @@ export default function ServiceDetailsPage() {
 								<DialogDescription>A API Key abaixo é exclusiva deste remetente.</DialogDescription>
 							</DialogHeader>
 							<div className="py-6 px-4">
-								<div className="bg-slate-100 p-4 rounded-lg relative">
+								<div className="bg-slate-100 p-4 rounded-lg">
 									<p className="text-xs font-semibold text-slate-500 mb-2 uppercase">Token de Acesso (API Key)</p>
 									<code className="text-sm break-all text-slate-900">{generatedKey.token}</code>
+								</div>
+								<div className="flex justify-end mt-3">
 									<Button
 										size="sm"
-										className="absolute top-4 right-4 cursor-pointer"
+										className="cursor-pointer"
 										onClick={() => {
 											navigator.clipboard.writeText(generatedKey.token);
 											setCopied(true);

@@ -130,7 +130,7 @@ export default function ProfilePage() {
 								<label className="text-sm font-medium">Senha Atual</label>
 								<Input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} />
 							</div>
-							<div className="grid grid-cols-2 gap-4">
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 								<div className="grid gap-2">
 									<label className="text-sm font-medium">Nova Senha</label>
 									<Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} />

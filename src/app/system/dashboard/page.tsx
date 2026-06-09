@@ -147,7 +147,7 @@ export default function DashboardPage() {
 	return (
 		<div className="space-y-6 animate-in fade-in duration-500">
 			<div>
-				<h2 className="text-2xl font-bold tracking-tight">Overview da Operação {isAdmin && <Badge variant="outline" className="ml-2">Modo Admin</Badge>}</h2>
+				<h2 className="text-2xl font-bold tracking-tight">Overview da Operação {isAdmin && <Badge variant="outline" className="ml-2 bg-yellow-400 text-yellow-900 hover:bg-yellow-200">Modo Admin</Badge>}</h2>
 				<p className="text-sm text-muted-foreground">Métricas de entregabilidade e saúde transacional da sua conta.</p>
 			</div>
 
@@ -230,6 +230,7 @@ export default function DashboardPage() {
 					<CardDescription>Acompanhe em tempo real o status de entrega dos últimos disparos da sua infraestrutura.</CardDescription>
 				</CardHeader>
 				<CardContent>
+					<div className="overflow-x-auto">
 					<Table>
 						<TableHeader>
 							<TableRow>
@@ -279,6 +280,7 @@ export default function DashboardPage() {
 							)}
 						</TableBody>
 					</Table>
+					</div>
 				</CardContent>
 			</Card>
 		</div>
