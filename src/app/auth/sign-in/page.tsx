@@ -56,6 +56,18 @@ export default function SignInPage() {
 		}
 	}
 
+	async function handleGitHubSignIn() {
+		try {
+			console.log('Iniciando login com GitHub...');
+			await authClient.signIn.social({
+				provider: 'github',
+				callbackURL: window.location.origin + '/system/dashboard',
+			});
+		} catch (err) {
+			setError('Erro ao iniciar login com GitHub.');
+		}
+	}
+
 	return (
 		<div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
 			<Card>
@@ -74,13 +86,13 @@ export default function SignInPage() {
 						)}
 						<div className="space-y-2">
 							<label htmlFor="email" className="text-sm font-medium leading-none">E-mail corporativo</label>
-							<Input 
-								id="email" 
-								type="email" 
-								placeholder="exemplo@empresa.com" 
+							<Input
+								id="email"
+								type="email"
+								placeholder="exemplo@empresa.com"
 								value={email}
 								onChange={(e) => setEmail(e.target.value)}
-								required 
+								required
 							/>
 						</div>
 						<div className="space-y-2">
@@ -90,12 +102,12 @@ export default function SignInPage() {
 									Esqueceu a senha?
 								</Link>
 							</div>
-							<Input 
-								id="password" 
-								type="password" 
+							<Input
+								id="password"
+								type="password"
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
-								required 
+								required
 							/>
 						</div>
 						<Button type="submit" className="w-full" disabled={loading}>
@@ -114,7 +126,7 @@ export default function SignInPage() {
 					</div>
 
 					<div className="grid grid-cols-2 gap-4">
-						<Button variant="outline" type="button" disabled={loading}>
+						<Button variant="outline" type="button" onClick={handleGitHubSignIn} disabled={loading}>
 							<FaGithub className="mr-2 h-4 w-4" />
 							GitHub
 						</Button>

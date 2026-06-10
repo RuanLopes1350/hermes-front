@@ -19,6 +19,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/src/components/ui/dropdown-menu';
+import { ConfirmModal } from '@/src/components/ui/confirm-modal';
 
 interface User {
 	id: string;
@@ -39,6 +40,7 @@ export default function UsersPage() {
 	const [loading, setLoading] = useState(true);
 	const [isActionInProgress, setIsActionInProgress] = useState(false);
 	const [searchTerm, setSearchTerm] = useState('');
+	const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
 	const { data: session, isPending } = authClient.useSession();
 	const { toast } = useToast();
@@ -71,22 +73,25 @@ export default function UsersPage() {
 		}
 	}, [fetchUsers, isPending, currentUser]);
 
-	const handleDeleteUser = async (id: string, name: string) => {
+	const handleDeleteUser = (id: string, name: string) => {
 		if (id === currentUser?.id) {
 			toast({ variant: 'destructive', title: 'Operação Bloqueada', description: 'Você não pode remover sua própria conta.' });
 			return;
 		}
-		if (!confirm(`Confirmar exclusão de "${name}"?`)) return;
+		setDeleteTarget({ id, name });
+	};
 
+	const confirmDeleteUser = async () => {
+		if (!deleteTarget) return;
 		try {
 			setIsActionInProgress(true);
-			const response = await apiFetch(`/api/users/${id}`, { method: 'DELETE' });
+			const response = await apiFetch(`/api/users/${deleteTarget.id}`, { method: 'DELETE' });
 			const result = await response.json();
 
 			if (!response.ok || result.error) throw new Error();
 
 			toast({ title: 'Sucesso', description: `O usuário foi removido com sucesso.` });
-			setUsers((prev) => prev.filter((u) => u.id !== id));
+			setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
 		} catch (error: any) {
 			toast({ variant: 'destructive', title: 'Erro', description: 'Falha ao excluir usuário.' });
 		} finally {
@@ -102,7 +107,7 @@ export default function UsersPage() {
 
 		try {
 			setIsActionInProgress(true);
-			const response = await apiFetch(`/api/users/${id}/admin`, { 
+			const response = await apiFetch(`/api/users/${id}/admin`, {
 				method: 'PATCH',
 				body: JSON.stringify(payload)
 			});
@@ -133,6 +138,16 @@ export default function UsersPage() {
 	}
 
 	return (
+		<>
+		<ConfirmModal
+			isOpen={!!deleteTarget}
+			onClose={() => setDeleteTarget(null)}
+			onConfirm={confirmDeleteUser}
+			title="Excluir Usuário"
+			description={`Tem certeza que deseja excluir permanentemente o usuário "${deleteTarget?.name}"? Esta ação não pode ser desfeita.`}
+			confirmText="Excluir"
+			variant="danger"
+		/>
 		<div className="space-y-6 animate-in fade-in duration-500">
 			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 				<div>
@@ -191,7 +206,7 @@ export default function UsersPage() {
 											<TableCell>
 												<div className="font-medium flex items-center gap-2">
 													{user.name}
-													{user.id === currentUser?.id && <Badge variant="secondary" className="text-[10px]">Você</Badge>}
+													{user.id === currentUser?.id && <Badge variant="secondary" className="text-[10px] bg-primary text-primary-foreground hover:bg-primary/90">Você</Badge>}
 												</div>
 												<div className="text-sm text-muted-foreground">{user.email}</div>
 											</TableCell>
@@ -225,8 +240,8 @@ export default function UsersPage() {
 														<DropdownMenuContent align="end">
 															<DropdownMenuLabel>Ações Administrativas</DropdownMenuLabel>
 															<DropdownMenuSeparator />
-															
-															<DropdownMenuItem 
+
+															<DropdownMenuItem
 																className="cursor-pointer"
 																onClick={() => handleUpdateUser(user.id, user.name, { isAdmin: !user.isAdmin })}
 															>
@@ -234,7 +249,7 @@ export default function UsersPage() {
 																{user.isAdmin ? 'Remover privilégios Admin' : 'Promover a Admin'}
 															</DropdownMenuItem>
 
-															<DropdownMenuItem 
+															<DropdownMenuItem
 																className="cursor-pointer"
 																onClick={() => handleUpdateUser(user.id, user.name, { isActive: user.isActive === false ? true : false })}
 															>
@@ -246,7 +261,7 @@ export default function UsersPage() {
 															</DropdownMenuItem>
 
 															<DropdownMenuSeparator />
-															<DropdownMenuItem 
+															<DropdownMenuItem
 																className="text-destructive focus:text-destructive cursor-pointer"
 																onClick={() => handleDeleteUser(user.id, user.name)}
 															>
@@ -266,5 +281,6 @@ export default function UsersPage() {
 				</CardContent>
 			</Card>
 		</div>
+		</>
 	);
 }
