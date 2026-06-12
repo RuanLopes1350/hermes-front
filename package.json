@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run format:fix && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "format:fix": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css}\"",
