@@ -158,6 +158,12 @@ export default function EmailsPage() {
 				);
 			case 'failed':
 				return <Badge variant="destructive">Falhou</Badge>;
+			case 'retrying':
+				return (
+					<Badge className="bg-orange-500/20 text-orange-600 hover:bg-orange-500/30 border-orange-500/50">
+						Reenviando
+					</Badge>
+				);
 			default:
 				return <Badge variant="outline">{status}</Badge>;
 		}
@@ -208,6 +214,7 @@ export default function EmailsPage() {
 						<SelectContent>
 							<SelectItem value="all">Qualquer status</SelectItem>
 							<SelectItem value="pending">Pendente</SelectItem>
+							<SelectItem value="retrying">Reenviando</SelectItem>
 							<SelectItem value="sent">Enviado</SelectItem>
 							<SelectItem value="failed">Falhou</SelectItem>
 						</SelectContent>

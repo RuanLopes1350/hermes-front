@@ -32,6 +32,8 @@ import {
 } from '@/src/components/ui/dialog';
 import { ConfirmModal } from '@/src/components/ui/confirm-modal';
 
+import { Badge } from '@/src/components/ui/badge';
+
 export default function ServicesPage() {
 	const { services, loading, processing, fetchServices, saveService, deleteService } =
 		useServices();
@@ -134,6 +136,21 @@ export default function ServicesPage() {
 									<CardTitle className="text-base font-semibold leading-none flex items-center gap-2">
 										<Server className="h-4 w-4 text-muted-foreground" />
 										{service.name}
+										{service.ownerName && (
+											<Badge
+												variant="secondary"
+												title={service.ownerEmail}
+												className="ml-2 text-xs font-medium bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-200 border border-violet-200 dark:border-violet-800/50"
+											>
+												Dono:{' '}
+												<span
+													title={service.ownerEmail}
+													className="ml-1 font-semibold hover:underline"
+												>
+													{service.ownerName.split(' ')[0]}
+												</span>
+											</Badge>
+										)}
 									</CardTitle>
 									<CardDescription className="font-mono text-xs mt-1">
 										ID: {service.id.split('-')[0]}
