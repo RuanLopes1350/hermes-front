@@ -14,7 +14,11 @@ export function ThemeToggle() {
 	}, []);
 
 	if (!mounted) {
-		return <Button variant="ghost" size="icon" className="rounded-full w-9 h-9" disabled><span className="sr-only">Toggle theme</span></Button>;
+		return (
+			<Button variant="ghost" size="icon" className="rounded-full w-9 h-9" disabled>
+				<span className="sr-only">Toggle theme</span>
+			</Button>
+		);
 	}
 
 	const currentTheme = theme === 'system' ? resolvedTheme : theme;

@@ -67,12 +67,7 @@ export function ConfirmModal({
 				</DialogHeader>
 
 				<DialogFooter className="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 gap-2 sm:gap-0">
-					<Button
-						variant="outline"
-						onClick={onClose}
-						disabled={loading}
-						className="cursor-pointer"
-					>
+					<Button variant="outline" onClick={onClose} disabled={loading} className="cursor-pointer">
 						{cancelText}
 					</Button>
 					<Button

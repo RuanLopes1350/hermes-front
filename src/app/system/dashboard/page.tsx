@@ -14,18 +14,30 @@ import {
 	Database,
 	User,
 	CheckCircle2,
-	XCircle
+	XCircle,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/src/components/ui/table';
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@/src/components/ui/card';
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '@/src/components/ui/table';
 import { Badge } from '@/src/components/ui/badge';
 import { authClient } from '@/src/lib/auth-client';
 import { apiFetch } from '@/src/lib/api';
 import { useToast } from '@/src/hooks/use-toast';
-
 
 interface AppUser {
 	id: string;
@@ -48,7 +60,9 @@ export default function DashboardPage() {
 			fetchDashboardData();
 
 			const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1350';
-			const eventSource = new EventSource(`${API_URL}/api/dashboard/stream`, { withCredentials: true });
+			const eventSource = new EventSource(`${API_URL}/api/dashboard/stream`, {
+				withCredentials: true,
+			});
 
 			eventSource.onmessage = (event) => {
 				try {
@@ -80,7 +94,11 @@ export default function DashboardPage() {
 			if (response.ok) {
 				setData(result.data);
 			} else {
-				toast({ variant: 'destructive', title: 'Erro', description: result.message || 'Falha ao carregar métricas.' });
+				toast({
+					variant: 'destructive',
+					title: 'Erro',
+					description: result.message || 'Falha ao carregar métricas.',
+				});
 			}
 		} catch (error) {
 			console.error(error);
@@ -101,54 +119,213 @@ export default function DashboardPage() {
 	}
 
 	const totalSent = Number(data.summary.sent || data.summary.totalSent || 0);
-	const totalFailed = Number(data.summary.pending || data.summary.totalFailed || 0); // Reusing pending as failed for demo if needed
+	const totalFailed = Number(data.summary.totalFailed || 0);
 	const totalAttempts = totalSent + totalFailed;
 	const successRate = totalAttempts > 0 ? ((totalSent / totalAttempts) * 100).toFixed(1) : '100';
 
-	// Chart Options - Volume vs Latency
-	const getVolumeOption = (latencyData: any[]) => {
-		const dates = (latencyData || []).map(d => new Date(d.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }));
-		
-		// In a real scenario, this would be actual volume data. Here we mock a volume curve based on the latency data array length
-		// so the chart looks full and represents "Envios" correctly.
-		const values = (latencyData || []).map(d => Math.floor(Math.random() * 500) + 100);
+	// Gráfico 1: Latência média real por dia (dados reais do backend)
+	const getLatencyOption = (latencyData: any[]) => {
+		const dates = (latencyData || []).map((d) =>
+			new Date(d.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }),
+		);
+		// avg_latency vem em segundos (EXTRACT EPOCH), convertemos para ms para exibição
+		const values = (latencyData || []).map((d) => Number(Number(d.avg_latency || 0).toFixed(2)));
 
 		return {
 			backgroundColor: 'transparent',
-			tooltip: { trigger: 'axis', backgroundColor: '#fff', borderColor: '#e2e8f0', textStyle: { color: '#0f172a' } },
+			tooltip: {
+				trigger: 'axis',
+				backgroundColor: '#fff',
+				borderColor: '#e2e8f0',
+				textStyle: { color: '#0f172a' },
+				formatter: (params: any) => {
+					const p = params[0];
+					return `${p.axisValue}<br/><b>${p.value}s</b> latência média`;
+				},
+			},
 			grid: { top: 20, left: 30, right: 30, bottom: 20, containLabel: true },
-			xAxis: { type: 'category', data: dates, axisLine: { lineStyle: { color: '#cbd5e1' } }, axisLabel: { color: '#64748b' }, boundaryGap: false },
-			yAxis: { type: 'value', splitLine: { lineStyle: { color: '#f1f5f9', type: 'dashed' } }, axisLabel: { color: '#64748b' } },
-			series: [{
-				name: 'E-mails Enviados',
-				data: values,
-				type: 'line',
-				smooth: true,
-				symbolSize: 6,
-				lineStyle: { width: 3, color: '#0ea5e9' },
-				itemStyle: { color: '#0ea5e9' },
-				areaStyle: {
-					color: {
-						type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-						colorStops: [{ offset: 0, color: 'rgba(14, 165, 233, 0.2)' }, { offset: 1, color: 'rgba(14, 165, 233, 0)' }]
-					}
-				}
-			}]
+			xAxis: {
+				type: 'category',
+				data: dates,
+				axisLine: { lineStyle: { color: '#cbd5e1' } },
+				axisLabel: { color: '#64748b' },
+				boundaryGap: false,
+			},
+			yAxis: {
+				type: 'value',
+				name: 'segundos',
+				nameTextStyle: { color: '#94a3b8', fontSize: 10 },
+				splitLine: { lineStyle: { color: '#f1f5f9', type: 'dashed' } },
+				axisLabel: { color: '#64748b', formatter: (v: number) => `${v}s` },
+			},
+			series: [
+				{
+					name: 'Latência Média',
+					data: values,
+					type: 'line',
+					smooth: true,
+					symbolSize: 6,
+					lineStyle: { width: 3, color: '#0ea5e9' },
+					itemStyle: { color: '#0ea5e9' },
+					areaStyle: {
+						color: {
+							type: 'linear',
+							x: 0,
+							y: 0,
+							x2: 0,
+							y2: 1,
+							colorStops: [
+								{ offset: 0, color: 'rgba(14, 165, 233, 0.2)' },
+								{ offset: 1, color: 'rgba(14, 165, 233, 0)' },
+							],
+						},
+					},
+				},
+			],
+		};
+	};
+
+	// Gráfico 2a (Admin): Serviços ativos por dono
+	const getAdminServicesOption = (allServices: any[]) => {
+		const names = (allServices || []).map((s: any) => s.name);
+		const owners = (allServices || []).map((s: any) => s.ownerName || 'N/A');
+		return {
+			backgroundColor: 'transparent',
+			tooltip: {
+				trigger: 'axis',
+				axisPointer: { type: 'shadow' },
+				formatter: (params: any) => {
+					const i = params[0].dataIndex;
+					return `<b>${names[i]}</b><br/>Dono: ${owners[i]}`;
+				},
+			},
+			grid: { top: 10, left: 10, right: 10, bottom: 10, containLabel: true },
+			xAxis: { type: 'value', axisLabel: { show: false }, splitLine: { show: false } },
+			yAxis: {
+				type: 'category',
+				data: names,
+				axisLabel: { color: '#64748b', fontSize: 11, width: 120, overflow: 'truncate' },
+			},
+			series: [
+				{
+					name: 'Serviços',
+					type: 'bar',
+					data: names.map(() => 1),
+					barMaxWidth: 20,
+					itemStyle: {
+						color: {
+							type: 'linear',
+							x: 0,
+							y: 0,
+							x2: 1,
+							y2: 0,
+							colorStops: [
+								{ offset: 0, color: '#6366f1' },
+								{ offset: 1, color: '#0ea5e9' },
+							],
+						},
+						borderRadius: [0, 4, 4, 0],
+					},
+				},
+			],
+		};
+	};
+
+	// Gráfico 2b (User): Top templates por uso
+	const getTopTemplatesOption = (topTemplates: any[]) => {
+		const names = (topTemplates || []).map((t: any) => t.name);
+		const counts = (topTemplates || []).map((t: any) => Number(t.usage_count));
+		return {
+			backgroundColor: 'transparent',
+			tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+			grid: { top: 10, left: 10, right: 10, bottom: 10, containLabel: true },
+			xAxis: {
+				type: 'value',
+				axisLabel: { color: '#64748b' },
+				splitLine: { lineStyle: { type: 'dashed', color: '#f1f5f9' } },
+			},
+			yAxis: {
+				type: 'category',
+				data: names,
+				axisLabel: { color: '#64748b', fontSize: 11, width: 120, overflow: 'truncate' },
+			},
+			series: [
+				{
+					name: 'Usos',
+					type: 'bar',
+					data: counts,
+					barMaxWidth: 20,
+					itemStyle: {
+						color: {
+							type: 'linear',
+							x: 0,
+							y: 0,
+							x2: 1,
+							y2: 0,
+							colorStops: [
+								{ offset: 0, color: '#10b981' },
+								{ offset: 1, color: '#0ea5e9' },
+							],
+						},
+						borderRadius: [0, 4, 4, 0],
+					},
+				},
+			],
 		};
 	};
 
 	const kpiCards = [
-		{ label: 'Volume Disparado', value: totalSent.toLocaleString('pt-BR'), icon: Zap, color: 'text-blue-600', bg: 'bg-blue-100', desc: 'E-mails processados na infra' },
-		{ label: 'Taxa de Entrega (Delivery)', value: `${successRate}%`, icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-100', desc: 'Sucesso nas caixas de entrada' },
-		{ label: 'Falhas / Hard Bounces', value: totalFailed.toLocaleString('pt-BR'), icon: XCircle, color: 'text-red-600', bg: 'bg-red-100', desc: 'Rejeições por provedores' },
-		{ label: 'Projetos Conectados', value: data.summary.services || data.summary.totalServices || 0, icon: Server, color: 'text-slate-600', bg: 'bg-slate-200', desc: 'Instâncias isoladas de API' },
+		{
+			label: 'Volume Disparado',
+			value: totalSent.toLocaleString('pt-BR'),
+			icon: Zap,
+			color: 'text-blue-600',
+			bg: 'bg-blue-100',
+			desc: 'E-mails processados na infra',
+		},
+		{
+			label: 'Taxa de Entrega (Delivery)',
+			value: `${successRate}%`,
+			icon: CheckCircle2,
+			color: 'text-emerald-600',
+			bg: 'bg-emerald-100',
+			desc: 'Sucesso nas caixas de entrada',
+		},
+		{
+			label: 'Falhas / Hard Bounces',
+			value: totalFailed.toLocaleString('pt-BR'),
+			icon: XCircle,
+			color: 'text-red-600',
+			bg: 'bg-red-100',
+			desc: 'Rejeições por provedores',
+		},
+		{
+			label: 'Projetos Conectados',
+			value: data.summary.services || data.summary.totalServices || 0,
+			icon: Server,
+			color: 'text-slate-600',
+			bg: 'bg-slate-200',
+			desc: 'Instâncias isoladas de API',
+		},
 	];
 
 	return (
 		<div className="space-y-6 animate-in fade-in duration-500">
 			<div>
-				<h2 className="text-2xl font-bold tracking-tight">Overview da Operação {isAdmin && <Badge variant="outline" className="ml-2 bg-yellow-400 text-yellow-900 hover:bg-yellow-200">Modo Admin</Badge>}</h2>
-				<p className="text-sm text-muted-foreground">Métricas de entregabilidade e saúde transacional da sua conta.</p>
+				<h2 className="text-2xl font-bold tracking-tight">
+					Overview da Operação{' '}
+					{isAdmin && (
+						<Badge
+							variant="outline"
+							className="ml-2 bg-yellow-400 text-yellow-900 hover:bg-yellow-200"
+						>
+							Modo Admin
+						</Badge>
+					)}
+				</h2>
+				<p className="text-sm text-muted-foreground">
+					Métricas de entregabilidade e saúde transacional da sua conta.
+				</p>
 			</div>
 
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -169,18 +346,25 @@ export default function DashboardPage() {
 			</div>
 
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+				{/* Gráfico 1: Latência Média Real */}
 				<Card className="col-span-2 flex flex-col">
 					<CardHeader>
-						<CardTitle>Histórico de Volume (30 dias)</CardTitle>
-						<CardDescription>Fluxo de saída de e-mails transacionais</CardDescription>
+						<CardTitle>Latência de Entrega (7 dias)</CardTitle>
+						<CardDescription>
+							Tempo médio de processamento por dia — dados reais do banco
+						</CardDescription>
 					</CardHeader>
 					<CardContent className="flex-1 min-h-[250px]">
-						{(!data.latency || data.latency.length === 0) ? (
+						{!data.latency || data.latency.length === 0 ? (
 							<div className="h-full flex items-center justify-center text-muted-foreground text-sm border-2 border-dashed rounded-lg">
 								Aguardando tráfego na API para gerar gráficos.
 							</div>
 						) : (
-							<ReactECharts option={getVolumeOption(data.latency)} style={{ height: '100%', width: '100%' }} opts={{ renderer: 'svg' }} />
+							<ReactECharts
+								option={getLatencyOption(data.latency)}
+								style={{ height: '100%', width: '100%' }}
+								opts={{ renderer: 'svg' }}
+							/>
 						)}
 					</CardContent>
 				</Card>
@@ -193,93 +377,158 @@ export default function DashboardPage() {
 					<CardContent className="flex-1 flex flex-col justify-center space-y-6">
 						<div className="space-y-2">
 							<div className="flex justify-between text-sm">
-								<span className="font-medium text-slate-600 flex items-center gap-2"><Clock className="h-4 w-4" /> Fila de Espera</span>
+								<span className="font-medium text-slate-600 flex items-center gap-2">
+									<Clock className="h-4 w-4" /> Fila de Espera
+								</span>
 								<span className="font-bold">{data.queue?.waiting || 0}</span>
 							</div>
 							<div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-								<div className="h-full bg-amber-500 transition-all duration-500" style={{ width: (data.queue?.waiting || 0) > 0 ? '100%' : '0%' }} />
-							</div>
-						</div>
-						
-						<div className="space-y-2">
-							<div className="flex justify-between text-sm">
-								<span className="font-medium text-slate-600 flex items-center gap-2"><Activity className="h-4 w-4" /> Em Processamento</span>
-								<span className="font-bold">{data.queue?.active || 0}</span>
-							</div>
-							<div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-								<div className="h-full bg-blue-500 transition-all duration-500" style={{ width: (data.queue?.active || 0) > 0 ? '100%' : '0%' }} />
+								<div
+									className="h-full bg-amber-500 transition-all duration-500"
+									style={{ width: (data.queue?.waiting || 0) > 0 ? '100%' : '0%' }}
+								/>
 							</div>
 						</div>
 
 						<div className="space-y-2">
 							<div className="flex justify-between text-sm">
-								<span className="font-medium text-slate-600 flex items-center gap-2"><AlertCircle className="h-4 w-4" /> Dead Letter (Falhas)</span>
+								<span className="font-medium text-slate-600 flex items-center gap-2">
+									<Activity className="h-4 w-4" /> Em Processamento
+								</span>
+								<span className="font-bold">{data.queue?.active || 0}</span>
+							</div>
+							<div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+								<div
+									className="h-full bg-blue-500 transition-all duration-500"
+									style={{ width: (data.queue?.active || 0) > 0 ? '100%' : '0%' }}
+								/>
+							</div>
+						</div>
+
+						<div className="space-y-2">
+							<div className="flex justify-between text-sm">
+								<span className="font-medium text-slate-600 flex items-center gap-2">
+									<AlertCircle className="h-4 w-4" /> Dead Letter (Falhas)
+								</span>
 								<span className="font-bold text-red-600">{data.queue?.failed || 0}</span>
 							</div>
 							<div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-								<div className="h-full bg-red-500 transition-all duration-500" style={{ width: (data.queue?.failed || 0) > 0 ? '100%' : '0%' }} />
+								<div
+									className="h-full bg-red-500 transition-all duration-500"
+									style={{ width: (data.queue?.failed || 0) > 0 ? '100%' : '0%' }}
+								/>
 							</div>
 						</div>
 					</CardContent>
 				</Card>
 			</div>
 
+			{/* Gráfico 2: Análise contextual (admin vs usuário) */}
+			<Card className="flex flex-col">
+				<CardHeader>
+					<CardTitle>
+						{isAdmin ? 'Serviços Ativos na Plataforma' : 'Top 5 Templates por Uso'}
+					</CardTitle>
+					<CardDescription>
+						{isAdmin
+							? 'Lista dos 10 projetos mais recentes e seus respectivos donos'
+							: 'Templates com mais disparos acumulados nos seus serviços'}
+					</CardDescription>
+				</CardHeader>
+				<CardContent className="min-h-[220px]">
+					{isAdmin ? (
+						!data.allServices || data.allServices.length === 0 ? (
+							<div className="h-full flex items-center justify-center text-muted-foreground text-sm border-2 border-dashed rounded-lg py-8">
+								Nenhum serviço registrado ainda.
+							</div>
+						) : (
+							<ReactECharts
+								option={getAdminServicesOption(data.allServices)}
+								style={{
+									height: `${Math.max(180, data.allServices.length * 36)}px`,
+									width: '100%',
+								}}
+								opts={{ renderer: 'svg' }}
+							/>
+						)
+					) : !data.topTemplates || data.topTemplates.length === 0 ? (
+						<div className="h-full flex items-center justify-center text-muted-foreground text-sm border-2 border-dashed rounded-lg py-8">
+							Nenhum template utilizado ainda.
+						</div>
+					) : (
+						<ReactECharts
+							option={getTopTemplatesOption(data.topTemplates)}
+							style={{ height: `${Math.max(180, data.topTemplates.length * 40)}px`, width: '100%' }}
+							opts={{ renderer: 'svg' }}
+						/>
+					)}
+				</CardContent>
+			</Card>
+
 			<Card>
 				<CardHeader>
 					<CardTitle>Auditoria de Envios Recentes</CardTitle>
-					<CardDescription>Acompanhe em tempo real o status de entrega dos últimos disparos da sua infraestrutura.</CardDescription>
+					<CardDescription>
+						Acompanhe em tempo real o status de entrega dos últimos disparos da sua infraestrutura.
+					</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<div className="overflow-x-auto">
-					<Table>
-						<TableHeader>
-							<TableRow>
-								<TableHead>Destinatário</TableHead>
-								<TableHead>Assunto / Template</TableHead>
-								<TableHead>Status de Entrega</TableHead>
-								<TableHead className="text-right">Timestamp</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{(!data.recentEmails || data.recentEmails.length === 0) ? (
+						<Table>
+							<TableHeader>
 								<TableRow>
-									<TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-										Nenhum log de disparo encontrado nas últimas 24 horas.
-									</TableCell>
+									<TableHead>Destinatário</TableHead>
+									<TableHead>Assunto / Template</TableHead>
+									<TableHead>Status de Entrega</TableHead>
+									<TableHead className="text-right">Timestamp</TableHead>
 								</TableRow>
-							) : (
-								data.recentEmails.map((mail: any) => (
-									<TableRow key={mail.id} className="group">
-										<TableCell className="font-medium">
-											<div className="flex items-center gap-2">
-												<Mail className="h-4 w-4 text-muted-foreground" />
-												{mail.recipient}
-											</div>
-										</TableCell>
-										<TableCell className="text-muted-foreground truncate max-w-xs">{mail.subject}</TableCell>
-										<TableCell>
-											{mail.status === 'sent' ? (
-												<Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-none">
-													Entregue ao Provedor
-												</Badge>
-											) : mail.status === 'failed' ? (
-												<Badge className="bg-red-100 text-red-800 hover:bg-red-200 border-none">
-													Falha (Bounce)
-												</Badge>
-											) : (
-												<Badge variant="outline" className="text-amber-600 border-amber-300">
-													Processando
-												</Badge>
-											)}
-										</TableCell>
-										<TableCell className="text-right text-muted-foreground text-sm font-mono">
-											{new Date(mail.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+							</TableHeader>
+							<TableBody>
+								{!data.recentEmails || data.recentEmails.length === 0 ? (
+									<TableRow>
+										<TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+											Nenhum log de disparo encontrado nas últimas 24 horas.
 										</TableCell>
 									</TableRow>
-								))
-							)}
-						</TableBody>
-					</Table>
+								) : (
+									data.recentEmails.map((mail: any) => (
+										<TableRow key={mail.id} className="group">
+											<TableCell className="font-medium">
+												<div className="flex items-center gap-2">
+													<Mail className="h-4 w-4 text-muted-foreground" />
+													{mail.recipient}
+												</div>
+											</TableCell>
+											<TableCell className="text-muted-foreground truncate max-w-xs">
+												{mail.subject}
+											</TableCell>
+											<TableCell>
+												{mail.status === 'sent' ? (
+													<Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-none">
+														Entregue ao Provedor
+													</Badge>
+												) : mail.status === 'failed' ? (
+													<Badge className="bg-red-100 text-red-800 hover:bg-red-200 border-none">
+														Falha (Bounce)
+													</Badge>
+												) : (
+													<Badge variant="outline" className="text-amber-600 border-amber-300">
+														Processando
+													</Badge>
+												)}
+											</TableCell>
+											<TableCell className="text-right text-muted-foreground text-sm font-mono">
+												{new Date(mail.createdAt).toLocaleTimeString('pt-BR', {
+													hour: '2-digit',
+													minute: '2-digit',
+													second: '2-digit',
+												})}
+											</TableCell>
+										</TableRow>
+									))
+								)}
+							</TableBody>
+						</Table>
 					</div>
 				</CardContent>
 			</Card>

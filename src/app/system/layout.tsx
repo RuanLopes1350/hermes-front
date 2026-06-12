@@ -41,7 +41,7 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 
 	useEffect(() => {
 		if (user && user.isActive === false) {
-			authClient.signOut({ fetchOptions: { onSuccess: () => router.push('/auth/sign-in') }});
+			authClient.signOut({ fetchOptions: { onSuccess: () => router.push('/auth/sign-in') } });
 		}
 	}, [user, router]);
 
@@ -58,16 +58,17 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 			{/* Top Navigation Bar */}
 			<header className="sticky top-0 z-50 w-full border-b bg-card">
 				<div className="container mx-auto max-w-7xl flex h-16 items-center justify-between px-4 sm:px-6">
-					
 					{/* Left: Brand & Links */}
 					<div className="flex items-center gap-8">
 						<div className="flex items-center gap-2 group">
 							<div className="flex h-8 w-8 items-center justify-center rounded-lg">
 								<img src="/hermes-icon.svg" alt="Hermes Icon" className="h-5 w-5" />
 							</div>
-							<span className="font-bold text-lg tracking-tight hidden sm:inline-block transition-colors group-hover:text-primary">Hermes</span>
+							<span className="font-bold text-lg tracking-tight hidden sm:inline-block transition-colors group-hover:text-primary">
+								Hermes
+							</span>
 						</div>
-						
+
 						<nav className="hidden md:flex items-center space-x-1">
 							{navItems.map((item) => {
 								const isActive = pathname?.startsWith(item.path);
@@ -76,8 +77,8 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 										key={item.path}
 										href={item.path}
 										className={`px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
-											isActive 
-												? 'bg-secondary text-secondary-foreground' 
+											isActive
+												? 'bg-secondary text-secondary-foreground'
 												: 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
 										}`}
 									>
@@ -93,12 +94,17 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 						<ThemeToggle />
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
-								<Button variant="ghost" className="relative h-9 rounded-full pl-2 pr-4 border border-border/50 hover:bg-secondary/50 cursor-pointer">
+								<Button
+									variant="ghost"
+									className="relative h-9 rounded-full pl-2 pr-4 border border-border/50 hover:bg-secondary/50 cursor-pointer"
+								>
 									<div className="flex items-center gap-2">
 										<div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10">
 											<UserIcon className="h-3 w-3 text-primary" />
 										</div>
-										<span className="text-sm font-medium">{user?.name?.split(' ')[0] || 'Conta'}</span>
+										<span className="text-sm font-medium">
+											{user?.name?.split(' ')[0] || 'Conta'}
+										</span>
 									</div>
 								</Button>
 							</DropdownMenuTrigger>
@@ -118,7 +124,7 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 										<span>Meu Perfil</span>
 									</Link>
 								</DropdownMenuItem>
-								
+
 								{user?.isAdmin && (
 									<DropdownMenuItem asChild>
 										<Link href="/system/users" className="cursor-pointer flex w-full">
@@ -127,11 +133,15 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 										</Link>
 									</DropdownMenuItem>
 								)}
-								
+
 								<DropdownMenuSeparator />
-								<DropdownMenuItem 
+								<DropdownMenuItem
 									className="text-destructive focus:text-destructive cursor-pointer flex w-full"
-									onClick={() => authClient.signOut({ fetchOptions: { onSuccess: () => router.push('/auth/sign-in') }})}
+									onClick={() =>
+										authClient.signOut({
+											fetchOptions: { onSuccess: () => router.push('/auth/sign-in') },
+										})
+									}
 								>
 									<LogOut className="mr-2 h-4 w-4" />
 									<span>Sair da plataforma</span>
@@ -160,8 +170,8 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 									href={item.path}
 									onClick={() => setIsMobileMenuOpen(false)}
 									className={`block px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-										isActive 
-											? 'bg-secondary text-secondary-foreground' 
+										isActive
+											? 'bg-secondary text-secondary-foreground'
 											: 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
 									}`}
 								>
@@ -175,9 +185,7 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 
 			{/* Main Content Viewport */}
 			<main className="flex-1 overflow-y-auto">
-				<div className="container mx-auto max-w-7xl px-4 sm:px-6 py-8">
-					{children}
-				</div>
+				<div className="container mx-auto max-w-7xl px-4 sm:px-6 py-8">{children}</div>
 			</main>
 		</div>
 	);

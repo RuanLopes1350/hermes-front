@@ -19,12 +19,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/src/components/ui/select';
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-} from '@/src/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/src/components/ui/dialog';
 import { Loader2, Eye, FilterX } from 'lucide-react';
 import { apiFetch } from '@/src/lib/api';
 
@@ -59,7 +54,7 @@ export default function EmailsPage() {
 	const [filterService, setFilterService] = useState('all');
 	const [filterStatus, setFilterStatus] = useState('all');
 	const [filterDate, setFilterDate] = useState('');
-	
+
 	const [selectedEmail, setSelectedEmail] = useState<EmailRecord | null>(null);
 	const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -69,7 +64,7 @@ export default function EmailsPage() {
 			try {
 				const [srvRes, tmplRes] = await Promise.all([
 					apiFetch('/api/services'),
-					apiFetch('/api/templates')
+					apiFetch('/api/templates'),
 				]);
 
 				if (tmplRes.ok) {
@@ -86,9 +81,9 @@ export default function EmailsPage() {
 						try {
 							const [res, credRes] = await Promise.all([
 								apiFetch(`/api/services/${s.id}/emails`),
-								apiFetch(`/api/services/${s.id}/credentials`)
+								apiFetch(`/api/services/${s.id}/credentials`),
 							]);
-							
+
 							let fetchedEmails = [];
 							let fetchedCreds = [];
 
@@ -101,9 +96,9 @@ export default function EmailsPage() {
 								fetchedCreds = credData.data || [];
 							}
 
-							return { 
-								emails: fetchedEmails.map((e: any) => ({ ...e, serviceName: s.name })), 
-								creds: fetchedCreds 
+							return {
+								emails: fetchedEmails.map((e: any) => ({ ...e, serviceName: s.name })),
+								creds: fetchedCreds,
 							};
 						} catch (e) {
 							return { emails: [], creds: [] };
@@ -111,10 +106,14 @@ export default function EmailsPage() {
 					});
 
 					const results = await Promise.all(emailsPromises);
-					const allEmails = results.flatMap(r => r.emails);
-					const allCreds = results.flatMap(r => r.creds);
-					
-					allEmails.sort((a, b) => new Date(b.created_at || b.createdAt || '').getTime() - new Date(a.created_at || a.createdAt || '').getTime());
+					const allEmails = results.flatMap((r) => r.emails);
+					const allCreds = results.flatMap((r) => r.creds);
+
+					allEmails.sort(
+						(a, b) =>
+							new Date(b.created_at || b.createdAt || '').getTime() -
+							new Date(a.created_at || a.createdAt || '').getTime(),
+					);
 					setEmails(allEmails);
 					setCredentials(allCreds);
 				}
@@ -143,9 +142,20 @@ export default function EmailsPage() {
 	const getStatusBadge = (status: string) => {
 		switch (status.toLowerCase()) {
 			case 'sent':
-				return <Badge variant="default" className="bg-emerald-500 hover:bg-emerald-600">Enviado</Badge>;
+				return (
+					<Badge variant="default" className="bg-emerald-500 hover:bg-emerald-600">
+						Enviado
+					</Badge>
+				);
 			case 'pending':
-				return <Badge variant="secondary" className="bg-amber-500/20 text-amber-600 hover:bg-amber-500/30 border-amber-500/50">Pendente</Badge>;
+				return (
+					<Badge
+						variant="secondary"
+						className="bg-amber-500/20 text-amber-600 hover:bg-amber-500/30 border-amber-500/50"
+					>
+						Pendente
+					</Badge>
+				);
 			case 'failed':
 				return <Badge variant="destructive">Falhou</Badge>;
 			default:
@@ -170,21 +180,27 @@ export default function EmailsPage() {
 			{/* Filters */}
 			<div className="flex flex-col sm:flex-row items-end sm:items-center gap-4 bg-card p-4 rounded-xl border">
 				<div className="space-y-1 w-full sm:w-auto flex-1">
-					<label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Serviço</label>
+					<label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+						Serviço
+					</label>
 					<Select value={filterService} onValueChange={setFilterService}>
 						<SelectTrigger className="cursor-pointer">
 							<SelectValue placeholder="Todos os serviços" />
 						</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="all">Todos os serviços</SelectItem>
-							{services.map(s => (
-								<SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+							{services.map((s) => (
+								<SelectItem key={s.id} value={s.id}>
+									{s.name}
+								</SelectItem>
 							))}
 						</SelectContent>
 					</Select>
 				</div>
 				<div className="space-y-1 w-full sm:w-auto flex-1">
-					<label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</label>
+					<label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+						Status
+					</label>
 					<Select value={filterStatus} onValueChange={setFilterStatus}>
 						<SelectTrigger className="cursor-pointer">
 							<SelectValue placeholder="Qualquer status" />
@@ -198,18 +214,24 @@ export default function EmailsPage() {
 					</Select>
 				</div>
 				<div className="space-y-1 w-full sm:w-auto flex-1">
-					<label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data</label>
-					<Input 
-						type="date" 
+					<label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+						Data
+					</label>
+					<Input
+						type="date"
 						value={filterDate}
 						onChange={(e) => setFilterDate(e.target.value)}
 						className="cursor-pointer h-10"
 					/>
 				</div>
 				<div className="w-full sm:w-auto">
-					<Button 
-						variant="outline" 
-						onClick={() => { setFilterService('all'); setFilterStatus('all'); setFilterDate(''); }}
+					<Button
+						variant="outline"
+						onClick={() => {
+							setFilterService('all');
+							setFilterStatus('all');
+							setFilterDate('');
+						}}
 						className="w-full sm:w-auto h-10"
 					>
 						<FilterX className="h-4 w-4 mr-2" />
@@ -253,15 +275,17 @@ export default function EmailsPage() {
 									<TableCell className="text-sm">{email.recipient_to}</TableCell>
 									<TableCell className="text-sm max-w-[200px] truncate">{email.subject}</TableCell>
 									<TableCell className="text-xs font-mono text-muted-foreground truncate max-w-[120px]">
-										{credentials.find(c => c.id === email.credential_id)?.name || email.credential_id || 'N/A'}
+										{credentials.find((c) => c.id === email.credential_id)?.name ||
+											email.credential_id ||
+											'N/A'}
 									</TableCell>
 									<TableCell className="text-sm">
 										{new Date(email.created_at || email.createdAt || '').toLocaleString()}
 									</TableCell>
 									<TableCell className="text-right">
-										<Button 
-											variant="ghost" 
-											size="icon" 
+										<Button
+											variant="ghost"
+											size="icon"
 											onClick={() => openEmailModal(email)}
 											title="Ver detalhes"
 										>
@@ -284,46 +308,75 @@ export default function EmailsPage() {
 						<div className="space-y-6 mt-4">
 							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 								<div className="space-y-1">
-									<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Status</p>
+									<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+										Status
+									</p>
 									<div>{getStatusBadge(selectedEmail.status)}</div>
 								</div>
 								<div className="space-y-1">
-									<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Data do Registro</p>
-									<p className="text-sm font-medium">{new Date(selectedEmail.created_at || selectedEmail.createdAt || '').toLocaleString()}</p>
+									<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+										Data do Registro
+									</p>
+									<p className="text-sm font-medium">
+										{new Date(
+											selectedEmail.created_at || selectedEmail.createdAt || '',
+										).toLocaleString()}
+									</p>
 								</div>
 								<div className="space-y-1">
-									<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">ID do E-mail</p>
+									<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+										ID do E-mail
+									</p>
 									<p className="text-sm font-mono">{selectedEmail.id}</p>
 								</div>
 								<div className="space-y-1">
-									<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Credencial</p>
-									<p className="text-sm font-mono">{credentials.find(c => c.id === selectedEmail.credential_id)?.name || selectedEmail.credential_id || 'N/A'}</p>
+									<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+										Credencial
+									</p>
+									<p className="text-sm font-mono">
+										{credentials.find((c) => c.id === selectedEmail.credential_id)?.name ||
+											selectedEmail.credential_id ||
+											'N/A'}
+									</p>
 								</div>
 							</div>
-							
+
 							<div className="space-y-1 bg-muted p-3 rounded-lg border">
-								<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Destinatário</p>
+								<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+									Destinatário
+								</p>
 								<p className="text-sm font-medium">{selectedEmail.recipient_to}</p>
 							</div>
 
 							<div className="space-y-1 bg-muted p-3 rounded-lg border">
-								<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Assunto</p>
+								<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+									Assunto
+								</p>
 								<p className="text-sm font-medium">{selectedEmail.subject}</p>
 							</div>
 
-							{(selectedEmail.template_id || selectedEmail.service_template_id) ? (
+							{selectedEmail.template_id || selectedEmail.service_template_id ? (
 								<div className="space-y-1 bg-primary/5 p-3 rounded-lg border border-primary/20">
 									<p className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-2">
 										<span className="h-2 w-2 rounded-full bg-primary inline-block"></span>
 										Template Usado
 									</p>
-									<p className="text-sm font-medium">{templates.find(t => t.id === (selectedEmail.template_id || selectedEmail.service_template_id))?.name || (selectedEmail.template_id || selectedEmail.service_template_id)}</p>
+									<p className="text-sm font-medium">
+										{templates.find(
+											(t) =>
+												t.id === (selectedEmail.template_id || selectedEmail.service_template_id),
+										)?.name ||
+											selectedEmail.template_id ||
+											selectedEmail.service_template_id}
+									</p>
 								</div>
 							) : null}
 
 							{selectedEmail.variables && Object.keys(selectedEmail.variables).length > 0 && (
 								<div className="space-y-2">
-									<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Variáveis</p>
+									<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+										Variáveis
+									</p>
 									<pre className="bg-black/10 dark:bg-black p-4 rounded-xl text-xs font-mono overflow-x-auto border">
 										{JSON.stringify(selectedEmail.variables, null, 2)}
 									</pre>
@@ -332,7 +385,9 @@ export default function EmailsPage() {
 
 							{selectedEmail.body && (
 								<div className="space-y-2">
-									<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Corpo do E-mail (HTML/Texto)</p>
+									<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+										Corpo do E-mail (HTML/Texto)
+									</p>
 									<div className="bg-background border p-4 rounded-xl text-sm whitespace-pre-wrap max-h-64 overflow-y-auto">
 										{selectedEmail.body}
 									</div>

@@ -9,8 +9,14 @@ import { Loader2 } from 'lucide-react';
 import { authClient } from '@/src/lib/auth-client';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/src/components/ui/card';
-
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from '@/src/components/ui/card';
 
 export default function SignInPage() {
 	const [email, setEmail] = useState('');
@@ -73,9 +79,7 @@ export default function SignInPage() {
 			<Card>
 				<CardHeader className="space-y-1 text-center">
 					<CardTitle className="text-2xl font-bold tracking-tight">Acesso à Plataforma</CardTitle>
-					<CardDescription>
-						Digite seu e-mail e senha para entrar no Hermes.
-					</CardDescription>
+					<CardDescription>Digite seu e-mail e senha para entrar no Hermes.</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<form onSubmit={handleSignIn} className="space-y-4">
@@ -85,7 +89,9 @@ export default function SignInPage() {
 							</div>
 						)}
 						<div className="space-y-2">
-							<label htmlFor="email" className="text-sm font-medium leading-none">E-mail corporativo</label>
+							<label htmlFor="email" className="text-sm font-medium leading-none">
+								E-mail corporativo
+							</label>
 							<Input
 								id="email"
 								type="email"
@@ -97,8 +103,13 @@ export default function SignInPage() {
 						</div>
 						<div className="space-y-2">
 							<div className="flex items-center justify-between">
-								<label htmlFor="password" className="text-sm font-medium leading-none">Senha</label>
-								<Link href="/auth/recovery" className="text-sm font-medium text-primary hover:underline">
+								<label htmlFor="password" className="text-sm font-medium leading-none">
+									Senha
+								</label>
+								<Link
+									href="/auth/recovery"
+									className="text-sm font-medium text-primary hover:underline"
+								>
 									Esqueceu a senha?
 								</Link>
 							</div>

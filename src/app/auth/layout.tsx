@@ -23,15 +23,34 @@ export default function AuthLayout({
 				<h1 className="text-2xl font-black tracking-tight">Hermes</h1>
 			</div>
 
-			<div className="w-full max-w-md flex-1 flex flex-col justify-center">
-				{children}
-			</div>
+			<div className="w-full max-w-md flex-1 flex flex-col justify-center">{children}</div>
 
 			<div className="flex flex-col items-center gap-4 text-xs text-muted-foreground mt-8">
 				<div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-					<a href={Documentacao} target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">Documentação</a>
-					<a href={Status} target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">Status API</a>
-					<a href={Privacidade} target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">Privacidade</a>
+					<a
+						href={Documentacao}
+						target="_blank"
+						rel="noreferrer"
+						className="hover:text-primary transition-colors"
+					>
+						Documentação
+					</a>
+					<a
+						href={Status}
+						target="_blank"
+						rel="noreferrer"
+						className="hover:text-primary transition-colors"
+					>
+						Status API
+					</a>
+					<a
+						href={Privacidade}
+						target="_blank"
+						rel="noreferrer"
+						className="hover:text-primary transition-colors"
+					>
+						Privacidade
+					</a>
 				</div>
 				<p>Hermes - v{Version}</p>
 				<p>© {new Date().getFullYear()} Hermes. Todos os direitos reservados.</p>

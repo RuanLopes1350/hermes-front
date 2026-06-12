@@ -17,7 +17,11 @@ export function useServices() {
 			if (response.ok && !result.error) {
 				setServices(result.data || []);
 			} else {
-				toast({ variant: 'destructive', title: 'Erro', description: result.message || 'Falha ao carregar serviços.' });
+				toast({
+					variant: 'destructive',
+					title: 'Erro',
+					description: result.message || 'Falha ao carregar serviços.',
+				});
 			}
 		} catch (err) {
 			toast({ variant: 'destructive', title: 'Erro', description: 'Erro de rede.' });
@@ -44,7 +48,11 @@ export function useServices() {
 				await fetchServices();
 				return true;
 			} else {
-				toast({ variant: 'destructive', title: 'Erro', description: result.message || 'Falha ao salvar.' });
+				toast({
+					variant: 'destructive',
+					title: 'Erro',
+					description: result.message || 'Falha ao salvar.',
+				});
 				return false;
 			}
 		} catch (err) {
@@ -65,7 +73,11 @@ export function useServices() {
 				setServices((prev) => prev.filter((s) => s.id !== id));
 				return true;
 			} else {
-				toast({ variant: 'destructive', title: 'Erro', description: result.message || 'Falha ao excluir.' });
+				toast({
+					variant: 'destructive',
+					title: 'Erro',
+					description: result.message || 'Falha ao excluir.',
+				});
 				return false;
 			}
 		} catch (err) {

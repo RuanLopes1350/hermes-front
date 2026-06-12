@@ -69,13 +69,20 @@ export default function TemplateDetailsPage() {
 		if (!content) return [];
 		const matches = content.match(/\{\{\{?([^{}]+)\}?\}\}/g);
 		if (!matches) return [];
-		
-		const detected = Array.from(new Set(matches.map(m => {
-			let v = m.replace(/\{|\}/g, '').trim();
-			if (v.startsWith('#') || v.startsWith('/') || v.startsWith('!') || v === 'else') return null;
-			return v.split(' ')[0];
-		}).filter(Boolean))) as string[];
-		
+
+		const detected = Array.from(
+			new Set(
+				matches
+					.map((m) => {
+						let v = m.replace(/\{|\}/g, '').trim();
+						if (v.startsWith('#') || v.startsWith('/') || v.startsWith('!') || v === 'else')
+							return null;
+						return v.split(' ')[0];
+					})
+					.filter(Boolean),
+			),
+		) as string[];
+
 		return detected;
 	}, [content]);
 
@@ -254,10 +261,13 @@ export default function TemplateDetailsPage() {
 								{isGlobal ? 'Global' : services.find((s) => s.id === serviceId)?.name || 'Privado'}
 							</Badge>
 						</div>
-						<div 
+						<div
 							onClick={() => {
 								navigator.clipboard.writeText(id as string);
-								toast({ title: 'Copiado!', description: 'ID do template copiado para a área de transferência.' });
+								toast({
+									title: 'Copiado!',
+									description: 'ID do template copiado para a área de transferência.',
+								});
 							}}
 							className="flex items-center gap-1.5 mt-1 text-[10px] text-muted-foreground hover:text-primary cursor-pointer w-fit transition-colors"
 							title="Clique para copiar o ID"
@@ -394,16 +404,20 @@ export default function TemplateDetailsPage() {
 
 							<div className="flex flex-wrap gap-2 max-h-25 overflow-y-auto text-left">
 								{detectedVariables.length === 0 ? (
-									<span className="text-xs text-muted-foreground italic">Nenhuma variável no código.</span>
-								) : detectedVariables.map((tag) => (
-									<Badge
-										key={tag}
-										variant="outline"
-										className="bg-background/50 border-border-subtle text-primary font-mono text-[9px] gap-2 py-1.5 px-3"
-									>
-										{'{{' + tag + '}}'}
-									</Badge>
-								))}
+									<span className="text-xs text-muted-foreground italic">
+										Nenhuma variável no código.
+									</span>
+								) : (
+									detectedVariables.map((tag) => (
+										<Badge
+											key={tag}
+											variant="outline"
+											className="bg-background/50 border-border-subtle text-primary font-mono text-[9px] gap-2 py-1.5 px-3"
+										>
+											{'{{' + tag + '}}'}
+										</Badge>
+									))
+								)}
 							</div>
 						</div>
 					</Card>

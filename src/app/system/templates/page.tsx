@@ -44,14 +44,14 @@ export default function TemplatesPage() {
 	const [services, setServices] = useState<ServiceType[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [creating, setCreating] = useState(false);
-	
+
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [newName, setNewName] = useState('');
 	const [selectedService, setSelectedService] = useState('');
-	
+
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [templateToDelete, setTemplateToDelete] = useState<Template | null>(null);
-	
+
 	const router = useRouter();
 	const { toast } = useToast();
 
@@ -66,7 +66,9 @@ export default function TemplatesPage() {
 			const res = await apiFetch('/api/templates');
 			const data = await res.json();
 			if (res.ok) setTemplates(data.data || []);
-		} finally { setLoading(false); }
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	const fetchServices = async () => {
@@ -89,7 +91,8 @@ export default function TemplatesPage() {
 					service_id: isGlobal ? null : selectedService,
 					global: isGlobal,
 					subject_template: 'Novo E-mail',
-					html_content: '<mjml><mj-body><mj-section><mj-column><mj-text>Olá!</mj-text></mj-column></mj-section></mj-body></mjml>',
+					html_content:
+						'<mjml><mj-body><mj-section><mj-column><mj-text>Olá!</mj-text></mj-column></mj-section></mj-body></mjml>',
 				}),
 			});
 			const result = await response.json();
@@ -108,7 +111,7 @@ export default function TemplatesPage() {
 			const res = await apiFetch(`/api/templates/${templateToDelete.id}`, { method: 'DELETE' });
 			if (res.ok) {
 				toast({ title: 'Sucesso', description: 'Template excluído.' });
-				setTemplates(prev => prev.filter(t => t.id !== templateToDelete.id));
+				setTemplates((prev) => prev.filter((t) => t.id !== templateToDelete.id));
 			}
 		} finally {
 			setDeleteModalOpen(false);
@@ -120,7 +123,9 @@ export default function TemplatesPage() {
 			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 				<div>
 					<h2 className="text-2xl font-bold tracking-tight">Meus Templates</h2>
-					<p className="text-sm text-muted-foreground">Gerencie seus layouts de e-mail transacionais.</p>
+					<p className="text-sm text-muted-foreground">
+						Gerencie seus layouts de e-mail transacionais.
+					</p>
 				</div>
 				<Button onClick={() => setShowCreateModal(true)}>
 					<Plus className="mr-2 h-4 w-4" /> Novo Template
@@ -128,17 +133,23 @@ export default function TemplatesPage() {
 			</div>
 
 			{loading ? (
-				<div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+				<div className="flex h-64 items-center justify-center">
+					<Loader2 className="h-8 w-8 animate-spin text-primary" />
+				</div>
 			) : templates.length === 0 ? (
 				<div className="flex flex-col items-center justify-center h-64 border border-dashed rounded-lg bg-card text-center p-6">
 					<Layout className="h-10 w-10 text-muted-foreground mb-4" />
 					<h3 className="text-lg font-semibold">Nenhum Template</h3>
-					<p className="text-sm text-muted-foreground mt-2 max-w-sm">Você ainda não criou nenhum template. Comece agora para agilizar seus envios.</p>
-					<Button variant="outline" className="mt-4" onClick={() => setShowCreateModal(true)}>Criar Template</Button>
+					<p className="text-sm text-muted-foreground mt-2 max-w-sm">
+						Você ainda não criou nenhum template. Comece agora para agilizar seus envios.
+					</p>
+					<Button variant="outline" className="mt-4" onClick={() => setShowCreateModal(true)}>
+						Criar Template
+					</Button>
 				</div>
 			) : (
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{templates.map(tmpl => (
+					{templates.map((tmpl) => (
 						<Card key={tmpl.id} className="flex flex-col">
 							<CardHeader className="pb-4">
 								<div className="flex justify-between items-start mb-2">
@@ -146,19 +157,38 @@ export default function TemplatesPage() {
 										<FileText className="h-5 w-5" />
 									</div>
 									{tmpl.global ? (
-										<Badge className="bg-primary text-primary-foreground flex items-center gap-1 cursor-default"><Globe className="h-3 w-3"/> Global</Badge>
+										<Badge className="bg-primary text-primary-foreground flex items-center gap-1 cursor-default">
+											<Globe className="h-3 w-3" /> Global
+										</Badge>
 									) : (
-										<Badge variant="secondary" className="flex items-center gap-1 cursor-default"><Server className="h-3 w-3"/> {services.find(s => s.id === tmpl.service_id)?.name || 'Específico'}</Badge>
+										<Badge variant="secondary" className="flex items-center gap-1 cursor-default">
+											<Server className="h-3 w-3" />{' '}
+											{services.find((s) => s.id === tmpl.service_id)?.name || 'Específico'}
+										</Badge>
 									)}
 								</div>
-								<CardTitle className="text-lg truncate" title={tmpl.name}>{tmpl.name}</CardTitle>
-								<p className="text-xs text-muted-foreground truncate font-mono">{tmpl.subject_template}</p>
+								<CardTitle className="text-lg truncate" title={tmpl.name}>
+									{tmpl.name}
+								</CardTitle>
+								<p className="text-xs text-muted-foreground truncate font-mono">
+									{tmpl.subject_template}
+								</p>
 							</CardHeader>
 							<CardFooter className="mt-auto flex gap-2 pt-0">
 								<Button asChild variant="outline" className="flex-1">
-									<Link href={`/system/templates/${tmpl.id}`}>Editar <ArrowRight className="ml-2 h-4 w-4" /></Link>
+									<Link href={`/system/templates/${tmpl.id}`}>
+										Editar <ArrowRight className="ml-2 h-4 w-4" />
+									</Link>
 								</Button>
-								<Button variant="ghost" size="icon" onClick={() => { setTemplateToDelete(tmpl); setDeleteModalOpen(true); }} className="text-destructive hover:bg-destructive/10">
+								<Button
+									variant="ghost"
+									size="icon"
+									onClick={() => {
+										setTemplateToDelete(tmpl);
+										setDeleteModalOpen(true);
+									}}
+									className="text-destructive hover:bg-destructive/10"
+								>
 									<Trash2 className="h-4 w-4" />
 								</Button>
 							</CardFooter>
@@ -175,7 +205,11 @@ export default function TemplatesPage() {
 					<div className="grid gap-4 py-4">
 						<div className="grid gap-2">
 							<label className="text-sm font-medium">Nome do Template</label>
-							<Input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Ex: Boas-vindas" />
+							<Input
+								value={newName}
+								onChange={(e) => setNewName(e.target.value)}
+								placeholder="Ex: Boas-vindas"
+							/>
 						</div>
 						<div className="grid gap-2">
 							<label className="text-sm font-medium">Escopo de Uso</label>
@@ -184,14 +218,22 @@ export default function TemplatesPage() {
 									<SelectValue placeholder="Onde este template será usado?" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="global" className="font-semibold text-primary">🌍 Global (Todos os Serviços)</SelectItem>
-									{services.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+									<SelectItem value="global" className="font-semibold text-primary">
+										🌍 Global (Todos os Serviços)
+									</SelectItem>
+									{services.map((s) => (
+										<SelectItem key={s.id} value={s.id}>
+											{s.name}
+										</SelectItem>
+									))}
 								</SelectContent>
 							</Select>
 						</div>
 					</div>
 					<DialogFooter>
-						<Button variant="outline" onClick={() => setShowCreateModal(false)}>Cancelar</Button>
+						<Button variant="outline" onClick={() => setShowCreateModal(false)}>
+							Cancelar
+						</Button>
 						<Button onClick={handleCreate} disabled={creating || !newName || !selectedService}>
 							{creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Criar e Abrir
 						</Button>

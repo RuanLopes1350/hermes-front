@@ -9,8 +9,14 @@ import { Loader2, ShieldCheck } from 'lucide-react';
 import { authClient } from '@/src/lib/auth-client';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/src/components/ui/card';
-
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from '@/src/components/ui/card';
 
 export default function SignUpPage() {
 	const [name, setName] = useState('');
@@ -55,9 +61,7 @@ export default function SignUpPage() {
 			<Card>
 				<CardHeader className="space-y-1 text-center">
 					<CardTitle className="text-2xl font-bold tracking-tight">Criar Conta</CardTitle>
-					<CardDescription>
-						Junte-se ao Hermes e gerencie seus e-mails.
-					</CardDescription>
+					<CardDescription>Junte-se ao Hermes e gerencie seus e-mails.</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<form onSubmit={handleSignUp} className="space-y-4">
@@ -67,50 +71,58 @@ export default function SignUpPage() {
 							</div>
 						)}
 						<div className="space-y-2">
-							<label htmlFor="name" className="text-sm font-medium leading-none">Nome Completo</label>
-							<Input 
-								id="name" 
-								type="text" 
-								placeholder="John Doe" 
+							<label htmlFor="name" className="text-sm font-medium leading-none">
+								Nome Completo
+							</label>
+							<Input
+								id="name"
+								type="text"
+								placeholder="John Doe"
 								value={name}
 								onChange={(e) => setName(e.target.value)}
-								required 
+								required
 							/>
 						</div>
 						<div className="space-y-2">
-							<label htmlFor="email" className="text-sm font-medium leading-none">E-mail corporativo</label>
-							<Input 
-								id="email" 
-								type="email" 
-								placeholder="exemplo@empresa.com" 
+							<label htmlFor="email" className="text-sm font-medium leading-none">
+								E-mail corporativo
+							</label>
+							<Input
+								id="email"
+								type="email"
+								placeholder="exemplo@empresa.com"
 								value={email}
 								onChange={(e) => setEmail(e.target.value)}
-								required 
+								required
 							/>
 						</div>
 						<div className="grid grid-cols-2 gap-4">
 							<div className="space-y-2">
-								<label htmlFor="password" className="text-sm font-medium leading-none">Senha</label>
-								<Input 
-									id="password" 
-									type="password" 
+								<label htmlFor="password" className="text-sm font-medium leading-none">
+									Senha
+								</label>
+								<Input
+									id="password"
+									type="password"
 									value={password}
 									onChange={(e) => setPassword(e.target.value)}
-									required 
+									required
 								/>
 							</div>
 							<div className="space-y-2">
-								<label htmlFor="confirmPassword" className="text-sm font-medium leading-none">Confirmar</label>
-								<Input 
-									id="confirmPassword" 
-									type="password" 
+								<label htmlFor="confirmPassword" className="text-sm font-medium leading-none">
+									Confirmar
+								</label>
+								<Input
+									id="confirmPassword"
+									type="password"
 									value={confirmPassword}
 									onChange={(e) => setConfirmPassword(e.target.value)}
-									required 
+									required
 								/>
 							</div>
 						</div>
-						
+
 						<div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted p-2 rounded-md">
 							<ShieldCheck className="h-4 w-4 text-emerald-500" />
 							<span>Suas credenciais são criptografadas de ponta-a-ponta.</span>

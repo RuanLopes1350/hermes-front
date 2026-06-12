@@ -9,13 +9,19 @@ import { Service } from '@/src/types';
 
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/src/components/ui/card';
+import {
+	Card,
+	CardHeader,
+	CardTitle,
+	CardDescription,
+	CardContent,
+} from '@/src/components/ui/card';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-	DropdownMenuSeparator
+	DropdownMenuSeparator,
 } from '@/src/components/ui/dropdown-menu';
 import {
 	Dialog,
@@ -27,13 +33,14 @@ import {
 import { ConfirmModal } from '@/src/components/ui/confirm-modal';
 
 export default function ServicesPage() {
-	const { services, loading, processing, fetchServices, saveService, deleteService } = useServices();
+	const { services, loading, processing, fetchServices, saveService, deleteService } =
+		useServices();
 	const [search, setSearch] = useState('');
-	
+
 	const [modalOpen, setModalOpen] = useState(false);
 	const [editingService, setEditingService] = useState<Service | null>(null);
 	const [serviceName, setServiceName] = useState('');
-	
+
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
 
@@ -72,8 +79,8 @@ export default function ServicesPage() {
 		}
 	};
 
-	const filteredServices = services.filter(s => 
-		s.name.toLowerCase().includes(search.toLowerCase())
+	const filteredServices = services.filter((s) =>
+		s.name.toLowerCase().includes(search.toLowerCase()),
 	);
 
 	return (
@@ -120,7 +127,7 @@ export default function ServicesPage() {
 				</div>
 			) : (
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-					{filteredServices.map(service => (
+					{filteredServices.map((service) => (
 						<Card key={service.id} className="flex flex-col">
 							<CardHeader className="flex flex-row items-start justify-between pb-2">
 								<div className="space-y-1">
@@ -140,11 +147,17 @@ export default function ServicesPage() {
 										</Button>
 									</DropdownMenuTrigger>
 									<DropdownMenuContent align="end">
-										<DropdownMenuItem onClick={() => handleOpenEdit(service)} className="cursor-pointer">
+										<DropdownMenuItem
+											onClick={() => handleOpenEdit(service)}
+											className="cursor-pointer"
+										>
 											<Pencil className="mr-2 h-4 w-4" /> Editar Nome
 										</DropdownMenuItem>
 										<DropdownMenuSeparator />
-										<DropdownMenuItem onClick={() => handleRequestDelete(service)} className="text-destructive focus:text-destructive cursor-pointer">
+										<DropdownMenuItem
+											onClick={() => handleRequestDelete(service)}
+											className="text-destructive focus:text-destructive cursor-pointer"
+										>
 											<Trash2 className="mr-2 h-4 w-4" /> Excluir
 										</DropdownMenuItem>
 									</DropdownMenuContent>
@@ -169,7 +182,9 @@ export default function ServicesPage() {
 					</DialogHeader>
 					<div className="grid gap-4 py-4">
 						<div className="grid gap-2">
-							<label htmlFor="name" className="text-sm font-medium">Nome</label>
+							<label htmlFor="name" className="text-sm font-medium">
+								Nome
+							</label>
 							<Input
 								id="name"
 								value={serviceName}
@@ -180,8 +195,18 @@ export default function ServicesPage() {
 						</div>
 					</div>
 					<DialogFooter>
-						<Button variant="outline" onClick={() => setModalOpen(false)} className="cursor-pointer">Cancelar</Button>
-						<Button onClick={handleSave} disabled={processing || !serviceName.trim()} className="cursor-pointer">
+						<Button
+							variant="outline"
+							onClick={() => setModalOpen(false)}
+							className="cursor-pointer"
+						>
+							Cancelar
+						</Button>
+						<Button
+							onClick={handleSave}
+							disabled={processing || !serviceName.trim()}
+							className="cursor-pointer"
+						>
 							{processing ? 'Salvando...' : 'Salvar'}
 						</Button>
 					</DialogFooter>
