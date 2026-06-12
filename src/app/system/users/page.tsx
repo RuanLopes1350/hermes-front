@@ -307,7 +307,7 @@ export default function UsersPage() {
 																	<MoreVertical className="h-4 w-4" />
 																</Button>
 															</DropdownMenuTrigger>
-															<DropdownMenuContent align="end">
+															<DropdownMenuContent align="end" className="w-64">
 																<DropdownMenuLabel>Ações Administrativas</DropdownMenuLabel>
 																<DropdownMenuSeparator />
 
