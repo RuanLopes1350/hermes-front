@@ -300,20 +300,20 @@ export default function EmailsPage() {
 			</div>
 
 			<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-				<DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+				<DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto w-[95vw] sm:w-full">
 					<DialogHeader>
 						<DialogTitle>Detalhes do E-mail</DialogTitle>
 					</DialogHeader>
 					{selectedEmail && (
-						<div className="space-y-6 mt-4">
+						<div className="space-y-6 mt-4 min-w-0 w-full overflow-hidden">
 							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-								<div className="space-y-1">
+								<div className="space-y-1 min-w-0">
 									<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
 										Status
 									</p>
 									<div>{getStatusBadge(selectedEmail.status)}</div>
 								</div>
-								<div className="space-y-1">
+								<div className="space-y-1 min-w-0">
 									<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
 										Data do Registro
 									</p>
@@ -323,17 +323,17 @@ export default function EmailsPage() {
 										).toLocaleString()}
 									</p>
 								</div>
-								<div className="space-y-1">
+								<div className="space-y-1 min-w-0">
 									<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
 										ID do E-mail
 									</p>
-									<p className="text-sm font-mono">{selectedEmail.id}</p>
+									<p className="text-sm font-mono break-all">{selectedEmail.id}</p>
 								</div>
-								<div className="space-y-1">
+								<div className="space-y-1 min-w-0">
 									<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
 										Credencial
 									</p>
-									<p className="text-sm font-mono">
+									<p className="text-sm font-mono break-all">
 										{credentials.find((c) => c.id === selectedEmail.credential_id)?.name ||
 											selectedEmail.credential_id ||
 											'N/A'}
@@ -341,27 +341,27 @@ export default function EmailsPage() {
 								</div>
 							</div>
 
-							<div className="space-y-1 bg-muted p-3 rounded-lg border">
+							<div className="space-y-1 bg-muted p-3 rounded-lg border min-w-0 overflow-hidden">
 								<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
 									Destinatário
 								</p>
-								<p className="text-sm font-medium">{selectedEmail.recipient_to}</p>
+								<p className="text-sm font-medium break-all">{selectedEmail.recipient_to}</p>
 							</div>
 
-							<div className="space-y-1 bg-muted p-3 rounded-lg border">
+							<div className="space-y-1 bg-muted p-3 rounded-lg border min-w-0 overflow-hidden">
 								<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
 									Assunto
 								</p>
-								<p className="text-sm font-medium">{selectedEmail.subject}</p>
+								<p className="text-sm font-medium break-words">{selectedEmail.subject}</p>
 							</div>
 
 							{selectedEmail.template_id || selectedEmail.service_template_id ? (
-								<div className="space-y-1 bg-primary/5 p-3 rounded-lg border border-primary/20">
+								<div className="space-y-1 bg-primary/5 p-3 rounded-lg border border-primary/20 min-w-0 overflow-hidden">
 									<p className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-2">
-										<span className="h-2 w-2 rounded-full bg-primary inline-block"></span>
+										<span className="h-2 w-2 rounded-full bg-primary inline-block shrink-0"></span>
 										Template Usado
 									</p>
-									<p className="text-sm font-medium">
+									<p className="text-sm font-medium break-words">
 										{templates.find(
 											(t) =>
 												t.id === (selectedEmail.template_id || selectedEmail.service_template_id),
@@ -373,22 +373,24 @@ export default function EmailsPage() {
 							) : null}
 
 							{selectedEmail.variables && Object.keys(selectedEmail.variables).length > 0 && (
-								<div className="space-y-2">
+								<div className="space-y-2 min-w-0 w-full overflow-hidden">
 									<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
 										Variáveis
 									</p>
-									<pre className="bg-black/10 dark:bg-black p-4 rounded-xl text-xs font-mono overflow-x-auto border">
-										{JSON.stringify(selectedEmail.variables, null, 2)}
-									</pre>
+									<div className="overflow-hidden rounded-xl border w-full">
+										<pre className="bg-black/10 dark:bg-black p-4 text-xs font-mono overflow-x-auto w-full">
+											{JSON.stringify(selectedEmail.variables, null, 2)}
+										</pre>
+									</div>
 								</div>
 							)}
 
 							{selectedEmail.body && (
-								<div className="space-y-2">
+								<div className="space-y-2 min-w-0 w-full overflow-hidden">
 									<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
 										Corpo do E-mail (HTML/Texto)
 									</p>
-									<div className="bg-background border p-4 rounded-xl text-sm whitespace-pre-wrap max-h-64 overflow-y-auto">
+									<div className="bg-background border p-4 rounded-xl text-sm whitespace-pre-wrap break-words overflow-y-auto max-h-64 w-full">
 										{selectedEmail.body}
 									</div>
 								</div>
