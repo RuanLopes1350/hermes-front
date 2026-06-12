@@ -433,7 +433,8 @@ export default function ServiceDetailsPage() {
 						<p className="text-sm text-muted-foreground font-mono">ID: {service?.id}</p>
 					</div>
 				</div>
-				{(isOwner || session?.user?.isAdmin) && (
+				{/* TODO: Add a proper type definition for session user when better-auth client is fully typed. */}
+				{(isOwner || (session?.user as any)?.isAdmin) && (
 					<div className="flex items-center gap-2">
 						<Button
 							variant="outline"
