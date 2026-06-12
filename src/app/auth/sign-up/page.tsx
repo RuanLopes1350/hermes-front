@@ -111,7 +111,7 @@ export default function SignUpPage() {
 							</div>
 							<div className="space-y-2">
 								<label htmlFor="confirmPassword" className="text-sm font-medium leading-none">
-									Confirmar
+									Repetir Senha
 								</label>
 								<Input
 									id="confirmPassword"
