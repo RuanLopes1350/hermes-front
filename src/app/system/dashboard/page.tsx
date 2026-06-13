@@ -15,6 +15,12 @@ import {
 	User,
 	CheckCircle2,
 	XCircle,
+	CalendarClock,
+	FileText,
+	PlusCircle,
+	MinusCircle,
+	RefreshCw,
+	MessageSquare
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
@@ -118,87 +124,125 @@ export default function DashboardPage() {
 		);
 	}
 
-	const totalSent = Number(data.summary.sent || data.summary.totalSent || 0);
-	const totalFailed = Number(data.summary.totalFailed || 0);
-	const totalAttempts = totalSent + totalFailed;
-	const successRate = totalAttempts > 0 ? ((totalSent / totalAttempts) * 100).toFixed(1) : '100';
-
-	// Gráfico 1: Latência média real por dia (dados reais do backend)
-	const getLatencyOption = (latencyData: any[]) => {
-		const dates = (latencyData || []).map((d) =>
-			new Date(d.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }),
-		);
-		// avg_latency vem em segundos (EXTRACT EPOCH), convertemos para ms para exibição
-		const values = (latencyData || []).map((d) => Number(Number(d.avg_latency || 0).toFixed(2)));
-
-		return {
-			backgroundColor: 'transparent',
-			tooltip: {
-				trigger: 'axis',
-				backgroundColor: '#fff',
-				borderColor: '#e2e8f0',
-				textStyle: { color: '#0f172a' },
-				formatter: (params: any) => {
-					const p = params[0];
-					return `${p.axisValue}<br/><b>${p.value}s</b> latência média`;
-				},
-			},
-			grid: { top: 20, left: 30, right: 30, bottom: 20, containLabel: true },
-			xAxis: {
-				type: 'category',
-				data: dates,
-				axisLine: { lineStyle: { color: '#cbd5e1' } },
-				axisLabel: { color: '#64748b' },
-				boundaryGap: false,
-			},
-			yAxis: {
-				type: 'value',
-				name: 'segundos',
-				nameTextStyle: { color: '#94a3b8', fontSize: 10 },
-				splitLine: { lineStyle: { color: '#f1f5f9', type: 'dashed' } },
-				axisLabel: { color: '#64748b', formatter: (v: number) => `${v}s` },
-			},
-			series: [
-				{
-					name: 'Latência Média',
-					data: values,
-					type: 'line',
-					smooth: true,
-					symbolSize: 6,
-					lineStyle: { width: 3, color: '#0ea5e9' },
-					itemStyle: { color: '#0ea5e9' },
-					areaStyle: {
-						color: {
-							type: 'linear',
-							x: 0,
-							y: 0,
-							x2: 0,
-							y2: 1,
-							colorStops: [
-								{ offset: 0, color: 'rgba(14, 165, 233, 0.2)' },
-								{ offset: 1, color: 'rgba(14, 165, 233, 0)' },
-							],
-						},
-					},
-				},
-			],
-		};
+	// Helper para Saudação
+	const getGreeting = () => {
+		const hour = new Date().getHours();
+		if (hour >= 6 && hour < 12) return 'Bom dia';
+		if (hour >= 12 && hour < 18) return 'Boa tarde';
+		return 'Boa noite';
 	};
 
-	// Gráfico 2a (Admin): Serviços ativos por dono
-	const getAdminServicesOption = (allServices: any[]) => {
-		const names = (allServices || []).map((s: any) => s.name);
-		const owners = (allServices || []).map((s: any) => s.ownerName || 'N/A');
+	// Helper para Action Icon (Timeline)
+	const getActionIcon = (action: string) => {
+		if (action.includes('CREATED') || action.includes('ADDED')) return <PlusCircle className="h-4 w-4 text-emerald-500" />;
+		if (action.includes('DELETED') || action.includes('REMOVED')) return <MinusCircle className="h-4 w-4 text-red-500" />;
+		if (action.includes('UPDATED') || action.includes('TRANSFERRED')) return <RefreshCw className="h-4 w-4 text-blue-500" />;
+		return <MessageSquare className="h-4 w-4 text-amber-500" />;
+	};
+
+	const totalSent = isAdmin ? Number(data.summary.totalSent || 0) : Number(data.summary.sent || 0);
+	const totalFailed = isAdmin ? Number(data.summary.totalFailed || 0) : Number(data.summary.pending || 0);
+	const totalAttempts = totalSent + (isAdmin ? totalFailed : 0);
+	const successRate = totalAttempts > 0 ? ((totalSent / totalAttempts) * 100).toFixed(1) : '100';
+
+	// ==========================================
+	// CONFIGURAÇÕES DE GRÁFICOS ECHARTS
+	// ==========================================
+
+	// 1. Gráfico de Volume por Dia (Stacked Bar)
+	const getVolumeByDayOption = (volumeData: any[]) => {
+		const dates = (volumeData || []).map((d) =>
+			new Date(d.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }),
+		);
+		const sentValues = (volumeData || []).map((d) => Number(d.sent || 0));
+		const failedValues = (volumeData || []).map((d) => Number(d.failed || 0));
+
 		return {
 			backgroundColor: 'transparent',
 			tooltip: {
 				trigger: 'axis',
 				axisPointer: { type: 'shadow' },
-				formatter: (params: any) => {
-					const i = params[0].dataIndex;
-					return `<b>${names[i]}</b><br/>Dono: ${owners[i]}`;
-				},
 			},
+			legend: { data: ['Enviados', 'Falhas'], bottom: 0 },
+			grid: { top: 20, left: 10, right: 10, bottom: 30, containLabel: true },
+			xAxis: {
+				type: 'category',
+				data: dates,
+				axisLine: { lineStyle: { color: '#cbd5e1' } },
+				axisLabel: { color: '#64748b' },
+			},
+			yAxis: {
+				type: 'value',
+				splitLine: { lineStyle: { color: '#f1f5f9', type: 'dashed' } },
+				axisLabel: { color: '#64748b' },
+			},
+			series: [
+				{
+					name: 'Enviados',
+					type: 'bar',
+					stack: 'total',
+					data: sentValues,
+					itemStyle: { color: '#10b981' },
+				},
+				{
+					name: 'Falhas',
+					type: 'bar',
+					stack: 'total',
+					data: failedValues,
+					itemStyle: { color: '#ef4444' },
+				},
+			],
+		};
+	};
+
+	// 2. Gráfico de Distribuição de Status (Donut)
+	const getStatusDistributionOption = (statusData: any[]) => {
+		const colorMap: Record<string, string> = {
+			sent: '#10b981', // Emerald
+			pending: '#f59e0b', // Amber
+			failed: '#ef4444', // Red
+			retrying: '#3b82f6', // Blue
+		};
+
+		const formattedData = (statusData || []).map(d => ({
+			value: Number(d.total),
+			name: d.status.charAt(0).toUpperCase() + d.status.slice(1),
+			itemStyle: { color: colorMap[d.status] || '#94a3b8' }
+		}));
+
+		return {
+			backgroundColor: 'transparent',
+			tooltip: { trigger: 'item' },
+			legend: { top: 'bottom' },
+			series: [
+				{
+					name: 'Status',
+					type: 'pie',
+					radius: ['40%', '70%'],
+					avoidLabelOverlap: false,
+					itemStyle: {
+						borderRadius: 5,
+						borderColor: '#fff',
+						borderWidth: 2
+					},
+					label: { show: false, position: 'center' },
+					emphasis: {
+						label: { show: true, fontSize: 16, fontWeight: 'bold' }
+					},
+					labelLine: { show: false },
+					data: formattedData
+				}
+			]
+		};
+	};
+
+	// 3. Admin: Top Serviços por Volume (Horizontal Bar)
+	const getTopServicesOption = (topServices: any[]) => {
+		const names = (topServices || []).map((s: any) => s.name);
+		const counts = (topServices || []).map((s: any) => Number(s.emailCount));
+		return {
+			backgroundColor: 'transparent',
+			tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
 			grid: { top: 10, left: 10, right: 10, bottom: 10, containLabel: true },
 			xAxis: { type: 'value', axisLabel: { show: false }, splitLine: { show: false } },
 			yAxis: {
@@ -208,21 +252,14 @@ export default function DashboardPage() {
 			},
 			series: [
 				{
-					name: 'Serviços',
+					name: 'Envios',
 					type: 'bar',
-					data: names.map(() => 1),
+					data: counts,
 					barMaxWidth: 20,
 					itemStyle: {
 						color: {
-							type: 'linear',
-							x: 0,
-							y: 0,
-							x2: 1,
-							y2: 0,
-							colorStops: [
-								{ offset: 0, color: '#6366f1' },
-								{ offset: 1, color: '#0ea5e9' },
-							],
+							type: 'linear', x: 0, y: 0, x2: 1, y2: 0,
+							colorStops: [ { offset: 0, color: '#6366f1' }, { offset: 1, color: '#0ea5e9' } ],
 						},
 						borderRadius: [0, 4, 4, 0],
 					},
@@ -231,7 +268,7 @@ export default function DashboardPage() {
 		};
 	};
 
-	// Gráfico 2b (User): Top templates por uso
+	// 4. User: Top templates por uso
 	const getTopTemplatesOption = (topTemplates: any[]) => {
 		const names = (topTemplates || []).map((t: any) => t.name);
 		const counts = (topTemplates || []).map((t: any) => Number(t.usage_count));
@@ -257,15 +294,8 @@ export default function DashboardPage() {
 					barMaxWidth: 20,
 					itemStyle: {
 						color: {
-							type: 'linear',
-							x: 0,
-							y: 0,
-							x2: 1,
-							y2: 0,
-							colorStops: [
-								{ offset: 0, color: '#10b981' },
-								{ offset: 1, color: '#0ea5e9' },
-							],
+							type: 'linear', x: 0, y: 0, x2: 1, y2: 0,
+							colorStops: [ { offset: 0, color: '#10b981' }, { offset: 1, color: '#0ea5e9' } ],
 						},
 						borderRadius: [0, 4, 4, 0],
 					},
@@ -274,46 +304,69 @@ export default function DashboardPage() {
 		};
 	};
 
-	const kpiCards = [
-		{
-			label: 'Volume Disparado',
-			value: totalSent.toLocaleString('pt-BR'),
-			icon: Zap,
-			color: 'text-blue-600',
-			bg: 'bg-blue-100',
-			desc: 'E-mails processados na infra',
-		},
-		{
-			label: 'Taxa de Entrega (Delivery)',
-			value: `${successRate}%`,
-			icon: CheckCircle2,
-			color: 'text-emerald-600',
-			bg: 'bg-emerald-100',
-			desc: 'Sucesso nas caixas de entrada',
-		},
-		{
-			label: 'Falhas / Hard Bounces',
-			value: totalFailed.toLocaleString('pt-BR'),
-			icon: XCircle,
-			color: 'text-red-600',
-			bg: 'bg-red-100',
-			desc: 'Rejeições por provedores',
-		},
-		{
-			label: 'Projetos Conectados',
-			value: data.summary.services || data.summary.totalServices || 0,
-			icon: Server,
-			color: 'text-slate-600',
-			bg: 'bg-slate-200',
-			desc: 'Instâncias isoladas de API',
-		},
-	];
+	// ==========================================
+	// CONFIGURAÇÃO DOS CARDS DE KPI
+	// ==========================================
+	const kpiCards = isAdmin
+		? [
+				{
+					label: 'E-mails na Plataforma',
+					value: totalSent.toLocaleString('pt-BR'),
+					icon: Zap, color: 'text-blue-600', bg: 'bg-blue-100',
+					desc: 'Enviados com sucesso',
+				},
+				{
+					label: 'Taxa de Entrega Global',
+					value: `${successRate}%`,
+					icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-100',
+					desc: 'Todas as contas',
+				},
+				{
+					label: 'Usuários Ativos',
+					value: data.summary.totalUsers || 0,
+					icon: Users, color: 'text-slate-600', bg: 'bg-slate-200',
+					desc: 'Cadastrados no Hermes',
+				},
+				{
+					label: 'Serviços Registrados',
+					value: data.summary.totalServices || 0,
+					icon: Server, color: 'text-indigo-600', bg: 'bg-indigo-100',
+					desc: 'Projetos ativos',
+				},
+		  ]
+		: [
+				{
+					label: 'E-mails Enviados',
+					value: totalSent.toLocaleString('pt-BR'),
+					icon: Mail, color: 'text-blue-600', bg: 'bg-blue-100',
+					desc: 'Total de todos os seus serviços',
+				},
+				{
+					label: 'Taxa de Sucesso',
+					value: `${successRate}%`,
+					icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-100',
+					desc: 'Últimos 30 dias',
+				},
+				{
+					label: 'Seus Serviços',
+					value: data.summary.services || 0,
+					icon: Layers, color: 'text-slate-600', bg: 'bg-slate-200',
+					desc: 'Projetos onde você é membro',
+				},
+				{
+					label: 'Templates Ativos',
+					value: data.summary.templates || 0,
+					icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-100',
+					desc: 'Templates disponíveis',
+				},
+		  ];
 
 	return (
 		<div className="space-y-6 animate-in fade-in duration-500">
+			{/* Cabeçalho */}
 			<div>
 				<h2 className="text-2xl font-bold tracking-tight">
-					Overview da Operação{' '}
+					☀️ {getGreeting()}, {user?.name?.split(' ')[0] || 'Usuário'}!{' '}
 					{isAdmin && (
 						<Badge
 							variant="outline"
@@ -323,11 +376,12 @@ export default function DashboardPage() {
 						</Badge>
 					)}
 				</h2>
-				<p className="text-sm text-muted-foreground">
-					Métricas de entregabilidade e saúde transacional da sua conta.
+				<p className="text-sm text-muted-foreground mt-1">
+					Aqui está o resumo da sua operação de e-mails.
 				</p>
 			</div>
 
+			{/* KPI Cards */}
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
 				{kpiCards.map((stat, i) => (
 					<Card key={i}>
@@ -345,23 +399,24 @@ export default function DashboardPage() {
 				))}
 			</div>
 
+			{/* Gráficos e Timeline */}
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-				{/* Gráfico 1: Latência Média Real */}
-				<Card className="col-span-2 flex flex-col">
+				{/* Gráfico 1: Volume de Envios */}
+				<Card className="col-span-1 lg:col-span-2 flex flex-col">
 					<CardHeader>
-						<CardTitle>Latência de Entrega (7 dias)</CardTitle>
+						<CardTitle>Volume de Envios (7 dias)</CardTitle>
 						<CardDescription>
-							Tempo médio de processamento por dia — dados reais do banco
+							Quantidade de e-mails enviados e falhas por dia
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="flex-1 min-h-[250px]">
-						{!data.latency || data.latency.length === 0 ? (
+						{!data.volumeByDay || data.volumeByDay.length === 0 ? (
 							<div className="h-full flex items-center justify-center text-muted-foreground text-sm border-2 border-dashed rounded-lg">
-								Aguardando tráfego na API para gerar gráficos.
+								Aguardando tráfego para gerar gráficos.
 							</div>
 						) : (
 							<ReactECharts
-								option={getLatencyOption(data.latency)}
+								option={getVolumeByDayOption(data.volumeByDay)}
 								style={{ height: '100%', width: '100%' }}
 								opts={{ renderer: 'svg' }}
 							/>
@@ -369,169 +424,242 @@ export default function DashboardPage() {
 					</CardContent>
 				</Card>
 
+				{/* Gráfico 2: Distribuição de Status */}
 				<Card className="flex flex-col">
 					<CardHeader>
-						<CardTitle>Saúde da Fila (Workers)</CardTitle>
-						<CardDescription>Status real-time do Redis</CardDescription>
+						<CardTitle>Distribuição por Status</CardTitle>
+						<CardDescription>Status atual de todos os disparos</CardDescription>
 					</CardHeader>
-					<CardContent className="flex-1 flex flex-col justify-center space-y-6">
-						<div className="space-y-2">
-							<div className="flex justify-between text-sm">
-								<span className="font-medium text-slate-600 flex items-center gap-2">
-									<Clock className="h-4 w-4" /> Fila de Espera
-								</span>
-								<span className="font-bold">{data.queue?.waiting || 0}</span>
+					<CardContent className="flex-1 min-h-[250px]">
+						{!data.statusDistribution || data.statusDistribution.length === 0 ? (
+							<div className="h-full flex items-center justify-center text-muted-foreground text-sm border-2 border-dashed rounded-lg">
+								Sem dados disponíveis
 							</div>
-							<div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-								<div
-									className="h-full bg-amber-500 transition-all duration-500"
-									style={{ width: (data.queue?.waiting || 0) > 0 ? '100%' : '0%' }}
-								/>
-							</div>
-						</div>
+						) : (
+							<ReactECharts
+								option={getStatusDistributionOption(data.statusDistribution)}
+								style={{ height: '100%', width: '100%' }}
+								opts={{ renderer: 'svg' }}
+							/>
+						)}
+					</CardContent>
+				</Card>
+			</div>
 
-						<div className="space-y-2">
-							<div className="flex justify-between text-sm">
-								<span className="font-medium text-slate-600 flex items-center gap-2">
-									<Activity className="h-4 w-4" /> Em Processamento
-								</span>
-								<span className="font-bold">{data.queue?.active || 0}</span>
+			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+				{/* Timeline de Atividades */}
+				<Card className="col-span-1 flex flex-col max-h-[500px]">
+					<CardHeader>
+						<CardTitle>Atividade Recente</CardTitle>
+						<CardDescription>Últimas ações na plataforma</CardDescription>
+					</CardHeader>
+					<CardContent className="flex-1 overflow-y-auto">
+						{!data.recentActivity || data.recentActivity.length === 0 ? (
+							<div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg">
+								<p>Nenhuma atividade recente.</p>
 							</div>
-							<div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-								<div
-									className="h-full bg-blue-500 transition-all duration-500"
-									style={{ width: (data.queue?.active || 0) > 0 ? '100%' : '0%' }}
-								/>
+						) : (
+							<div className="relative border-l border-muted-foreground/20 ml-3 space-y-6 pb-2">
+								{data.recentActivity.map((log: any, idx: number) => (
+									<div key={idx} className="relative pl-6">
+										<span className="absolute -left-2 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-background">
+											{getActionIcon(log.action)}
+										</span>
+										<div className="flex flex-col gap-0.5">
+											<span className="text-xs text-muted-foreground font-medium">
+												{new Date(log.createdAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
+											</span>
+											<p className="text-sm text-foreground">{log.description}</p>
+											<p className="text-xs text-muted-foreground mt-0.5">
+												Por <strong>{log.actorName || 'Sistema'}</strong> em <strong>{log.serviceName || 'Desconhecido'}</strong>
+											</p>
+										</div>
+									</div>
+								))}
 							</div>
-						</div>
+						)}
+					</CardContent>
+				</Card>
 
-						<div className="space-y-2">
-							<div className="flex justify-between text-sm">
-								<span className="font-medium text-slate-600 flex items-center gap-2">
-									<AlertCircle className="h-4 w-4" /> Dead Letter (Falhas)
-								</span>
-								<span className="font-bold text-red-600">{data.queue?.failed || 0}</span>
-							</div>
-							<div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-								<div
-									className="h-full bg-red-500 transition-all duration-500"
-									style={{ width: (data.queue?.failed || 0) > 0 ? '100%' : '0%' }}
-								/>
-							</div>
+				{/* Envios Recentes */}
+				<Card className="col-span-1 lg:col-span-2 flex flex-col max-h-[500px]">
+					<CardHeader>
+						<CardTitle>Últimos Envios</CardTitle>
+						<CardDescription>
+							Acompanhe o status de entrega dos disparos recentes.
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="flex-1 overflow-y-auto">
+						<div className="overflow-x-auto">
+							<Table>
+								<TableHeader>
+									<TableRow>
+										<TableHead>Destinatário</TableHead>
+										<TableHead>Assunto</TableHead>
+										<TableHead>Serviço</TableHead>
+										<TableHead>Prior.</TableHead>
+										<TableHead>Status</TableHead>
+										<TableHead className="text-right">Horário</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									{!data.recentEmails || data.recentEmails.length === 0 ? (
+										<TableRow>
+											<TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+												Nenhum disparo encontrado.
+											</TableCell>
+										</TableRow>
+									) : (
+										data.recentEmails.map((mail: any) => (
+											<TableRow key={mail.id} className="group">
+												<TableCell className="font-medium">
+													<div className="flex items-center gap-2">
+														<Mail className="h-4 w-4 text-muted-foreground" />
+														<span className="truncate max-w-[120px]" title={mail.recipient}>{mail.recipient}</span>
+													</div>
+												</TableCell>
+												<TableCell className="text-muted-foreground truncate max-w-[150px]" title={mail.subject}>
+													{mail.subject}
+												</TableCell>
+												<TableCell className="text-xs text-muted-foreground truncate max-w-[100px]" title={mail.serviceName}>
+													{mail.serviceName || 'N/A'}
+												</TableCell>
+												<TableCell>
+													<Badge className={`text-[10px] uppercase border-none ${mail.priority === 'high' ? 'bg-red-100 text-red-800 hover:bg-red-200' : mail.priority === 'medium' ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' : 'bg-blue-100 text-blue-800 hover:bg-blue-200'}`}>
+														{mail.priority}
+													</Badge>
+												</TableCell>
+												<TableCell>
+													{mail.status === 'sent' ? (
+														<Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-none">
+															Entregue
+														</Badge>
+													) : mail.status === 'failed' ? (
+														<Badge className="bg-red-100 text-red-800 hover:bg-red-200 border-none">
+															Falha
+														</Badge>
+													) : (
+														<Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200 border-none">
+															{mail.status === 'pending' ? 'Pendente' : mail.status === 'retrying' ? 'Retentando' : mail.status}
+														</Badge>
+													)}
+												</TableCell>
+												<TableCell className="text-right text-muted-foreground text-xs font-mono">
+													{new Date(mail.createdAt).toLocaleTimeString('pt-BR', {
+														hour: '2-digit',
+														minute: '2-digit',
+													})}
+												</TableCell>
+											</TableRow>
+										))
+									)}
+								</TableBody>
+							</Table>
 						</div>
 					</CardContent>
 				</Card>
 			</div>
 
-			{/* Gráfico 2: Análise contextual (admin vs usuário) */}
-			<Card className="flex flex-col">
-				<CardHeader>
-					<CardTitle>
-						{isAdmin ? 'Serviços Ativos na Plataforma' : 'Top 5 Templates por Uso'}
-					</CardTitle>
-					<CardDescription>
-						{isAdmin
-							? 'Lista dos 10 projetos mais recentes e seus respectivos donos'
-							: 'Templates com mais disparos acumulados nos seus serviços'}
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="min-h-[220px]">
-					{isAdmin ? (
-						!data.allServices || data.allServices.length === 0 ? (
+			{/* ========================================== */}
+			{/* PAINEL DE INFRAESTRUTURA (ADMIN ONLY)      */}
+			{/* ========================================== */}
+			{isAdmin && (
+				<div className="space-y-6 pt-6 border-t mt-8">
+					<div>
+						<h3 className="text-lg font-bold flex items-center gap-2">
+							<Server className="h-5 w-5 text-indigo-500" />
+							Painel de Infraestrutura
+						</h3>
+						<p className="text-sm text-muted-foreground">Métricas globais de sistema e filas do Redis.</p>
+					</div>
+
+					<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+						{/* Fila Real-Time */}
+						<Card className="col-span-1 lg:col-span-2">
+							<CardHeader>
+								<CardTitle>Saúde da Fila (Redis / BullMQ)</CardTitle>
+								<CardDescription>Monitoramento real-time dos workers de envio.</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+									<div className="p-4 rounded-lg bg-amber-50 border border-amber-100 flex flex-col items-center justify-center text-center">
+										<Clock className="h-5 w-5 text-amber-500 mb-1" />
+										<span className="text-2xl font-bold text-amber-700">{data.queue?.waiting || 0}</span>
+										<span className="text-xs font-medium text-amber-600 uppercase tracking-wider">Waiting</span>
+									</div>
+									<div className="p-4 rounded-lg bg-blue-50 border border-blue-100 flex flex-col items-center justify-center text-center">
+										<Activity className="h-5 w-5 text-blue-500 mb-1" />
+										<span className="text-2xl font-bold text-blue-700">{data.queue?.active || 0}</span>
+										<span className="text-xs font-medium text-blue-600 uppercase tracking-wider">Active</span>
+									</div>
+									<div className="p-4 rounded-lg bg-emerald-50 border border-emerald-100 flex flex-col items-center justify-center text-center">
+										<CheckCircle2 className="h-5 w-5 text-emerald-500 mb-1" />
+										<span className="text-2xl font-bold text-emerald-700">{data.queue?.completed || 0}</span>
+										<span className="text-xs font-medium text-emerald-600 uppercase tracking-wider">Completed</span>
+									</div>
+									<div className="p-4 rounded-lg bg-red-50 border border-red-100 flex flex-col items-center justify-center text-center">
+										<AlertCircle className="h-5 w-5 text-red-500 mb-1" />
+										<span className="text-2xl font-bold text-red-700">{data.queue?.failed || 0}</span>
+										<span className="text-xs font-medium text-red-600 uppercase tracking-wider">Failed</span>
+									</div>
+									<div className="p-4 rounded-lg bg-purple-50 border border-purple-100 flex flex-col items-center justify-center text-center">
+										<CalendarClock className="h-5 w-5 text-purple-500 mb-1" />
+										<span className="text-2xl font-bold text-purple-700">{data.queue?.delayed || 0}</span>
+										<span className="text-xs font-medium text-purple-600 uppercase tracking-wider">Delayed</span>
+									</div>
+								</div>
+							</CardContent>
+						</Card>
+
+						{/* Top Serviços */}
+						<Card className="col-span-1">
+							<CardHeader>
+								<CardTitle>Top Serviços por Volume</CardTitle>
+								<CardDescription>Projetos que mais consumiram a fila globalmente.</CardDescription>
+							</CardHeader>
+							<CardContent className="min-h-[200px]">
+								{!data.topServicesByVolume || data.topServicesByVolume.length === 0 ? (
+									<div className="h-full flex items-center justify-center text-muted-foreground text-sm border-2 border-dashed rounded-lg py-8">
+										Nenhum serviço registrado ainda.
+									</div>
+								) : (
+									<ReactECharts
+										option={getTopServicesOption(data.topServicesByVolume)}
+										style={{ height: `${Math.max(160, data.topServicesByVolume.length * 36)}px`, width: '100%' }}
+										opts={{ renderer: 'svg' }}
+									/>
+								)}
+							</CardContent>
+						</Card>
+					</div>
+				</div>
+			)}
+
+			{/* ========================================== */}
+			{/* CONTEXTO USER (Templates)                  */}
+			{/* ========================================== */}
+			{!isAdmin && (
+				<Card>
+					<CardHeader>
+						<CardTitle>Top 5 Templates por Uso</CardTitle>
+						<CardDescription>Templates com mais disparos acumulados nos seus serviços.</CardDescription>
+					</CardHeader>
+					<CardContent className="min-h-[220px]">
+						{!data.topTemplates || data.topTemplates.length === 0 ? (
 							<div className="h-full flex items-center justify-center text-muted-foreground text-sm border-2 border-dashed rounded-lg py-8">
-								Nenhum serviço registrado ainda.
+								Nenhum template utilizado ainda.
 							</div>
 						) : (
 							<ReactECharts
-								option={getAdminServicesOption(data.allServices)}
-								style={{
-									height: `${Math.max(180, data.allServices.length * 36)}px`,
-									width: '100%',
-								}}
+								option={getTopTemplatesOption(data.topTemplates)}
+								style={{ height: `${Math.max(180, data.topTemplates.length * 40)}px`, width: '100%' }}
 								opts={{ renderer: 'svg' }}
 							/>
-						)
-					) : !data.topTemplates || data.topTemplates.length === 0 ? (
-						<div className="h-full flex items-center justify-center text-muted-foreground text-sm border-2 border-dashed rounded-lg py-8">
-							Nenhum template utilizado ainda.
-						</div>
-					) : (
-						<ReactECharts
-							option={getTopTemplatesOption(data.topTemplates)}
-							style={{ height: `${Math.max(180, data.topTemplates.length * 40)}px`, width: '100%' }}
-							opts={{ renderer: 'svg' }}
-						/>
-					)}
-				</CardContent>
-			</Card>
+						)}
+					</CardContent>
+				</Card>
+			)}
 
-			<Card>
-				<CardHeader>
-					<CardTitle>Auditoria de Envios Recentes</CardTitle>
-					<CardDescription>
-						Acompanhe em tempo real o status de entrega dos últimos disparos da sua infraestrutura.
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<div className="overflow-x-auto">
-						<Table>
-							<TableHeader>
-								<TableRow>
-									<TableHead>Destinatário</TableHead>
-									<TableHead>Assunto / Template</TableHead>
-									<TableHead>Status de Entrega</TableHead>
-									<TableHead className="text-right">Timestamp</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{!data.recentEmails || data.recentEmails.length === 0 ? (
-									<TableRow>
-										<TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-											Nenhum log de disparo encontrado nas últimas 24 horas.
-										</TableCell>
-									</TableRow>
-								) : (
-									data.recentEmails.map((mail: any) => (
-										<TableRow key={mail.id} className="group">
-											<TableCell className="font-medium">
-												<div className="flex items-center gap-2">
-													<Mail className="h-4 w-4 text-muted-foreground" />
-													{mail.recipient}
-												</div>
-											</TableCell>
-											<TableCell className="text-muted-foreground truncate max-w-xs">
-												{mail.subject}
-											</TableCell>
-											<TableCell>
-												{mail.status === 'sent' ? (
-													<Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-none">
-														Entregue ao Provedor
-													</Badge>
-												) : mail.status === 'failed' ? (
-													<Badge className="bg-red-100 text-red-800 hover:bg-red-200 border-none">
-														Falha (Bounce)
-													</Badge>
-												) : (
-													<Badge variant="outline" className="text-amber-600 border-amber-300">
-														Processando
-													</Badge>
-												)}
-											</TableCell>
-											<TableCell className="text-right text-muted-foreground text-sm font-mono">
-												{new Date(mail.createdAt).toLocaleTimeString('pt-BR', {
-													hour: '2-digit',
-													minute: '2-digit',
-													second: '2-digit',
-												})}
-											</TableCell>
-										</TableRow>
-									))
-								)}
-							</TableBody>
-						</Table>
-					</div>
-				</CardContent>
-			</Card>
 		</div>
 	);
 }

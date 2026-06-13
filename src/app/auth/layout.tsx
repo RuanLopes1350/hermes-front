@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Documentacao, Status, Privacidade, Version } from '@/src/constants/links';
+import { Documentacao, Tutorial, Privacidade, Version } from '@/src/constants/links';
 import { ThemeToggle } from '@/src/components/theme-toggle';
 
 export const metadata: Metadata = {
@@ -18,7 +18,7 @@ export default function AuthLayout({
 			</div>
 			<div className="flex flex-col items-center gap-2 mb-8 mt-4 sm:mt-8">
 				<div className="bg-primary/10 p-3 rounded-2xl">
-					<img className="w-10 h-10" src="/hermes-icon1.svg" alt="Hermes Logo" />
+					<img className="w-10 h-10" src="/hermes-icon.svg" alt="Hermes Logo" />
 				</div>
 				<h1 className="text-2xl font-black tracking-tight">Hermes</h1>
 			</div>
@@ -36,12 +36,12 @@ export default function AuthLayout({
 						Documentação
 					</a>
 					<a
-						href={Status}
+						href={Tutorial}
 						target="_blank"
 						rel="noreferrer"
 						className="hover:text-primary transition-colors"
 					>
-						Status API
+						Tutorial
 					</a>
 					<a
 						href={Privacidade}
