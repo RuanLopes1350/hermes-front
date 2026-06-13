@@ -20,7 +20,7 @@ import {
 	PlusCircle,
 	MinusCircle,
 	RefreshCw,
-	MessageSquare
+	MessageSquare,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
@@ -134,14 +134,19 @@ export default function DashboardPage() {
 
 	// Helper para Action Icon (Timeline)
 	const getActionIcon = (action: string) => {
-		if (action.includes('CREATED') || action.includes('ADDED')) return <PlusCircle className="h-4 w-4 text-emerald-500" />;
-		if (action.includes('DELETED') || action.includes('REMOVED')) return <MinusCircle className="h-4 w-4 text-red-500" />;
-		if (action.includes('UPDATED') || action.includes('TRANSFERRED')) return <RefreshCw className="h-4 w-4 text-blue-500" />;
+		if (action.includes('CREATED') || action.includes('ADDED'))
+			return <PlusCircle className="h-4 w-4 text-emerald-500" />;
+		if (action.includes('DELETED') || action.includes('REMOVED'))
+			return <MinusCircle className="h-4 w-4 text-red-500" />;
+		if (action.includes('UPDATED') || action.includes('TRANSFERRED'))
+			return <RefreshCw className="h-4 w-4 text-blue-500" />;
 		return <MessageSquare className="h-4 w-4 text-amber-500" />;
 	};
 
 	const totalSent = isAdmin ? Number(data.summary.totalSent || 0) : Number(data.summary.sent || 0);
-	const totalFailed = isAdmin ? Number(data.summary.totalFailed || 0) : Number(data.summary.pending || 0);
+	const totalFailed = isAdmin
+		? Number(data.summary.totalFailed || 0)
+		: Number(data.summary.pending || 0);
 	const totalAttempts = totalSent + (isAdmin ? totalFailed : 0);
 	const successRate = totalAttempts > 0 ? ((totalSent / totalAttempts) * 100).toFixed(1) : '100';
 
@@ -204,10 +209,10 @@ export default function DashboardPage() {
 			retrying: '#3b82f6', // Blue
 		};
 
-		const formattedData = (statusData || []).map(d => ({
+		const formattedData = (statusData || []).map((d) => ({
 			value: Number(d.total),
 			name: d.status.charAt(0).toUpperCase() + d.status.slice(1),
-			itemStyle: { color: colorMap[d.status] || '#94a3b8' }
+			itemStyle: { color: colorMap[d.status] || '#94a3b8' },
 		}));
 
 		return {
@@ -223,16 +228,16 @@ export default function DashboardPage() {
 					itemStyle: {
 						borderRadius: 5,
 						borderColor: '#fff',
-						borderWidth: 2
+						borderWidth: 2,
 					},
 					label: { show: false, position: 'center' },
 					emphasis: {
-						label: { show: true, fontSize: 16, fontWeight: 'bold' }
+						label: { show: true, fontSize: 16, fontWeight: 'bold' },
 					},
 					labelLine: { show: false },
-					data: formattedData
-				}
-			]
+					data: formattedData,
+				},
+			],
 		};
 	};
 
@@ -258,8 +263,15 @@ export default function DashboardPage() {
 					barMaxWidth: 20,
 					itemStyle: {
 						color: {
-							type: 'linear', x: 0, y: 0, x2: 1, y2: 0,
-							colorStops: [ { offset: 0, color: '#6366f1' }, { offset: 1, color: '#0ea5e9' } ],
+							type: 'linear',
+							x: 0,
+							y: 0,
+							x2: 1,
+							y2: 0,
+							colorStops: [
+								{ offset: 0, color: '#6366f1' },
+								{ offset: 1, color: '#0ea5e9' },
+							],
 						},
 						borderRadius: [0, 4, 4, 0],
 					},
@@ -294,8 +306,15 @@ export default function DashboardPage() {
 					barMaxWidth: 20,
 					itemStyle: {
 						color: {
-							type: 'linear', x: 0, y: 0, x2: 1, y2: 0,
-							colorStops: [ { offset: 0, color: '#10b981' }, { offset: 1, color: '#0ea5e9' } ],
+							type: 'linear',
+							x: 0,
+							y: 0,
+							x2: 1,
+							y2: 0,
+							colorStops: [
+								{ offset: 0, color: '#10b981' },
+								{ offset: 1, color: '#0ea5e9' },
+							],
 						},
 						borderRadius: [0, 4, 4, 0],
 					},
@@ -312,54 +331,70 @@ export default function DashboardPage() {
 				{
 					label: 'E-mails na Plataforma',
 					value: totalSent.toLocaleString('pt-BR'),
-					icon: Zap, color: 'text-blue-600', bg: 'bg-blue-100',
+					icon: Zap,
+					color: 'text-blue-600',
+					bg: 'bg-blue-100',
 					desc: 'Enviados com sucesso',
 				},
 				{
 					label: 'Taxa de Entrega Global',
 					value: `${successRate}%`,
-					icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-100',
+					icon: CheckCircle2,
+					color: 'text-emerald-600',
+					bg: 'bg-emerald-100',
 					desc: 'Todas as contas',
 				},
 				{
 					label: 'Usuários Ativos',
 					value: data.summary.totalUsers || 0,
-					icon: Users, color: 'text-slate-600', bg: 'bg-slate-200',
+					icon: Users,
+					color: 'text-slate-600',
+					bg: 'bg-slate-200',
 					desc: 'Cadastrados no Hermes',
 				},
 				{
 					label: 'Serviços Registrados',
 					value: data.summary.totalServices || 0,
-					icon: Server, color: 'text-indigo-600', bg: 'bg-indigo-100',
+					icon: Server,
+					color: 'text-indigo-600',
+					bg: 'bg-indigo-100',
 					desc: 'Projetos ativos',
 				},
-		  ]
+			]
 		: [
 				{
 					label: 'E-mails Enviados',
 					value: totalSent.toLocaleString('pt-BR'),
-					icon: Mail, color: 'text-blue-600', bg: 'bg-blue-100',
+					icon: Mail,
+					color: 'text-blue-600',
+					bg: 'bg-blue-100',
 					desc: 'Total de todos os seus serviços',
 				},
 				{
 					label: 'Taxa de Sucesso',
 					value: `${successRate}%`,
-					icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-100',
+					icon: TrendingUp,
+					color: 'text-emerald-600',
+					bg: 'bg-emerald-100',
 					desc: 'Últimos 30 dias',
 				},
 				{
 					label: 'Seus Serviços',
 					value: data.summary.services || 0,
-					icon: Layers, color: 'text-slate-600', bg: 'bg-slate-200',
+					icon: Layers,
+					color: 'text-slate-600',
+					bg: 'bg-slate-200',
 					desc: 'Projetos onde você é membro',
 				},
 				{
 					label: 'Templates Ativos',
 					value: data.summary.templates || 0,
-					icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-100',
+					icon: FileText,
+					color: 'text-indigo-600',
+					bg: 'bg-indigo-100',
 					desc: 'Templates disponíveis',
 				},
-		  ];
+			];
 
 	return (
 		<div className="space-y-6 animate-in fade-in duration-500">
@@ -405,9 +440,7 @@ export default function DashboardPage() {
 				<Card className="col-span-1 lg:col-span-2 flex flex-col">
 					<CardHeader>
 						<CardTitle>Volume de Envios (7 dias)</CardTitle>
-						<CardDescription>
-							Quantidade de e-mails enviados e falhas por dia
-						</CardDescription>
+						<CardDescription>Quantidade de e-mails enviados e falhas por dia</CardDescription>
 					</CardHeader>
 					<CardContent className="flex-1 min-h-[250px]">
 						{!data.volumeByDay || data.volumeByDay.length === 0 ? (
@@ -467,11 +500,15 @@ export default function DashboardPage() {
 										</span>
 										<div className="flex flex-col gap-0.5">
 											<span className="text-xs text-muted-foreground font-medium">
-												{new Date(log.createdAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
+												{new Date(log.createdAt).toLocaleString('pt-BR', {
+													dateStyle: 'short',
+													timeStyle: 'short',
+												})}
 											</span>
 											<p className="text-sm text-foreground">{log.description}</p>
 											<p className="text-xs text-muted-foreground mt-0.5">
-												Por <strong>{log.actorName || 'Sistema'}</strong> em <strong>{log.serviceName || 'Desconhecido'}</strong>
+												Por <strong>{log.actorName || 'Sistema'}</strong> em{' '}
+												<strong>{log.serviceName || 'Desconhecido'}</strong>
 											</p>
 										</div>
 									</div>
@@ -485,9 +522,7 @@ export default function DashboardPage() {
 				<Card className="col-span-1 lg:col-span-2 flex flex-col max-h-[500px]">
 					<CardHeader>
 						<CardTitle>Últimos Envios</CardTitle>
-						<CardDescription>
-							Acompanhe o status de entrega dos disparos recentes.
-						</CardDescription>
+						<CardDescription>Acompanhe o status de entrega dos disparos recentes.</CardDescription>
 					</CardHeader>
 					<CardContent className="flex-1 overflow-y-auto">
 						<div className="overflow-x-auto">
@@ -515,17 +550,27 @@ export default function DashboardPage() {
 												<TableCell className="font-medium">
 													<div className="flex items-center gap-2">
 														<Mail className="h-4 w-4 text-muted-foreground" />
-														<span className="truncate max-w-[120px]" title={mail.recipient}>{mail.recipient}</span>
+														<span className="truncate max-w-[120px]" title={mail.recipient}>
+															{mail.recipient}
+														</span>
 													</div>
 												</TableCell>
-												<TableCell className="text-muted-foreground truncate max-w-[150px]" title={mail.subject}>
+												<TableCell
+													className="text-muted-foreground truncate max-w-[150px]"
+													title={mail.subject}
+												>
 													{mail.subject}
 												</TableCell>
-												<TableCell className="text-xs text-muted-foreground truncate max-w-[100px]" title={mail.serviceName}>
+												<TableCell
+													className="text-xs text-muted-foreground truncate max-w-[100px]"
+													title={mail.serviceName}
+												>
 													{mail.serviceName || 'N/A'}
 												</TableCell>
 												<TableCell>
-													<Badge className={`text-[10px] uppercase border-none ${mail.priority === 'high' ? 'bg-red-100 text-red-800 hover:bg-red-200' : mail.priority === 'medium' ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' : 'bg-blue-100 text-blue-800 hover:bg-blue-200'}`}>
+													<Badge
+														className={`text-[10px] uppercase border-none ${mail.priority === 'high' ? 'bg-red-100 text-red-800 hover:bg-red-200' : mail.priority === 'medium' ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' : 'bg-blue-100 text-blue-800 hover:bg-blue-200'}`}
+													>
 														{mail.priority}
 													</Badge>
 												</TableCell>
@@ -540,7 +585,11 @@ export default function DashboardPage() {
 														</Badge>
 													) : (
 														<Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200 border-none">
-															{mail.status === 'pending' ? 'Pendente' : mail.status === 'retrying' ? 'Retentando' : mail.status}
+															{mail.status === 'pending'
+																? 'Pendente'
+																: mail.status === 'retrying'
+																	? 'Retentando'
+																	: mail.status}
 														</Badge>
 													)}
 												</TableCell>
@@ -570,7 +619,9 @@ export default function DashboardPage() {
 							<Server className="h-5 w-5 text-indigo-500" />
 							Painel de Infraestrutura
 						</h3>
-						<p className="text-sm text-muted-foreground">Métricas globais de sistema e filas do Redis.</p>
+						<p className="text-sm text-muted-foreground">
+							Métricas globais de sistema e filas do Redis.
+						</p>
 					</div>
 
 					<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -584,28 +635,48 @@ export default function DashboardPage() {
 								<div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
 									<div className="p-4 rounded-lg bg-amber-50 border border-amber-100 flex flex-col items-center justify-center text-center">
 										<Clock className="h-5 w-5 text-amber-500 mb-1" />
-										<span className="text-2xl font-bold text-amber-700">{data.queue?.waiting || 0}</span>
-										<span className="text-xs font-medium text-amber-600 uppercase tracking-wider">Waiting</span>
+										<span className="text-2xl font-bold text-amber-700">
+											{data.queue?.waiting || 0}
+										</span>
+										<span className="text-xs font-medium text-amber-600 uppercase tracking-wider">
+											Waiting
+										</span>
 									</div>
 									<div className="p-4 rounded-lg bg-blue-50 border border-blue-100 flex flex-col items-center justify-center text-center">
 										<Activity className="h-5 w-5 text-blue-500 mb-1" />
-										<span className="text-2xl font-bold text-blue-700">{data.queue?.active || 0}</span>
-										<span className="text-xs font-medium text-blue-600 uppercase tracking-wider">Active</span>
+										<span className="text-2xl font-bold text-blue-700">
+											{data.queue?.active || 0}
+										</span>
+										<span className="text-xs font-medium text-blue-600 uppercase tracking-wider">
+											Active
+										</span>
 									</div>
 									<div className="p-4 rounded-lg bg-emerald-50 border border-emerald-100 flex flex-col items-center justify-center text-center">
 										<CheckCircle2 className="h-5 w-5 text-emerald-500 mb-1" />
-										<span className="text-2xl font-bold text-emerald-700">{data.queue?.completed || 0}</span>
-										<span className="text-xs font-medium text-emerald-600 uppercase tracking-wider">Completed</span>
+										<span className="text-2xl font-bold text-emerald-700">
+											{data.queue?.completed || 0}
+										</span>
+										<span className="text-xs font-medium text-emerald-600 uppercase tracking-wider">
+											Completed
+										</span>
 									</div>
 									<div className="p-4 rounded-lg bg-red-50 border border-red-100 flex flex-col items-center justify-center text-center">
 										<AlertCircle className="h-5 w-5 text-red-500 mb-1" />
-										<span className="text-2xl font-bold text-red-700">{data.queue?.failed || 0}</span>
-										<span className="text-xs font-medium text-red-600 uppercase tracking-wider">Failed</span>
+										<span className="text-2xl font-bold text-red-700">
+											{data.queue?.failed || 0}
+										</span>
+										<span className="text-xs font-medium text-red-600 uppercase tracking-wider">
+											Failed
+										</span>
 									</div>
 									<div className="p-4 rounded-lg bg-purple-50 border border-purple-100 flex flex-col items-center justify-center text-center">
 										<CalendarClock className="h-5 w-5 text-purple-500 mb-1" />
-										<span className="text-2xl font-bold text-purple-700">{data.queue?.delayed || 0}</span>
-										<span className="text-xs font-medium text-purple-600 uppercase tracking-wider">Delayed</span>
+										<span className="text-2xl font-bold text-purple-700">
+											{data.queue?.delayed || 0}
+										</span>
+										<span className="text-xs font-medium text-purple-600 uppercase tracking-wider">
+											Delayed
+										</span>
 									</div>
 								</div>
 							</CardContent>
@@ -625,7 +696,10 @@ export default function DashboardPage() {
 								) : (
 									<ReactECharts
 										option={getTopServicesOption(data.topServicesByVolume)}
-										style={{ height: `${Math.max(160, data.topServicesByVolume.length * 36)}px`, width: '100%' }}
+										style={{
+											height: `${Math.max(160, data.topServicesByVolume.length * 36)}px`,
+											width: '100%',
+										}}
 										opts={{ renderer: 'svg' }}
 									/>
 								)}
@@ -642,7 +716,9 @@ export default function DashboardPage() {
 				<Card>
 					<CardHeader>
 						<CardTitle>Top 5 Templates por Uso</CardTitle>
-						<CardDescription>Templates com mais disparos acumulados nos seus serviços.</CardDescription>
+						<CardDescription>
+							Templates com mais disparos acumulados nos seus serviços.
+						</CardDescription>
 					</CardHeader>
 					<CardContent className="min-h-[220px]">
 						{!data.topTemplates || data.topTemplates.length === 0 ? (
@@ -652,14 +728,16 @@ export default function DashboardPage() {
 						) : (
 							<ReactECharts
 								option={getTopTemplatesOption(data.topTemplates)}
-								style={{ height: `${Math.max(180, data.topTemplates.length * 40)}px`, width: '100%' }}
+								style={{
+									height: `${Math.max(180, data.topTemplates.length * 40)}px`,
+									width: '100%',
+								}}
 								opts={{ renderer: 'svg' }}
 							/>
 						)}
 					</CardContent>
 				</Card>
 			)}
-
 		</div>
 	);
 }

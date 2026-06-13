@@ -301,7 +301,7 @@ export default function ServiceDetailsPage() {
 		try {
 			const res = await apiFetch(`/api/services/${params.id}`, { method: 'DELETE' });
 			if (res.ok) router.push('/system/services');
-		} catch { }
+		} catch {}
 	};
 
 	const handleCreateConnection = async () => {
@@ -647,16 +647,18 @@ export default function ServiceDetailsPage() {
 											<div className="flex items-center gap-2 bg-muted px-3 py-1.5 rounded-md w-full sm:w-auto">
 												<KeyRound className="h-4 w-4 text-primary shrink-0" />
 												<code
-													className={`text-sm font-mono flex-1 ${!conn.is_active ? 'line-through opacity-50' : ''
-														}`}
+													className={`text-sm font-mono flex-1 ${
+														!conn.is_active ? 'line-through opacity-50' : ''
+													}`}
 												>
 													{conn.prefix ? `${conn.prefix}••••••••` : 'NÃO GERADA'}
 												</code>
 												<Badge
-													className={`text-[9px] cursor-default shrink-0 ${conn.is_active
+													className={`text-[9px] cursor-default shrink-0 ${
+														conn.is_active
 															? 'bg-emerald-100 text-emerald-800'
 															: 'bg-red-100 text-red-700'
-														}`}
+													}`}
 												>
 													{conn.is_active ? 'Ativa' : 'Inativa'}
 												</Badge>
@@ -678,10 +680,11 @@ export default function ServiceDetailsPage() {
 													<Button
 														variant="ghost"
 														size="icon"
-														className={`h-6 w-6 cursor-pointer ${conn.is_active
+														className={`h-6 w-6 cursor-pointer ${
+															conn.is_active
 																? 'text-emerald-600 hover:text-amber-600 hover:bg-amber-50'
 																: 'text-red-500 hover:text-emerald-600 hover:bg-emerald-50'
-															}`}
+														}`}
 														title={conn.is_active ? 'Desativar chave' : 'Ativar chave'}
 														disabled={togglingKeyId === conn.id}
 														onClick={() => handleToggleKeyStatus(conn.id, conn.is_active)}
