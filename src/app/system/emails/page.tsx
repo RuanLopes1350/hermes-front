@@ -37,6 +37,7 @@ interface EmailRecord {
 	created_at: string;
 	createdAt?: string;
 	serviceName?: string;
+	credentialName?: string;
 }
 
 interface Service {
@@ -48,7 +49,6 @@ export default function EmailsPage() {
 	const [services, setServices] = useState<Service[]>([]);
 	const [emails, setEmails] = useState<EmailRecord[]>([]);
 	const [templates, setTemplates] = useState<any[]>([]);
-	const [credentials, setCredentials] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 
 	const [filterService, setFilterService] = useState('all');
@@ -62,9 +62,10 @@ export default function EmailsPage() {
 		async function fetchData() {
 			setLoading(true);
 			try {
-				const [srvRes, tmplRes] = await Promise.all([
+				const [srvRes, tmplRes, emailsRes] = await Promise.all([
 					apiFetch('/api/services'),
 					apiFetch('/api/templates'),
+					apiFetch('/api/emails?limit=100'),
 				]);
 
 				if (tmplRes.ok) {
@@ -76,46 +77,17 @@ export default function EmailsPage() {
 					const srvData = await srvRes.json();
 					const srvs: Service[] = srvData.data || [];
 					setServices(srvs);
+				}
 
-					const emailsPromises = srvs.map(async (s) => {
-						try {
-							const [res, credRes] = await Promise.all([
-								apiFetch(`/api/services/${s.id}/emails`),
-								apiFetch(`/api/services/${s.id}/credentials`),
-							]);
-
-							let fetchedEmails = [];
-							let fetchedCreds = [];
-
-							if (res.ok) {
-								const data = await res.json();
-								fetchedEmails = data.data || [];
-							}
-							if (credRes.ok) {
-								const credData = await credRes.json();
-								fetchedCreds = credData.data || [];
-							}
-
-							return {
-								emails: fetchedEmails.map((e: any) => ({ ...e, serviceName: s.name })),
-								creds: fetchedCreds,
-							};
-						} catch (e) {
-							return { emails: [], creds: [] };
-						}
-					});
-
-					const results = await Promise.all(emailsPromises);
-					const allEmails = results.flatMap((r) => r.emails);
-					const allCreds = results.flatMap((r) => r.creds);
-
+				if (emailsRes.ok) {
+					const emailsData = await emailsRes.json();
+					const allEmails: EmailRecord[] = emailsData.data || [];
 					allEmails.sort(
 						(a, b) =>
 							new Date(b.created_at || b.createdAt || '').getTime() -
 							new Date(a.created_at || a.createdAt || '').getTime(),
 					);
 					setEmails(allEmails);
-					setCredentials(allCreds);
 				}
 			} catch (err) {
 				console.error('Erro ao buscar dados', err);
@@ -282,7 +254,7 @@ export default function EmailsPage() {
 									<TableCell className="text-sm">{email.recipient_to}</TableCell>
 									<TableCell className="text-sm max-w-[200px] truncate">{email.subject}</TableCell>
 									<TableCell className="text-xs font-mono text-muted-foreground truncate max-w-[120px]">
-										{credentials.find((c) => c.id === email.credential_id)?.name ||
+										{email.credentialName ||
 											email.credential_id ||
 											'N/A'}
 									</TableCell>
@@ -341,7 +313,7 @@ export default function EmailsPage() {
 										Credencial
 									</p>
 									<p className="text-sm font-mono break-all">
-										{credentials.find((c) => c.id === selectedEmail.credential_id)?.name ||
+										{selectedEmail.credentialName ||
 											selectedEmail.credential_id ||
 											'N/A'}
 									</p>
