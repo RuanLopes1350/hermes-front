@@ -25,6 +25,7 @@ import Link from 'next/link';
 import { Button } from '@/src/components/ui/button';
 import { Badge } from '@/src/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { ThemeToggle } from '@/src/components/theme-toggle';
 
 export default function TutorialPage() {
 	const [currentStep, setCurrentStep] = useState(0);
@@ -57,27 +58,28 @@ export default function TutorialPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-primary/30 selection:text-white">
+		<div className="min-h-screen bg-background text-foreground flex flex-col font-sans selection:bg-primary/30">
 			{/* Header */}
-			<header className="sticky top-0 z-50 w-full border-b border-slate-800 bg-slate-950/80 backdrop-blur-md">
+			<header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
 				<div className="container mx-auto max-w-7xl flex h-16 items-center justify-between px-4 sm:px-6">
 					<div className="flex items-center gap-3">
 						<img src="/hermes-icon.svg" alt="Hermes Icon" className="h-6 w-6" />
-						<span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+						<span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
 							Hermes
 						</span>
-						<Badge variant="outline" className="border-blue-500/30 text-blue-400 bg-blue-500/10">
+						<Badge variant="outline" className="border-primary/30 text-primary bg-primary/5">
 							Guia do Desenvolvedor
 						</Badge>
 					</div>
-					<div className="flex items-center gap-4">
+					<div className="flex items-center gap-3">
+						<ThemeToggle />
 						<Link href="/auth/sign-in">
-							<Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-slate-900 cursor-pointer">
+							<Button variant="ghost" className="cursor-pointer">
 								Entrar
 							</Button>
 						</Link>
 						<Link href="/auth/sign-up">
-							<Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white cursor-pointer shadow-lg shadow-blue-500/20">
+							<Button className="bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer shadow-lg shadow-primary/20">
 								Criar Conta Grátis
 							</Button>
 						</Link>
@@ -89,9 +91,9 @@ export default function TutorialPage() {
 			<div className="flex-1 container mx-auto max-w-7xl px-4 sm:px-6 py-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
 				{/* Sidebar Steps */}
 				<aside className="lg:col-span-3 space-y-2">
-					<div className="p-4 bg-slate-900/50 rounded-xl border border-slate-800/80 mb-6">
-						<h3 className="font-bold text-sm text-slate-400 uppercase tracking-wider mb-2">Fluxo de Integração</h3>
-						<p className="text-xs text-slate-500">Siga o passo a passo para integrar seu sistema com o Hermes.</p>
+					<div className="p-4 bg-muted/50 rounded-xl border border-border mb-6">
+						<h3 className="font-bold text-sm text-muted-foreground uppercase tracking-wider mb-2">Fluxo de Integração</h3>
+						<p className="text-xs text-muted-foreground/70">Siga o passo a passo para integrar seu sistema com o Hermes.</p>
 					</div>
 
 					<nav className="space-y-1">
@@ -105,21 +107,21 @@ export default function TutorialPage() {
 									key={step.id}
 									onClick={() => setCurrentStep(idx)}
 									className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left transition-all duration-300 group cursor-pointer ${isActive
-											? 'bg-gradient-to-r from-blue-600/20 to-indigo-600/15 border-l-4 border-blue-500 text-white font-medium bg-slate-900/80 shadow-md'
-											: 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50 border-l-4 border-transparent'
+											? 'bg-primary/10 border-l-4 border-primary text-foreground font-medium shadow-sm'
+											: 'text-muted-foreground hover:text-foreground hover:bg-muted/60 border-l-4 border-transparent'
 										}`}
 								>
 									<span
 										className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs transition-colors ${isActive
-												? 'bg-blue-500 text-white'
+												? 'bg-primary text-primary-foreground'
 												: isCompleted
-													? 'bg-indigo-950 text-indigo-400 border border-indigo-500/30'
-													: 'bg-slate-800 text-slate-500 group-hover:bg-slate-700'
+													? 'bg-accent text-accent-foreground border border-primary/30'
+													: 'bg-muted text-muted-foreground group-hover:bg-secondary'
 											}`}
 									>
 										{isCompleted ? <CheckCircle2 className="h-4 w-4" /> : idx + 1}
 									</span>
-									<StepIcon className={`h-4 w-4 shrink-0 transition-transform ${isActive ? 'scale-110 text-blue-400' : 'text-slate-500 group-hover:text-slate-300'}`} />
+									<StepIcon className={`h-4 w-4 shrink-0 transition-transform ${isActive ? 'scale-110 text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
 									<span className="text-sm truncate">{step.title}</span>
 								</button>
 							);
@@ -129,311 +131,311 @@ export default function TutorialPage() {
 
 				{/* Content Panel */}
 				<main className="lg:col-span-9 flex flex-col min-w-0">
-					<div className="flex-1 bg-slate-900/40 border border-slate-800/80 rounded-2xl p-6 sm:p-8 backdrop-blur-sm relative overflow-hidden shadow-2xl">
+					<div className="flex-1 bg-card border border-border rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-sm">
 						{/* Background glow effects */}
-						<div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-						<div className="absolute -bottom-40 -left-40 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+						<div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+						<div className="absolute -bottom-40 -left-40 w-96 h-96 bg-accent/20 rounded-full blur-3xl pointer-events-none" />
 
 						{/* STEP 1: REGISTER */}
 						{currentStep === 0 && (
 							<div className="space-y-6 animate-in fade-in duration-500">
 								<div className="space-y-2">
-									<Badge variant="outline" className="border-blue-500/20 text-blue-400 bg-blue-500/5">Passo 1</Badge>
-									<h2 className="text-3xl font-extrabold text-white tracking-tight">Cadastro e Acesso Seguro</h2>
-									<p className="text-slate-400 text-base">
-										O Hermes utiliza o **Better Auth** para gerenciar sessões, senhas e logins sociais com segurança de ponta.
+									<Badge variant="outline" className="border-primary/20 text-primary bg-primary/5">Passo 1</Badge>
+									<h2 className="text-3xl font-extrabold text-foreground tracking-tight">Cadastro e Acesso Seguro</h2>
+									<p className="text-muted-foreground text-base">
+										O Hermes utiliza o <strong>Better Auth</strong> para gerenciar sessões, senhas e logins sociais com segurança de ponta.
 									</p>
 								</div>
 
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-4">
 									<div className="space-y-4">
 										<div className="flex gap-4">
-											<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400">
+											<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
 												<User className="h-5 w-5" />
 											</div>
 											<div>
-												<h4 className="text-white font-bold">Criação de Conta</h4>
-												<p className="text-sm text-slate-400">
+												<h4 className="text-foreground font-bold">Criação de Conta</h4>
+												<p className="text-sm text-muted-foreground">
 													Cadastre-se usando seu e-mail ou utilize o login social do Google para acesso instantâneo.
 												</p>
 											</div>
 										</div>
 
 										<div className="flex gap-4">
-											<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400">
+											<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/50 text-accent-foreground">
 												<ShieldCheck className="h-5 w-5" />
 											</div>
 											<div>
-												<h4 className="text-white font-bold">Controle de Privilégios</h4>
-												<p className="text-sm text-slate-400">
-													O primeiro usuário registrado na base ganha perfil Administrador (`isAdmin: true`), permitindo gerenciar outros usuários e visualizar auditorias completas de envios.
+												<h4 className="text-foreground font-bold">Controle de Privilégios</h4>
+												<p className="text-sm text-muted-foreground">
+													O primeiro usuário registrado na base ganha perfil Administrador (<code className="text-primary text-xs">isAdmin: true</code>), permitindo gerenciar outros usuários e visualizar auditorias completas de envios.
 												</p>
 											</div>
 										</div>
 									</div>
 
 									{/* Visual mockup of register card */}
-									<Card className="bg-slate-950 border-slate-800 shadow-xl max-w-sm mx-auto w-full">
+									<Card className="bg-background border-border shadow-xl max-w-sm mx-auto w-full">
 										<CardHeader className="space-y-1 pb-4">
-											<CardTitle className="text-lg text-white font-bold text-center">Criar conta no Hermes</CardTitle>
-											<CardDescription className="text-slate-500 text-xs text-center">Entre com seus dados para começar</CardDescription>
+											<CardTitle className="text-lg text-foreground font-bold text-center">Criar conta no Hermes</CardTitle>
+											<CardDescription className="text-muted-foreground text-xs text-center">Entre com seus dados para começar</CardDescription>
 										</CardHeader>
 										<CardContent className="space-y-4">
 											<div className="space-y-1">
-												<label className="text-[10px] uppercase font-bold text-slate-400">Nome Completo</label>
-												<div className="bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-500">Desenvolvedor Hermes</div>
+												<label className="text-[10px] uppercase font-bold text-muted-foreground">Nome Completo</label>
+												<div className="bg-muted border border-border rounded-lg p-2.5 text-xs text-muted-foreground">Desenvolvedor Hermes</div>
 											</div>
 											<div className="space-y-1">
-												<label className="text-[10px] uppercase font-bold text-slate-400">E-mail corporativo</label>
-												<div className="bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-500">dev@suaempresa.com</div>
+												<label className="text-[10px] uppercase font-bold text-muted-foreground">E-mail corporativo</label>
+												<div className="bg-muted border border-border rounded-lg p-2.5 text-xs text-muted-foreground">dev@suaempresa.com</div>
 											</div>
 											<div className="space-y-1">
-												<label className="text-[10px] uppercase font-bold text-slate-400">Senha de Acesso</label>
-												<div className="bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-500">••••••••••••••</div>
+												<label className="text-[10px] uppercase font-bold text-muted-foreground">Senha de Acesso</label>
+												<div className="bg-muted border border-border rounded-lg p-2.5 text-xs text-muted-foreground">••••••••••••••</div>
 											</div>
-											<Button className="w-full bg-blue-600 hover:bg-blue-500 text-white text-xs h-9 cursor-not-allowed">
+											<Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-xs h-9 cursor-not-allowed">
 												Criar conta
 											</Button>
 											<div className="relative flex py-1 items-center">
-												<div className="flex-grow border-t border-slate-800"></div>
-												<span className="flex-shrink mx-3 text-[10px] text-slate-600 font-bold uppercase">Ou</span>
-												<div className="flex-grow border-t border-slate-800"></div>
+												<div className="flex-grow border-t border-border"></div>
+												<span className="flex-shrink mx-3 text-[10px] text-muted-foreground/50 font-bold uppercase">Ou</span>
+												<div className="flex-grow border-t border-border"></div>
 											</div>
-											<Button variant="outline" className="w-full border-slate-800 text-slate-300 hover:bg-slate-900 text-xs h-9 cursor-not-allowed flex items-center justify-center gap-2">
+											<Button variant="outline" className="w-full text-xs h-9 cursor-not-allowed flex items-center justify-center gap-2">
 												<svg className="h-3.5 w-3.5" viewBox="0 0 24 24">
 													<path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.57 15.01 1 12 1 7.24 1 3.2 3.74 1.25 7.74l3.84 2.98C6.03 7.74 8.78 5.04 12 5.04z" />
 													<path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.35H12v4.45h6.47c-.28 1.48-1.12 2.73-2.38 3.58l3.69 2.87c2.16-1.99 3.41-4.92 3.41-8.55z" />
 													<path fill="#FBBC05" d="M5.09 14.76c-.24-.72-.38-1.5-.38-2.31s.14-1.59.38-2.31L1.25 7.15C.45 8.79 0 10.62 0 12.5s.45 3.71 1.25 5.35l3.84-3.09z" />
 													<path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.69-2.87c-1.02.68-2.33 1.09-3.96 1.09-3.22 0-5.97-2.7-6.91-5.68l-3.84 2.98C3.2 20.26 7.24 23 12 23z" />
 												</svg>
-											Registrar com o Google
-										</Button>
-									</CardContent>
-								</Card>
-							</div>
+												Registrar com o Google
+											</Button>
+										</CardContent>
+									</Card>
+								</div>
 							</div>
 						)}
 
-					{/* STEP 2: CREATING SERVICE */}
-					{currentStep === 1 && (
-						<div className="space-y-6 animate-in fade-in duration-500">
-							<div className="space-y-2">
-								<Badge variant="outline" className="border-blue-500/20 text-blue-400 bg-blue-500/5">Passo 2</Badge>
-								<h2 className="text-3xl font-extrabold text-white tracking-tight">Criação de Serviço (Tenant)</h2>
-								<p className="text-slate-400 text-base">
-									No Hermes, um **Serviço** atua como uma partição lógica (Tenant). Todos os e-mails, templates, logs e chaves de API pertencem a um serviço específico.
-								</p>
-							</div>
-
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-4">
-								{/* Interactive simulation */}
-								<Card className="bg-slate-950 border-slate-800 p-6 shadow-xl space-y-4">
-									<div className="flex items-center justify-between pb-2 border-b border-slate-800">
-										<span className="text-xs font-extrabold uppercase tracking-wider text-slate-400">Novo Serviço</span>
-										<Badge className="bg-blue-500/10 text-blue-400 border border-blue-500/20">Dashboard</Badge>
-									</div>
-									<div className="space-y-3">
-										<div className="space-y-1">
-											<label className="text-[10px] font-bold uppercase text-slate-500">Nome do Serviço</label>
-											<input
-												type="text"
-												readOnly
-												value="E-commerce API"
-												className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white outline-none"
-											/>
-										</div>
-										<div className="space-y-1">
-											<label className="text-[10px] font-bold uppercase text-slate-500">Finalidade / Descrição</label>
-											<textarea
-												readOnly
-												value="Disparar e-mails de confirmação de compras e rastreios de pedidos."
-												rows={2}
-												className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white outline-none resize-none"
-											/>
-										</div>
-										<Button className="w-full bg-blue-600 hover:bg-blue-500 text-white text-xs h-9 cursor-not-allowed">
-											Criar Serviço
-										</Button>
-									</div>
-								</Card>
-
-								<div className="space-y-4">
-									<div className="flex gap-4">
-										<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400">
-											<Layers className="h-5 w-5" />
-										</div>
-										<div>
-											<h4 className="text-white font-bold">Isolamento Multi-Tenant</h4>
-											<p className="text-sm text-slate-400">
-												Crie múltiplos serviços (ex: *Faturamento*, *Marketing*, *Suporte*). O acesso a um serviço é isolado entre os membros convidados.
-											</p>
-										</div>
-									</div>
-
-									<div className="flex gap-4">
-										<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400">
-											<User className="h-5 w-5" />
-										</div>
-										<div>
-											<h4 className="text-white font-bold">Membros do Serviço</h4>
-											<p className="text-sm text-slate-400">
-												Como proprietário do serviço, você pode convidar outros usuários pelo e-mail deles para colaborar no mesmo painel de métricas.
-											</p>
-										</div>
-									</div>
+						{/* STEP 2: CREATING SERVICE */}
+						{currentStep === 1 && (
+							<div className="space-y-6 animate-in fade-in duration-500">
+								<div className="space-y-2">
+									<Badge variant="outline" className="border-primary/20 text-primary bg-primary/5">Passo 2</Badge>
+									<h2 className="text-3xl font-extrabold text-foreground tracking-tight">Criação de Serviço (Tenant)</h2>
+									<p className="text-muted-foreground text-base">
+										No Hermes, um <strong>Serviço</strong> atua como uma partição lógica (Tenant). Todos os e-mails, templates, logs e chaves de API pertencem a um serviço específico.
+									</p>
 								</div>
-							</div>
-						</div>
-					)}
 
-					{/* STEP 3: SMTP & GOOGLE OAUTH2 */}
-					{currentStep === 2 && (
-						<div className="space-y-6 animate-in fade-in duration-500">
-							<div className="space-y-2">
-								<Badge variant="outline" className="border-blue-500/20 text-blue-400 bg-blue-500/5">Passo 3</Badge>
-								<h2 className="text-3xl font-extrabold text-white tracking-tight">Provedor de E-mail (SMTP / OAuth2)</h2>
-								<p className="text-slate-400 text-base">
-									Para enviar e-mails de forma confiável, configure uma **Credencial**. O Hermes suporta autenticação SMTP tradicional por senha e autenticação moderna OAuth2 com o Google.
-								</p>
-							</div>
-
-							{/* Toggle Selector */}
-							<div className="flex justify-center border-b border-slate-800 pb-2">
-								<div className="bg-slate-950 p-1 rounded-lg border border-slate-800 flex gap-2">
-									<button
-										onClick={() => setSmtpType('oauth2')}
-										className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${smtpType === 'oauth2'
-												? 'bg-blue-600 text-white shadow'
-												: 'text-slate-400 hover:text-white'
-											}`}
-									>
-										Google OAuth2 (Recomendado)
-									</button>
-									<button
-										onClick={() => setSmtpType('plain')}
-										className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${smtpType === 'plain'
-												? 'bg-blue-600 text-white shadow'
-												: 'text-slate-400 hover:text-white'
-											}`}
-									>
-										SMTP Simples (Senha)
-									</button>
-								</div>
-							</div>
-
-							{smtpType === 'oauth2' ? (
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
-									<div className="space-y-4 text-sm text-slate-400">
-										<h3 className="text-white font-bold text-base flex items-center gap-2">
-											<span className="h-2 w-2 rounded-full bg-emerald-500 inline-block"></span>
-											Por que usar Google OAuth2?
-										</h3>
-										<p>
-											O Google está descontinuando o uso de senhas tradicionais (menos seguras). O OAuth2 autentica o Hermes via tokens de acesso dinâmicos sem expor sua senha.
-										</p>
-
-										<div className="p-4 bg-slate-950/60 rounded-xl border border-slate-800 space-y-2 text-xs">
-											<h4 className="text-white font-bold uppercase tracking-wider">Como configurar:</h4>
-											<ol className="list-decimal list-inside space-y-1 text-slate-400">
-												<li>Crie um projeto no Google Cloud Console.</li>
-												<li>Configure a tela de Consentimento OAuth e crie uma credencial de ID do Cliente.</li>
-												<li>Adicione a URI de redirecionamento autorizada.</li>
-												<li>Utilize o fluxo do Hermes para logar em sua conta do Gmail de envio e obter o <strong>Refresh Token</strong>.</li>
-											</ol>
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-4">
+									{/* Interactive simulation */}
+									<Card className="bg-background border-border p-6 shadow-sm space-y-4">
+										<div className="flex items-center justify-between pb-2 border-b border-border">
+											<span className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">Novo Serviço</span>
+											<Badge className="bg-primary/10 text-primary border border-primary/20">Dashboard</Badge>
 										</div>
-									</div>
-
-									<Card className="bg-slate-950 border-slate-800 p-5 shadow-xl space-y-3">
-										<div className="space-y-1">
-											<label className="text-[10px] font-bold uppercase text-slate-400">Tipo de Autenticação</label>
-											<div className="bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white font-semibold flex items-center justify-between">
-												<span>OAuth2 (Google API)</span>
-												<Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Seguro</Badge>
-											</div>
-										</div>
-										<div className="space-y-1">
-											<label className="text-[10px] font-bold uppercase text-slate-400">Google Client ID</label>
-											<input type="text" readOnly value="1069303710668-cniot9...apps.googleusercontent.com" className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-400 outline-none" />
-										</div>
-										<div className="space-y-1">
-											<label className="text-[10px] font-bold uppercase text-slate-400">Google Client Secret</label>
-											<input type="text" readOnly value="GOCSPX-u1234..." className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-400 outline-none" />
-										</div>
-										<div className="space-y-1">
-											<label className="text-[10px] font-bold uppercase text-slate-400">Gmail do Remetente</label>
-											<input type="text" readOnly value="envios@suaempresa.com" className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-300 outline-none" />
-										</div>
-										<div className="space-y-1">
-											<label className="text-[10px] font-bold uppercase text-slate-400">Refresh Token</label>
-											<input type="text" readOnly value="1//04hWp3..." className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-400 outline-none" />
-										</div>
-									</Card>
-								</div>
-							) : (
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
-									<div className="space-y-4 text-sm text-slate-400">
-										<h3 className="text-white font-bold text-base">Configuração SMTP Comum</h3>
-										<p>
-											Ideal para servidores de e-mail próprios, SendGrid, Mailgun, Amazon SES ou servidores internos de hospedagem corporativa.
-										</p>
-
-										<div className="p-4 bg-slate-950/60 rounded-xl border border-slate-800 space-y-2 text-xs">
-											<h4 className="text-white font-bold uppercase tracking-wider">Segurança das Credenciais:</h4>
-											<p className="text-slate-400">
-												As senhas (`passkey`) e segredos armazenados são criptografados no banco de dados com algoritmo AES-256-CBC de padrão industrial, impedindo vazamentos mesmo com acesso físico às tabelas.
-											</p>
-										</div>
-									</div>
-
-									<Card className="bg-slate-950 border-slate-800 p-5 shadow-xl space-y-3">
-										<div className="space-y-1">
-											<label className="text-[10px] font-bold uppercase text-slate-400">SMTP Host</label>
-											<input type="text" readOnly value="smtp.sendgrid.net" className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white outline-none" />
-										</div>
-										<div className="grid grid-cols-2 gap-4">
+										<div className="space-y-3">
 											<div className="space-y-1">
-												<label className="text-[10px] font-bold uppercase text-slate-400">Porta</label>
-												<input type="text" readOnly value="465" className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white outline-none" />
+												<label className="text-[10px] font-bold uppercase text-muted-foreground">Nome do Serviço</label>
+												<input
+													type="text"
+													readOnly
+													value="E-commerce API"
+													className="w-full bg-muted border border-border rounded-lg p-2.5 text-xs text-foreground outline-none"
+												/>
 											</div>
 											<div className="space-y-1">
-												<label className="text-[10px] font-bold uppercase text-slate-400">SSL / TLS</label>
-												<div className="bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-emerald-400 font-bold">Ativo (SSL)</div>
+												<label className="text-[10px] font-bold uppercase text-muted-foreground">Finalidade / Descrição</label>
+												<textarea
+													readOnly
+													value="Disparar e-mails de confirmação de compras e rastreios de pedidos."
+													rows={2}
+													className="w-full bg-muted border border-border rounded-lg p-2.5 text-xs text-foreground outline-none resize-none"
+												/>
 											</div>
-										</div>
-										<div className="space-y-1">
-											<label className="text-[10px] font-bold uppercase text-slate-400">Usuário SMTP</label>
-											<input type="text" readOnly value="apikey" className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white outline-none" />
-										</div>
-										<div className="space-y-1">
-											<label className="text-[10px] font-bold uppercase text-slate-400">Senha SMTP</label>
-											<input type="text" readOnly value="••••••••••••••••••••••••" className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-400 outline-none" />
+											<Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-xs h-9 cursor-not-allowed">
+												Criar Serviço
+											</Button>
 										</div>
 									</Card>
-								</div>
-							)}
-						</div>
-					)}
 
-					{/* STEP 4: TEMPLATES */}
-					{currentStep === 3 && (
-						<div className="space-y-6 animate-in fade-in duration-500">
-							<div className="space-y-2">
-								<Badge variant="outline" className="border-blue-500/20 text-blue-400 bg-blue-500/5">Passo 4</Badge>
-								<h2 className="text-3xl font-extrabold text-white tracking-tight">Templates Dinâmicos com MJML e Handlebars</h2>
-								<p className="text-slate-400 text-base">
-									Crie e-mails responsivos que abrem perfeitamente no celular e desktop usando a sintaxe robusta do **MJML** aliada às variáveis dinâmicas do **Handlebars**.
-								</p>
-							</div>
+									<div className="space-y-4">
+										<div className="flex gap-4">
+											<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+												<Layers className="h-5 w-5" />
+											</div>
+											<div>
+												<h4 className="text-foreground font-bold">Isolamento Multi-Tenant</h4>
+												<p className="text-sm text-muted-foreground">
+													Crie múltiplos serviços (ex: <em>Faturamento</em>, <em>Marketing</em>, <em>Suporte</em>). O acesso a um serviço é isolado entre os membros convidados.
+												</p>
+											</div>
+										</div>
 
-							<div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch pt-2">
-								{/* MJML Code Editor Mockup */}
-								<div className="xl:col-span-7 flex flex-col rounded-xl border border-slate-850 overflow-hidden bg-slate-950 font-mono text-xs shadow-xl min-h-[300px]">
-									<div className="bg-slate-900 px-4 py-2 border-b border-slate-800 flex justify-between items-center">
-										<span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">MJML Template</span>
-										<Badge className="bg-blue-600/10 text-blue-400 border border-blue-500/20 font-sans">AOT Compilado</Badge>
+										<div className="flex gap-4">
+											<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/50 text-accent-foreground">
+												<User className="h-5 w-5" />
+											</div>
+											<div>
+												<h4 className="text-foreground font-bold">Membros do Serviço</h4>
+												<p className="text-sm text-muted-foreground">
+													Como proprietário do serviço, você pode convidar outros usuários pelo e-mail deles para colaborar no mesmo painel de métricas.
+												</p>
+											</div>
+										</div>
 									</div>
-									<pre className="p-4 text-blue-400/90 overflow-x-auto select-none leading-relaxed flex-1">
-										{`1: <mjml>
+								</div>
+							</div>
+						)}
+
+						{/* STEP 3: SMTP & GOOGLE OAUTH2 */}
+						{currentStep === 2 && (
+							<div className="space-y-6 animate-in fade-in duration-500">
+								<div className="space-y-2">
+									<Badge variant="outline" className="border-primary/20 text-primary bg-primary/5">Passo 3</Badge>
+									<h2 className="text-3xl font-extrabold text-foreground tracking-tight">Provedor de E-mail (SMTP / OAuth2)</h2>
+									<p className="text-muted-foreground text-base">
+										Para enviar e-mails de forma confiável, configure uma <strong>Credencial</strong>. O Hermes suporta autenticação SMTP tradicional por senha e autenticação moderna OAuth2 com o Google.
+									</p>
+								</div>
+
+								{/* Toggle Selector */}
+								<div className="flex justify-center border-b border-border pb-2">
+									<div className="bg-muted p-1 rounded-lg border border-border flex gap-2">
+										<button
+											onClick={() => setSmtpType('oauth2')}
+											className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${smtpType === 'oauth2'
+													? 'bg-primary text-primary-foreground shadow'
+													: 'text-muted-foreground hover:text-foreground'
+												}`}
+										>
+											Google OAuth2 (Recomendado)
+										</button>
+										<button
+											onClick={() => setSmtpType('plain')}
+											className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${smtpType === 'plain'
+													? 'bg-primary text-primary-foreground shadow'
+													: 'text-muted-foreground hover:text-foreground'
+												}`}
+										>
+											SMTP Simples (Senha)
+										</button>
+									</div>
+								</div>
+
+								{smtpType === 'oauth2' ? (
+									<div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
+										<div className="space-y-4 text-sm text-muted-foreground">
+											<h3 className="text-foreground font-bold text-base flex items-center gap-2">
+												<span className="h-2 w-2 rounded-full bg-success inline-block"></span>
+												Por que usar Google OAuth2?
+											</h3>
+											<p>
+												O Google está descontinuando o uso de senhas tradicionais (menos seguras). O OAuth2 autentica o Hermes via tokens de acesso dinâmicos sem expor sua senha.
+											</p>
+
+											<div className="p-4 bg-muted/50 rounded-xl border border-border space-y-2 text-xs">
+												<h4 className="text-foreground font-bold uppercase tracking-wider">Como configurar:</h4>
+												<ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+													<li>Crie um projeto no Google Cloud Console.</li>
+													<li>Configure a tela de Consentimento OAuth e crie uma credencial de ID do Cliente.</li>
+													<li>Adicione a URI de redirecionamento autorizada.</li>
+													<li>Utilize o fluxo do Hermes para logar em sua conta do Gmail de envio e obter o <strong>Refresh Token</strong>.</li>
+												</ol>
+											</div>
+										</div>
+
+										<Card className="bg-background border-border p-5 shadow-sm space-y-3">
+											<div className="space-y-1">
+												<label className="text-[10px] font-bold uppercase text-muted-foreground">Tipo de Autenticação</label>
+												<div className="bg-muted border border-border rounded-lg p-2.5 text-xs text-foreground font-semibold flex items-center justify-between">
+													<span>OAuth2 (Google API)</span>
+													<Badge className="bg-success/10 text-success border border-success/20">Seguro</Badge>
+												</div>
+											</div>
+											<div className="space-y-1">
+												<label className="text-[10px] font-bold uppercase text-muted-foreground">Google Client ID</label>
+												<input type="text" readOnly value="1069303710668-cniot9...apps.googleusercontent.com" className="w-full bg-muted border border-border rounded-lg p-2.5 text-xs text-muted-foreground outline-none" />
+											</div>
+											<div className="space-y-1">
+												<label className="text-[10px] font-bold uppercase text-muted-foreground">Google Client Secret</label>
+												<input type="text" readOnly value="GOCSPX-u1234..." className="w-full bg-muted border border-border rounded-lg p-2.5 text-xs text-muted-foreground outline-none" />
+											</div>
+											<div className="space-y-1">
+												<label className="text-[10px] font-bold uppercase text-muted-foreground">Gmail do Remetente</label>
+												<input type="text" readOnly value="envios@suaempresa.com" className="w-full bg-muted border border-border rounded-lg p-2.5 text-xs text-foreground outline-none" />
+											</div>
+											<div className="space-y-1">
+												<label className="text-[10px] font-bold uppercase text-muted-foreground">Refresh Token</label>
+												<input type="text" readOnly value="1//04hWp3..." className="w-full bg-muted border border-border rounded-lg p-2.5 text-xs text-muted-foreground outline-none" />
+											</div>
+										</Card>
+									</div>
+								) : (
+									<div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
+										<div className="space-y-4 text-sm text-muted-foreground">
+											<h3 className="text-foreground font-bold text-base">Configuração SMTP Comum</h3>
+											<p>
+												Ideal para servidores de e-mail próprios, SendGrid, Mailgun, Amazon SES ou servidores internos de hospedagem corporativa.
+											</p>
+
+											<div className="p-4 bg-muted/50 rounded-xl border border-border space-y-2 text-xs">
+												<h4 className="text-foreground font-bold uppercase tracking-wider">Segurança das Credenciais:</h4>
+												<p className="text-muted-foreground">
+													As senhas (<code className="text-primary">passkey</code>) e segredos armazenados são criptografados no banco de dados com algoritmo AES-256-CBC de padrão industrial, impedindo vazamentos mesmo com acesso físico às tabelas.
+												</p>
+											</div>
+										</div>
+
+										<Card className="bg-background border-border p-5 shadow-sm space-y-3">
+											<div className="space-y-1">
+												<label className="text-[10px] font-bold uppercase text-muted-foreground">SMTP Host</label>
+												<input type="text" readOnly value="smtp.sendgrid.net" className="w-full bg-muted border border-border rounded-lg p-2.5 text-xs text-foreground outline-none" />
+											</div>
+											<div className="grid grid-cols-2 gap-4">
+												<div className="space-y-1">
+													<label className="text-[10px] font-bold uppercase text-muted-foreground">Porta</label>
+													<input type="text" readOnly value="465" className="w-full bg-muted border border-border rounded-lg p-2.5 text-xs text-foreground outline-none" />
+												</div>
+												<div className="space-y-1">
+													<label className="text-[10px] font-bold uppercase text-muted-foreground">SSL / TLS</label>
+													<div className="bg-success/10 border border-success/20 rounded-lg p-2.5 text-xs text-success font-bold">Ativo (SSL)</div>
+												</div>
+											</div>
+											<div className="space-y-1">
+												<label className="text-[10px] font-bold uppercase text-muted-foreground">Usuário SMTP</label>
+												<input type="text" readOnly value="apikey" className="w-full bg-muted border border-border rounded-lg p-2.5 text-xs text-foreground outline-none" />
+											</div>
+											<div className="space-y-1">
+												<label className="text-[10px] font-bold uppercase text-muted-foreground">Senha SMTP</label>
+												<input type="text" readOnly value="••••••••••••••••••••••••" className="w-full bg-muted border border-border rounded-lg p-2.5 text-xs text-muted-foreground outline-none" />
+											</div>
+										</Card>
+									</div>
+								)}
+							</div>
+						)}
+
+						{/* STEP 4: TEMPLATES */}
+						{currentStep === 3 && (
+							<div className="space-y-6 animate-in fade-in duration-500">
+								<div className="space-y-2">
+									<Badge variant="outline" className="border-primary/20 text-primary bg-primary/5">Passo 4</Badge>
+									<h2 className="text-3xl font-extrabold text-foreground tracking-tight">Templates Dinâmicos com MJML e Handlebars</h2>
+									<p className="text-muted-foreground text-base">
+										Crie e-mails responsivos que abrem perfeitamente no celular e desktop usando a sintaxe robusta do <strong>MJML</strong> aliada às variáveis dinâmicas do <strong>Handlebars</strong>.
+									</p>
+								</div>
+
+								<div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch pt-2">
+									{/* MJML Code Editor Mockup */}
+									<div className="xl:col-span-7 flex flex-col rounded-xl border border-border overflow-hidden bg-background font-mono text-xs shadow-sm min-h-[300px]">
+										<div className="bg-muted px-4 py-2 border-b border-border flex justify-between items-center">
+											<span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">MJML Template</span>
+											<Badge className="bg-primary/10 text-primary border border-primary/20 font-sans">AOT Compilado</Badge>
+										</div>
+										<pre className="p-4 text-primary/90 overflow-x-auto select-none leading-relaxed flex-1">
+											{`1: <mjml>
 2:   <mj-body>
 3:     <mj-section>
 4:       <mj-column>
@@ -447,154 +449,154 @@ export default function TutorialPage() {
 12:    </mj-section>
 13:   </mj-body>
 14: </mjml>`}
-									</pre>
-								</div>
+										</pre>
+									</div>
 
-								{/* Explanation */}
-								<div className="xl:col-span-5 space-y-4 flex flex-col justify-center text-sm text-slate-400">
-									<div className="flex gap-3 items-start">
-										<div className="h-2 w-2 rounded-full bg-blue-500 mt-2 shrink-0"></div>
-										<p>
-											**Compilação AOT (Ahead-Of-Time)**: O Hermes compila o código MJML para HTML puro no momento em que você o salva, garantindo que o envio de e-mails pelo worker BullMQ seja até 50 vezes mais rápido por não sobrecarregar a CPU.
-										</p>
-									</div>
-									<div className="flex gap-3 items-start">
-										<div className="h-2 w-2 rounded-full bg-blue-500 mt-2 shrink-0"></div>
-										<p>
-											**Fácil injeção**: Chaves Handlebars como `{"{{nome_usuario}}"}` são mantidas no HTML compilado para substituição dinâmica rápida em tempo de envio.
-										</p>
-									</div>
-									<div className="flex gap-3 items-start">
-										<div className="h-2 w-2 rounded-full bg-blue-500 mt-2 shrink-0"></div>
-										<p>
-											**Sanitização automática**: O Hermes higieniza HTML perigoso nas variáveis enviadas para evitar injeções de scripts maliciosos (XSS) no leitor do e-mail.
-										</p>
+									{/* Explanation */}
+									<div className="xl:col-span-5 space-y-4 flex flex-col justify-center text-sm text-muted-foreground">
+										<div className="flex gap-3 items-start">
+											<div className="h-2 w-2 rounded-full bg-primary mt-2 shrink-0"></div>
+											<p>
+												<strong className="text-foreground">Compilação AOT (Ahead-Of-Time)</strong>: O Hermes compila o código MJML para HTML puro no momento em que você o salva, garantindo que o envio de e-mails pelo worker BullMQ seja até 50 vezes mais rápido por não sobrecarregar a CPU.
+											</p>
+										</div>
+										<div className="flex gap-3 items-start">
+											<div className="h-2 w-2 rounded-full bg-primary mt-2 shrink-0"></div>
+											<p>
+												<strong className="text-foreground">Fácil injeção</strong>: Chaves Handlebars como <code className="text-primary text-xs">{"{{nome_usuario}}"}</code> são mantidas no HTML compilado para substituição dinâmica rápida em tempo de envio.
+											</p>
+										</div>
+										<div className="flex gap-3 items-start">
+											<div className="h-2 w-2 rounded-full bg-primary mt-2 shrink-0"></div>
+											<p>
+												<strong className="text-foreground">Sanitização automática</strong>: O Hermes higieniza HTML perigoso nas variáveis enviadas para evitar injeções de scripts maliciosos (XSS) no leitor do e-mail.
+											</p>
+										</div>
 									</div>
 								</div>
 							</div>
-						</div>
-					)}
+						)}
 
-					{/* STEP 5: API KEYS */}
-					{currentStep === 4 && (
-						<div className="space-y-6 animate-in fade-in duration-500">
-							<div className="space-y-2">
-								<Badge variant="outline" className="border-blue-500/20 text-blue-400 bg-blue-500/5">Passo 5</Badge>
-								<h2 className="text-3xl font-extrabold text-white tracking-tight">Geração de Chaves de API Seguras</h2>
-								<p className="text-slate-400 text-base">
-									Para integrar seus sistemas, você deve gerar uma **API Key** associada a um Serviço e a uma Credencial de e-mail.
-								</p>
-							</div>
-
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-4">
-								<div className="space-y-4 text-sm text-slate-400">
-									<h3 className="text-white font-bold text-base">Como funciona a API Key?</h3>
-									<p>
-										Cada API Key gerada é atrelada a uma credencial específica de SMTP. Quando seu sistema faz um envio usando essa chave, o Hermes já sabe por qual servidor deve rotear o e-mail.
-									</p>
-									<p>
-										O Hermes exibe a chave apenas **uma única vez** no momento da criação. O banco de dados armazena apenas um hash irreversível da chave, garantindo segurança total.
+						{/* STEP 5: API KEYS */}
+						{currentStep === 4 && (
+							<div className="space-y-6 animate-in fade-in duration-500">
+								<div className="space-y-2">
+									<Badge variant="outline" className="border-primary/20 text-primary bg-primary/5">Passo 5</Badge>
+									<h2 className="text-3xl font-extrabold text-foreground tracking-tight">Geração de Chaves de API Seguras</h2>
+									<p className="text-muted-foreground text-base">
+										Para integrar seus sistemas, você deve gerar uma <strong>API Key</strong> associada a um Serviço e a uma Credencial de e-mail.
 									</p>
 								</div>
 
-								{/* Simulated API Key Generator */}
-								<Card className="bg-slate-950 border-slate-800 p-6 shadow-xl space-y-4">
-									<div className="space-y-1">
-										<label className="text-[10px] font-bold uppercase text-slate-500">Serviço Destino</label>
-										<div className="bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white">E-commerce API</div>
-									</div>
-									<div className="space-y-1">
-										<label className="text-[10px] font-bold uppercase text-slate-500">Credencial de Envio</label>
-										<div className="bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white">Gmail OAuth2 corporativo</div>
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-4">
+									<div className="space-y-4 text-sm text-muted-foreground">
+										<h3 className="text-foreground font-bold text-base">Como funciona a API Key?</h3>
+										<p>
+											Cada API Key gerada é atrelada a uma credencial específica de SMTP. Quando seu sistema faz um envio usando essa chave, o Hermes já sabe por qual servidor deve rotear o e-mail.
+										</p>
+										<p>
+											O Hermes exibe a chave apenas <strong>uma única vez</strong> no momento da criação. O banco de dados armazena apenas um hash irreversível da chave, garantindo segurança total.
+										</p>
 									</div>
 
-									<div className="pt-2">
-										{generatedKey ? (
-											<div className="space-y-2">
-												<label className="text-[10px] font-bold uppercase text-emerald-400">Sua API Key (Copie agora!)</label>
-												<div className="flex gap-2">
-													<div className="bg-slate-900 border border-emerald-500/30 rounded-lg p-2.5 text-xs font-mono text-white flex-1 select-all break-all">
-														{generatedKey}
+									{/* Simulated API Key Generator */}
+									<Card className="bg-background border-border p-6 shadow-sm space-y-4">
+										<div className="space-y-1">
+											<label className="text-[10px] font-bold uppercase text-muted-foreground">Serviço Destino</label>
+											<div className="bg-muted border border-border rounded-lg p-2.5 text-xs text-foreground">E-commerce API</div>
+										</div>
+										<div className="space-y-1">
+											<label className="text-[10px] font-bold uppercase text-muted-foreground">Credencial de Envio</label>
+											<div className="bg-muted border border-border rounded-lg p-2.5 text-xs text-foreground">Gmail OAuth2 corporativo</div>
+										</div>
+
+										<div className="pt-2">
+											{generatedKey ? (
+												<div className="space-y-2">
+													<label className="text-[10px] font-bold uppercase text-success">Sua API Key (Copie agora!)</label>
+													<div className="flex gap-2">
+														<div className="bg-muted border border-success/30 rounded-lg p-2.5 text-xs font-mono text-foreground flex-1 select-all break-all">
+															{generatedKey}
+														</div>
+														<Button
+															size="icon"
+															onClick={() => handleCopy(generatedKey)}
+															className="bg-success hover:bg-success/90 text-success-foreground cursor-pointer h-10 w-10 shrink-0"
+														>
+															{copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+														</Button>
 													</div>
-													<Button
-														size="icon"
-														onClick={() => handleCopy(generatedKey)}
-														className="bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer h-10 w-10 shrink-0"
-													>
-														{copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-													</Button>
+													<p className="text-[10px] text-warning flex items-center gap-1">
+														<AlertCircle className="h-3.5 w-3.5" />
+														Esta chave não será exibida novamente no painel.
+													</p>
 												</div>
-												<p className="text-[10px] text-amber-500 flex items-center gap-1">
-													<AlertCircle className="h-3.5 w-3.5" />
-													Esta chave não será exibida novamente no painel.
-												</p>
-											</div>
-										) : (
-											<Button
-												onClick={generateSimulatedKey}
-												className="w-full bg-blue-600 hover:bg-blue-500 text-white text-xs h-10 cursor-pointer flex items-center justify-center gap-2"
-											>
-												<Key className="h-4 w-4" />
-												Gerar Chave de Teste
-											</Button>
-										)}
-									</div>
-								</Card>
+											) : (
+												<Button
+													onClick={generateSimulatedKey}
+													className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-xs h-10 cursor-pointer flex items-center justify-center gap-2"
+												>
+													<Key className="h-4 w-4" />
+													Gerar Chave de Teste
+												</Button>
+											)}
+										</div>
+									</Card>
+								</div>
 							</div>
-						</div>
-					)}
+						)}
 
-					{/* STEP 6: SENDING EMAIL (REQUESTS & RESPONSES) */}
-					{currentStep === 5 && (
-						<div className="space-y-6 animate-in fade-in duration-500">
-							<div className="space-y-2">
-								<Badge variant="outline" className="border-blue-500/20 text-blue-400 bg-blue-500/5">Passo 6</Badge>
-								<h2 className="text-3xl font-extrabold text-white tracking-tight">Utilização Prática: Requests & Responses</h2>
-								<p className="text-slate-400 text-base">
-									Faça chamadas HTTP REST para enviar e-mails de forma simples ou em lote (bulk). Insira sua chave no header `x-api-key`.
-								</p>
-							</div>
+						{/* STEP 6: SENDING EMAIL (REQUESTS & RESPONSES) */}
+						{currentStep === 5 && (
+							<div className="space-y-6 animate-in fade-in duration-500">
+								<div className="space-y-2">
+									<Badge variant="outline" className="border-primary/20 text-primary bg-primary/5">Passo 6</Badge>
+									<h2 className="text-3xl font-extrabold text-foreground tracking-tight">Utilização Prática: Requests &amp; Responses</h2>
+									<p className="text-muted-foreground text-base">
+										Faça chamadas HTTP REST para enviar e-mails de forma simples ou em lote (bulk). Insira sua chave no header <code className="text-primary text-sm">x-api-key</code>.
+									</p>
+								</div>
 
-							{/* Language Selector */}
-							<div className="flex gap-2 border-b border-slate-800 pb-2">
-								{(['curl', 'javascript', 'python'] as const).map((lang) => (
-									<button
-										key={lang}
-										onClick={() => setCodeLanguage(lang)}
-										className={`px-3 py-1 rounded-md text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${codeLanguage === lang
-												? 'bg-blue-600 text-white shadow'
-												: 'text-slate-400 hover:text-white'
-											}`}
-									>
-										{lang}
-									</button>
-								))}
-							</div>
-
-							<div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
-								{/* Code display */}
-								<div className="xl:col-span-7 flex flex-col rounded-xl border border-slate-850 overflow-hidden bg-slate-950 font-mono text-xs shadow-xl min-h-[300px]">
-									<div className="bg-slate-900 px-4 py-2 border-b border-slate-800 flex justify-between items-center">
-										<span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Requisição HTTP</span>
-										<Button
-											variant="ghost"
-											size="icon"
-											className="h-6 w-6 text-slate-400 hover:text-white cursor-pointer"
-											onClick={() => {
-												const codes = {
-													curl: `curl -X POST http://localhost:1350/api/emails \\\n  -H "Content-Type: application/json" \\\n  -H "x-api-key: hermes_live_8f3b2591a27e4d9c" \\\n  -d '{\n    "subject": "Confirmação de Compra",\n    "recipient_to": "cliente@email.com",\n    "template_id": "4db97abf-3265-410a-8007",\n    "variables": {\n      "nome_usuario": "Ruan Lopes",\n      "pedido": "9810ee"\n    }\n  }'`,
-													javascript: `import axios from 'axios';\n\nconst response = await axios.post(\n  'http://localhost:1350/api/emails',\n  {\n    subject: 'Confirmação de Compra',\n    recipient_to: 'cliente@email.com',\n    template_id: '4db97abf-3265-410a-8007',\n    variables: {\n      nome_usuario: 'Ruan Lopes',\n      pedido: '9810ee'\n    }\n  },\n  {\n    headers: {\n      'x-api-key': 'hermes_live_8f3b2591a27e4d9c'\n    }\n  }\n);`,
-													python: `import requests\n\nurl = 'http://localhost:1350/api/emails'\nheaders = {\n    'x-api-key': 'hermes_live_8f3b2591a27e4d9c',\n    'Content-Type': 'application/json'\n}\ndata = {\n    "subject": "Confirmação de Compra",\n    "recipient_to": "cliente@email.com",\n    "template_id": "4db97abf-3265-410a-8007",\n    "variables": {\n        "nome_usuario": "Ruan Lopes",\n        "pedido": "9810ee"\n    }\n}\n\nresponse = requests.post(url, headers=headers, json=data)`
-												};
-												handleCopy(codes[codeLanguage]);
-											}}
+								{/* Language Selector */}
+								<div className="flex gap-2 border-b border-border pb-2">
+									{(['curl', 'javascript', 'python'] as const).map((lang) => (
+										<button
+											key={lang}
+											onClick={() => setCodeLanguage(lang)}
+											className={`px-3 py-1 rounded-md text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${codeLanguage === lang
+													? 'bg-primary text-primary-foreground shadow'
+													: 'text-muted-foreground hover:text-foreground'
+												}`}
 										>
-											{copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-										</Button>
-									</div>
-									<pre className="p-4 text-blue-400/90 overflow-x-auto select-all leading-relaxed flex-1">
-										{codeLanguage === 'curl' && (
-											`curl -X POST http://localhost:1350/api/emails \\
+											{lang}
+										</button>
+									))}
+								</div>
+
+								<div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
+									{/* Code display */}
+									<div className="xl:col-span-7 flex flex-col rounded-xl border border-border overflow-hidden bg-background font-mono text-xs shadow-sm min-h-[300px]">
+										<div className="bg-muted px-4 py-2 border-b border-border flex justify-between items-center">
+											<span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Requisição HTTP</span>
+											<Button
+												variant="ghost"
+												size="icon"
+												className="h-6 w-6 text-muted-foreground hover:text-foreground cursor-pointer"
+												onClick={() => {
+													const codes = {
+														curl: `curl -X POST http://localhost:1350/api/emails \\\n  -H "Content-Type: application/json" \\\n  -H "x-api-key: hermes_live_8f3b2591a27e4d9c" \\\n  -d '{\n    "subject": "Confirmação de Compra",\n    "recipient_to": "cliente@email.com",\n    "template_id": "4db97abf-3265-410a-8007",\n    "variables": {\n      "nome_usuario": "Ruan Lopes",\n      "pedido": "9810ee"\n    }\n  }'`,
+														javascript: `import axios from 'axios';\n\nconst response = await axios.post(\n  'http://localhost:1350/api/emails',\n  {\n    subject: 'Confirmação de Compra',\n    recipient_to: 'cliente@email.com',\n    template_id: '4db97abf-3265-410a-8007',\n    variables: {\n      nome_usuario: 'Ruan Lopes',\n      pedido: '9810ee'\n    }\n  },\n  {\n    headers: {\n      'x-api-key': 'hermes_live_8f3b2591a27e4d9c'\n    }\n  }\n);`,
+														python: `import requests\n\nurl = 'http://localhost:1350/api/emails'\nheaders = {\n    'x-api-key': 'hermes_live_8f3b2591a27e4d9c',\n    'Content-Type': 'application/json'\n}\ndata = {\n    "subject": "Confirmação de Compra",\n    "recipient_to": "cliente@email.com",\n    "template_id": "4db97abf-3265-410a-8007",\n    "variables": {\n        "nome_usuario": "Ruan Lopes",\n        "pedido": "9810ee"\n    }\n}\n\nresponse = requests.post(url, headers=headers, json=data)`
+													};
+													handleCopy(codes[codeLanguage]);
+												}}
+											>
+												{copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
+											</Button>
+										</div>
+										<pre className="p-4 text-primary/90 overflow-x-auto select-all leading-relaxed flex-1">
+											{codeLanguage === 'curl' && (
+												`curl -X POST http://localhost:1350/api/emails \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: hermes_live_8f3b2591a27e4d9c" \\
   -d '{
@@ -606,9 +608,9 @@ export default function TutorialPage() {
       "pedido": "9810ee"
     }
   }'`
-										)}
-										{codeLanguage === 'javascript' && (
-											`import axios from 'axios';
+											)}
+											{codeLanguage === 'javascript' && (
+												`import axios from 'axios';
 
 const response = await axios.post(
   'http://localhost:1350/api/emails',
@@ -627,9 +629,9 @@ const response = await axios.post(
     }
   }
 );`
-										)}
-										{codeLanguage === 'python' && (
-											`import requests
+											)}
+											{codeLanguage === 'python' && (
+												`import requests
 
 url = 'http://localhost:1350/api/emails'
 headers = {
@@ -647,18 +649,18 @@ data = {
 }
 
 response = requests.post(url, headers=headers, json=data)`
-										)}
-									</pre>
-								</div>
-
-								{/* Simulated Response */}
-								<div className="xl:col-span-5 flex flex-col rounded-xl border border-slate-850 overflow-hidden bg-slate-950 font-mono text-xs shadow-xl min-h-[300px]">
-									<div className="bg-slate-900 px-4 py-2 border-b border-slate-800 flex justify-between items-center">
-										<span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Resposta do Servidor</span>
-										<Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-sans">202 Accepted</Badge>
+											)}
+										</pre>
 									</div>
-									<pre className="p-4 text-emerald-400/90 overflow-x-auto select-none leading-relaxed flex-1">
-										{`{
+
+									{/* Simulated Response */}
+									<div className="xl:col-span-5 flex flex-col rounded-xl border border-border overflow-hidden bg-background font-mono text-xs shadow-sm min-h-[300px]">
+										<div className="bg-muted px-4 py-2 border-b border-border flex justify-between items-center">
+											<span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Resposta do Servidor</span>
+											<Badge className="bg-success/10 text-success border border-success/20 font-sans">202 Accepted</Badge>
+										</div>
+										<pre className="p-4 text-success/90 overflow-x-auto select-none leading-relaxed flex-1">
+											{`{
   "success": true,
   "statusCode": 202,
   "message": "E-mail enfileirado com sucesso!",
@@ -670,140 +672,140 @@ response = requests.post(url, headers=headers, json=data)`
     "scheduled_at": null
   }
 }`}
-									</pre>
-								</div>
-							</div>
-						</div>
-					)}
-
-					{/* STEP 7: SWAGGER DOCUMENTATION */}
-					{currentStep === 6 && (
-						<div className="space-y-6 animate-in fade-in duration-500">
-							<div className="space-y-2">
-								<Badge variant="outline" className="border-blue-500/20 text-blue-400 bg-blue-500/5">Passo 7</Badge>
-								<h2 className="text-3xl font-extrabold text-white tracking-tight">Documentação OpenAPI / Swagger</h2>
-								<p className="text-slate-400 text-base">
-									O Hermes possui documentação automática Swagger integrada que permite testar requisições em tempo real no ambiente do desenvolvedor.
-								</p>
-							</div>
-
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-4">
-								<div className="space-y-4">
-									<div className="flex gap-4">
-										<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400">
-											<BookOpen className="h-5 w-5" />
-										</div>
-										<div>
-											<h4 className="text-white font-bold">Documentação Interativa</h4>
-											<p className="text-sm text-slate-400">
-												Acesse `/api/docs` no servidor backend para abrir o console Swagger UI. Todos os schemas e tipos de campos estão documentados.
-											</p>
-										</div>
-									</div>
-
-									<div className="flex gap-4">
-										<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400">
-											<PlayCircle className="h-5 w-5" />
-										</div>
-										<div>
-											<h4 className="text-white font-bold">Teste "Try It Out"</h4>
-											<p className="text-sm text-slate-400">
-												Cole sua API Key gerada na autenticação global do Swagger e teste os envios diretamente da página da documentação, sem escrever nenhuma linha de código.
-											</p>
-										</div>
+										</pre>
 									</div>
 								</div>
+							</div>
+						)}
 
-								{/* Simulated Swagger screen */}
-								<Card className="bg-slate-950 border-slate-800 overflow-hidden shadow-xl max-w-md mx-auto w-full">
-									<div className="bg-slate-900 border-b border-slate-800 p-3 flex items-center justify-between text-xs">
-										<div className="flex items-center gap-1.5">
-											<span className="h-2.5 w-2.5 rounded-full bg-red-500 inline-block"></span>
-											<span className="h-2.5 w-2.5 rounded-full bg-yellow-500 inline-block"></span>
-											<span className="h-2.5 w-2.5 rounded-full bg-green-500 inline-block"></span>
-										</div>
-										<span className="text-[10px] text-slate-500 font-mono">http://localhost:1350/api/docs</span>
-										<span className="h-4 w-4"></span>
-									</div>
-									<div className="p-4 space-y-3 font-sans text-xs">
-										<div className="flex items-center justify-between pb-2 border-b border-slate-850">
+						{/* STEP 7: SWAGGER DOCUMENTATION */}
+						{currentStep === 6 && (
+							<div className="space-y-6 animate-in fade-in duration-500">
+								<div className="space-y-2">
+									<Badge variant="outline" className="border-primary/20 text-primary bg-primary/5">Passo 7</Badge>
+									<h2 className="text-3xl font-extrabold text-foreground tracking-tight">Documentação OpenAPI / Swagger</h2>
+									<p className="text-muted-foreground text-base">
+										O Hermes possui documentação automática Swagger integrada que permite testar requisições em tempo real no ambiente do desenvolvedor.
+									</p>
+								</div>
+
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-4">
+									<div className="space-y-4">
+										<div className="flex gap-4">
+											<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+												<BookOpen className="h-5 w-5" />
+											</div>
 											<div>
-												<span className="font-bold text-sm text-slate-200">Hermes API Docs</span>
-												<span className="text-[10px] text-slate-500 block">v1.0.0 — OAS 3.0</span>
+												<h4 className="text-foreground font-bold">Documentação Interativa</h4>
+												<p className="text-sm text-muted-foreground">
+													Acesse <code className="text-primary text-xs">/api/docs</code> no servidor backend para abrir o console Swagger UI. Todos os schemas e tipos de campos estão documentados.
+												</p>
 											</div>
-											<Badge className="bg-emerald-600/20 text-emerald-400 border border-emerald-500/30">Authorize</Badge>
 										</div>
 
-										{/* Simulated Swagger Endpoints */}
-										<div className="space-y-2">
-											<div className="bg-emerald-950/20 border border-emerald-500/20 rounded-md p-2 flex items-center gap-3">
-												<Badge className="bg-emerald-500 text-white hover:bg-emerald-500 text-[9px] px-1 h-5 cursor-default">POST</Badge>
-												<span className="font-mono text-slate-200 font-semibold text-[10px]">/api/emails</span>
-												<span className="text-slate-500 ml-auto">Disparar e-mail individual</span>
+										<div className="flex gap-4">
+											<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/50 text-accent-foreground">
+												<PlayCircle className="h-5 w-5" />
 											</div>
-											<div className="bg-emerald-950/20 border border-emerald-500/20 rounded-md p-2 flex items-center gap-3">
-												<Badge className="bg-emerald-500 text-white hover:bg-emerald-500 text-[9px] px-1 h-5 cursor-default">POST</Badge>
-												<span className="font-mono text-slate-200 font-semibold text-[10px]">/api/emails/bulk</span>
-												<span className="text-slate-500 ml-auto">Disparar e-mails em lote</span>
-											</div>
-											<div className="bg-blue-950/20 border border-blue-500/20 rounded-md p-2 flex items-center gap-3 opacity-60">
-												<Badge className="bg-blue-500 text-white hover:bg-blue-500 text-[9px] px-1 h-5 cursor-default">GET</Badge>
-												<span className="font-mono text-slate-200 font-semibold text-[10px]">/api/services</span>
-												<span className="text-slate-500 ml-auto">Listar serviços</span>
+											<div>
+												<h4 className="text-foreground font-bold">Teste &quot;Try It Out&quot;</h4>
+												<p className="text-sm text-muted-foreground">
+													Cole sua API Key gerada na autenticação global do Swagger e teste os envios diretamente da página da documentação, sem escrever nenhuma linha de código.
+												</p>
 											</div>
 										</div>
 									</div>
-								</Card>
+
+									{/* Simulated Swagger screen */}
+									<Card className="bg-background border-border overflow-hidden shadow-sm max-w-md mx-auto w-full">
+										<div className="bg-muted border-b border-border p-3 flex items-center justify-between text-xs">
+											<div className="flex items-center gap-1.5">
+												<span className="h-2.5 w-2.5 rounded-full bg-destructive inline-block"></span>
+												<span className="h-2.5 w-2.5 rounded-full bg-warning inline-block"></span>
+												<span className="h-2.5 w-2.5 rounded-full bg-success inline-block"></span>
+											</div>
+											<span className="text-[10px] text-muted-foreground font-mono">http://localhost:1350/api/docs</span>
+											<span className="h-4 w-4"></span>
+										</div>
+										<div className="p-4 space-y-3 font-sans text-xs">
+											<div className="flex items-center justify-between pb-2 border-b border-border">
+												<div>
+													<span className="font-bold text-sm text-foreground">Hermes API Docs</span>
+													<span className="text-[10px] text-muted-foreground block">v1.0.0 — OAS 3.0</span>
+												</div>
+												<Badge className="bg-success/20 text-success border border-success/30">Authorize</Badge>
+											</div>
+
+											{/* Simulated Swagger Endpoints */}
+											<div className="space-y-2">
+												<div className="bg-success/10 border border-success/20 rounded-md p-2 flex items-center gap-3">
+													<Badge className="bg-success text-success-foreground hover:bg-success text-[9px] px-1 h-5 cursor-default">POST</Badge>
+													<span className="font-mono text-foreground font-semibold text-[10px]">/api/emails</span>
+													<span className="text-muted-foreground ml-auto">Disparar e-mail individual</span>
+												</div>
+												<div className="bg-success/10 border border-success/20 rounded-md p-2 flex items-center gap-3">
+													<Badge className="bg-success text-success-foreground hover:bg-success text-[9px] px-1 h-5 cursor-default">POST</Badge>
+													<span className="font-mono text-foreground font-semibold text-[10px]">/api/emails/bulk</span>
+													<span className="text-muted-foreground ml-auto">Disparar e-mails em lote</span>
+												</div>
+												<div className="bg-primary/10 border border-primary/20 rounded-md p-2 flex items-center gap-3 opacity-60">
+													<Badge className="bg-primary text-primary-foreground hover:bg-primary text-[9px] px-1 h-5 cursor-default">GET</Badge>
+													<span className="font-mono text-foreground font-semibold text-[10px]">/api/services</span>
+													<span className="text-muted-foreground ml-auto">Listar serviços</span>
+												</div>
+											</div>
+										</div>
+									</Card>
+								</div>
 							</div>
-						</div>
-					)}
-			</div>
+						)}
+					</div>
 
-			{/* Navigation actions */}
-			<div className="flex items-center justify-between mt-6 bg-slate-900/20 border border-slate-800/80 rounded-2xl p-4">
-				<Button
-					variant="outline"
-					onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
-					disabled={currentStep === 0}
-					className="border-slate-850 hover:bg-slate-900 text-slate-300 disabled:opacity-40 cursor-pointer"
-				>
-					<ArrowLeft className="mr-2 h-4 w-4" />
-					Anterior
-				</Button>
-
-				<div className="text-xs text-slate-500 font-medium">
-					Passo {currentStep + 1} de {steps.length}
-				</div>
-
-				{currentStep < steps.length - 1 ? (
-					<Button
-						onClick={() => setCurrentStep(currentStep + 1)}
-						className="bg-blue-600 hover:bg-blue-500 text-white cursor-pointer shadow-lg shadow-blue-500/10"
-					>
-						Próximo
-						<ArrowRight className="ml-2 h-4 w-4" />
-					</Button>
-				) : (
-					<Link href="/auth/sign-up">
-						<Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white cursor-pointer shadow-lg shadow-blue-500/20">
-							Começar Agora
-							<ChevronRight className="ml-1 h-4 w-4" />
+					{/* Navigation actions */}
+					<div className="flex items-center justify-between mt-6 bg-card border border-border rounded-2xl p-4">
+						<Button
+							variant="outline"
+							onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+							disabled={currentStep === 0}
+							className="disabled:opacity-40 cursor-pointer"
+						>
+							<ArrowLeft className="mr-2 h-4 w-4" />
+							Anterior
 						</Button>
-					</Link>
-				)}
-			</div>
-		</main>
-			</div >
 
-		{/* Footer */ }
-		< footer className = "mt-auto border-t border-slate-900 bg-slate-950/40 py-6 text-center text-xs text-slate-600" >
-			<div className="container mx-auto px-4 max-w-7xl">
-				<p>© 2026 Hermes Transactional Email. Todos os direitos reservados.</p>
-				<p className="mt-1 text-slate-700">
-					Desenvolvido em Next.js com foco em segurança de autenticação, fila de alta performance e AOT MJML.
-				</p>
+						<div className="text-xs text-muted-foreground font-medium">
+							Passo {currentStep + 1} de {steps.length}
+						</div>
+
+						{currentStep < steps.length - 1 ? (
+							<Button
+								onClick={() => setCurrentStep(currentStep + 1)}
+								className="bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer"
+							>
+								Próximo
+								<ArrowRight className="ml-2 h-4 w-4" />
+							</Button>
+						) : (
+							<Link href="/auth/sign-up">
+								<Button className="bg-gradient-to-r from-primary to-blue-400 hover:from-primary/90 hover:to-blue-400/90 text-primary-foreground cursor-pointer">
+									Começar Agora
+									<ChevronRight className="ml-1 h-4 w-4" />
+								</Button>
+							</Link>
+						)}
+					</div>
+				</main>
 			</div>
-			</footer >
-		</div >
+
+			{/* Footer */}
+			<footer className="mt-auto border-t border-border bg-card/40 py-6 text-center text-xs text-muted-foreground">
+				<div className="container mx-auto px-4 max-w-7xl">
+					<p>© 2026 Hermes Transactional Email. Todos os direitos reservados.</p>
+					<p className="mt-1 text-muted-foreground/50">
+						Desenvolvido em Next.js com foco em segurança de autenticação, fila de alta performance e AOT MJML.
+					</p>
+				</div>
+			</footer>
+		</div>
 	);
 }
