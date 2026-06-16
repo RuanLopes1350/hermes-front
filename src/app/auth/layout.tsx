@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Documentacao, Tutorial, Privacidade, Version } from '@/src/constants/links';
 import { ThemeToggle } from '@/src/components/theme-toggle';
+import Link from 'next/link';
+
 
 export const metadata: Metadata = {
 	title: 'Hermes | Autenticação',
@@ -20,7 +22,9 @@ export default function AuthLayout({
 				<div className="bg-primary/10 p-3 rounded-2xl">
 					<img className="w-10 h-10" src="/hermes-icon.svg" alt="Hermes Logo" />
 				</div>
-				<h1 className="text-2xl font-black tracking-tight">Hermes</h1>
+				<span className="font-extrabold text-3xl tracking-tight bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
+					Hermes
+				</span>
 			</div>
 
 			<div className="w-full max-w-md flex-1 flex flex-col justify-center">{children}</div>
@@ -35,14 +39,14 @@ export default function AuthLayout({
 					>
 						Documentação
 					</a>
-					<a
+					<Link
 						href={Tutorial}
 						target="_blank"
 						rel="noreferrer"
 						className="hover:text-primary transition-colors"
 					>
 						Tutorial
-					</a>
+					</Link>
 					<a
 						href={Privacidade}
 						target="_blank"

@@ -37,6 +37,7 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 		{ name: 'E-mails', path: '/system/emails' },
 		{ name: 'Templates', path: '/system/templates' },
 		{ name: 'Sandbox', path: '/system/sandbox' },
+		{ name: 'Como usar?', path: '/tutorial' }
 	];
 
 	useEffect(() => {
@@ -60,11 +61,9 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 				<div className="container mx-auto max-w-7xl flex h-16 items-center justify-between px-4 sm:px-6">
 					{/* Left: Brand & Links */}
 					<div className="flex items-center gap-8">
-						<div className="flex items-center gap-2 group">
-							<div className="flex h-8 w-8 items-center justify-center rounded-lg">
-								<img src="/hermes-icon.svg" alt="Hermes Icon" className="h-5 w-5" />
-							</div>
-							<span className="font-bold text-lg tracking-tight hidden sm:inline-block transition-colors group-hover:text-primary">
+						<div className="flex items-center gap-3">
+							<img src="/hermes-icon.svg" alt="Hermes Icon" className="h-6 w-6" />
+							<span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
 								Hermes
 							</span>
 						</div>
@@ -76,11 +75,10 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 									<Link
 										key={item.path}
 										href={item.path}
-										className={`px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
-											isActive
+										className={`px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${isActive
 												? 'bg-secondary text-secondary-foreground'
 												: 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
-										}`}
+											}`}
 									>
 										{item.name}
 									</Link>
@@ -169,11 +167,10 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 									key={item.path}
 									href={item.path}
 									onClick={() => setIsMobileMenuOpen(false)}
-									className={`block px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-										isActive
+									className={`block px-4 py-2 rounded-md text-sm font-medium transition-colors ${isActive
 											? 'bg-secondary text-secondary-foreground'
 											: 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
-									}`}
+										}`}
 								>
 									{item.name}
 								</Link>

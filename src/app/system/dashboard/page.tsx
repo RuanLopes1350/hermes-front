@@ -127,9 +127,9 @@ export default function DashboardPage() {
 	// Helper para Saudação
 	const getGreeting = () => {
 		const hour = new Date().getHours();
-		if (hour >= 6 && hour < 12) return 'Bom dia';
-		if (hour >= 12 && hour < 18) return 'Boa tarde';
-		return 'Boa noite';
+		if (hour >= 6 && hour < 12) return '☀️ Bom dia';
+		if (hour >= 12 && hour < 18) return '🌤️ Boa tarde';
+		return '🌙 Boa noite';
 	};
 
 	// Helper para Action Icon (Timeline)
@@ -401,7 +401,7 @@ export default function DashboardPage() {
 			{/* Cabeçalho */}
 			<div>
 				<h2 className="text-2xl font-bold tracking-tight">
-					☀️ {getGreeting()}, {user?.name?.split(' ')[0] || 'Usuário'}!{' '}
+					{getGreeting()}, {user?.name?.split(' ')[0] || 'Usuário'}!{' '}
 					{isAdmin && (
 						<Badge
 							variant="outline"

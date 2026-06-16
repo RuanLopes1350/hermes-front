@@ -796,16 +796,6 @@ response = requests.post(url, headers=headers, json=data)`
 					</div>
 				</main>
 			</div>
-
-			{/* Footer */}
-			<footer className="mt-auto border-t border-border bg-card/40 py-6 text-center text-xs text-muted-foreground">
-				<div className="container mx-auto px-4 max-w-7xl">
-					<p>© 2026 Hermes Transactional Email. Todos os direitos reservados.</p>
-					<p className="mt-1 text-muted-foreground/50">
-						Desenvolvido em Next.js com foco em segurança de autenticação, fila de alta performance e AOT MJML.
-					</p>
-				</div>
-			</footer>
 		</div>
 	);
 }
