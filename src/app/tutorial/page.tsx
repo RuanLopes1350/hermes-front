@@ -26,8 +26,10 @@ import { Button } from '@/src/components/ui/button';
 import { Badge } from '@/src/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { ThemeToggle } from '@/src/components/theme-toggle';
+import { authClient } from '@/src/lib/auth-client';
 
 export default function TutorialPage() {
+	const { data: session } = authClient.useSession();
 	const [currentStep, setCurrentStep] = useState(0);
 	const [codeLanguage, setCodeLanguage] = useState<'curl' | 'javascript' | 'python'>('curl');
 	const [smtpType, setSmtpType] = useState<'plain' | 'oauth2'>('oauth2');
@@ -73,16 +75,26 @@ export default function TutorialPage() {
 					</div>
 					<div className="flex items-center gap-3">
 						<ThemeToggle />
-						<Link href="/auth/sign-in">
-							<Button variant="ghost" className="cursor-pointer">
-								Entrar
-							</Button>
-						</Link>
-						<Link href="/auth/sign-up">
-							<Button className="bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer shadow-lg shadow-primary/20">
-								Criar Conta Grátis
-							</Button>
-						</Link>
+						{session ? (
+							<Link href="/system/dashboard">
+								<Button className="bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer shadow-lg shadow-primary/20">
+									Ir para o Dashboard
+								</Button>
+							</Link>
+						) : (
+							<>
+								<Link href="/auth/sign-in">
+									<Button variant="ghost" className="cursor-pointer">
+										Entrar
+									</Button>
+								</Link>
+								<Link href="/auth/sign-up">
+									<Button className="bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer shadow-lg shadow-primary/20">
+										Criar Conta Grátis
+									</Button>
+								</Link>
+							</>
+						)}
 					</div>
 				</div>
 			</header>
@@ -785,6 +797,13 @@ response = requests.post(url, headers=headers, json=data)`
 								Próximo
 								<ArrowRight className="ml-2 h-4 w-4" />
 							</Button>
+						) : session ? (
+							<Link href="/system/services">
+								<Button className="bg-gradient-to-r from-primary to-blue-400 hover:from-primary/90 hover:to-blue-400/90 text-primary-foreground cursor-pointer">
+									Ir para o Dashboard
+									<ChevronRight className="ml-1 h-4 w-4" />
+								</Button>
+							</Link>
 						) : (
 							<Link href="/auth/sign-up">
 								<Button className="bg-gradient-to-r from-primary to-blue-400 hover:from-primary/90 hover:to-blue-400/90 text-primary-foreground cursor-pointer">
