@@ -1,6 +1,18 @@
 {
   "name": "hermes-front",
   "version": "0.1.0",
+  "description": "Painel administrativo moderno para o gateway de e-mails transacionais Hermes.",
+  "author": "ruanlopes1350",
+  "keywords": [
+    "frontend",
+    "nextjs",
+    "react",
+    "dashboard",
+    "email-gateway",
+    "hermes",
+    "admin-panel",
+    "transactional-email"
+  ],
   "private": true,
   "scripts": {
     "dev": "next dev",

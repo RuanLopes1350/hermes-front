@@ -71,9 +71,11 @@ export default function SignUpPage() {
 							</div>
 						)}
 						<div className="space-y-2">
-							<label htmlFor="name" className="text-sm font-medium leading-none">
-								Nome Completo
-							</label>
+							<div className="flex items-center justify-between">
+								<label htmlFor="name" className="text-sm font-medium leading-none">
+									Nome Completo
+								</label>
+							</div>
 							<Input
 								id="name"
 								type="text"
@@ -84,9 +86,11 @@ export default function SignUpPage() {
 							/>
 						</div>
 						<div className="space-y-2">
-							<label htmlFor="email" className="text-sm font-medium leading-none">
-								E-mail corporativo
-							</label>
+							<div className="flex items-center justify-between">
+								<label htmlFor="email" className="text-sm font-medium leading-none">
+									E-mail corporativo
+								</label>
+							</div>
 							<Input
 								id="email"
 								type="email"
@@ -98,24 +102,30 @@ export default function SignUpPage() {
 						</div>
 						<div className="grid grid-cols-2 gap-4">
 							<div className="space-y-2">
-								<label htmlFor="password" className="text-sm font-medium leading-none">
-									Senha
-								</label>
+								<div className="flex items-center justify-between">
+									<label htmlFor="password" className="text-sm font-medium leading-none">
+										Senha
+									</label>
+								</div>
 								<Input
 									id="password"
 									type="password"
+									placeholder="Crie uma senha"
 									value={password}
 									onChange={(e) => setPassword(e.target.value)}
 									required
 								/>
 							</div>
 							<div className="space-y-2">
-								<label htmlFor="confirmPassword" className="text-sm font-medium leading-none">
-									Repetir Senha
-								</label>
+								<div className="flex items-center justify-between">
+									<label htmlFor="confirmPassword" className="text-sm font-medium leading-none">
+										Repetir Senha
+									</label>
+								</div>
 								<Input
 									id="confirmPassword"
 									type="password"
+									placeholder="Repita a senha"
 									value={confirmPassword}
 									onChange={(e) => setConfirmPassword(e.target.value)}
 									required

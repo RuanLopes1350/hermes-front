@@ -37,7 +37,7 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 		{ name: 'E-mails', path: '/system/emails' },
 		{ name: 'Templates', path: '/system/templates' },
 		{ name: 'Sandbox', path: '/system/sandbox' },
-		{ name: 'Como usar?', path: '/tutorial' }
+		{ name: 'Como usar?', path: '/tutorial' },
 	];
 
 	useEffect(() => {
@@ -75,10 +75,11 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 									<Link
 										key={item.path}
 										href={item.path}
-										className={`px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${isActive
+										className={`px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
+											isActive
 												? 'bg-secondary text-secondary-foreground'
 												: 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
-											}`}
+										}`}
 									>
 										{item.name}
 									</Link>
@@ -167,10 +168,11 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 									key={item.path}
 									href={item.path}
 									onClick={() => setIsMobileMenuOpen(false)}
-									className={`block px-4 py-2 rounded-md text-sm font-medium transition-colors ${isActive
+									className={`block px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+										isActive
 											? 'bg-secondary text-secondary-foreground'
 											: 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
-										}`}
+									}`}
 								>
 									{item.name}
 								</Link>

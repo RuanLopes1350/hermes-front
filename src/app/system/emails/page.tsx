@@ -254,9 +254,7 @@ export default function EmailsPage() {
 									<TableCell className="text-sm">{email.recipient_to}</TableCell>
 									<TableCell className="text-sm max-w-[200px] truncate">{email.subject}</TableCell>
 									<TableCell className="text-xs font-mono text-muted-foreground truncate max-w-[120px]">
-										{email.credentialName ||
-											email.credential_id ||
-											'N/A'}
+										{email.credentialName || email.credential_id || 'N/A'}
 									</TableCell>
 									<TableCell className="text-sm">
 										{new Date(email.created_at || email.createdAt || '').toLocaleString()}
@@ -313,9 +311,7 @@ export default function EmailsPage() {
 										Credencial
 									</p>
 									<p className="text-sm font-mono break-all">
-										{selectedEmail.credentialName ||
-											selectedEmail.credential_id ||
-											'N/A'}
+										{selectedEmail.credentialName || selectedEmail.credential_id || 'N/A'}
 									</p>
 								</div>
 							</div>

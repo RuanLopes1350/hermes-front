@@ -3,7 +3,6 @@ import { Documentacao, Tutorial, Privacidade, Version } from '@/src/constants/li
 import { ThemeToggle } from '@/src/components/theme-toggle';
 import Link from 'next/link';
 
-
 export const metadata: Metadata = {
 	title: 'Hermes | Autenticação',
 };

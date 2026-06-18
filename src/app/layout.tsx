@@ -15,9 +15,30 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: 'Hermes',
+	title: {
+		template: '%s | Hermes',
+		default: 'Hermes | Transactional Email Gateway',
+	},
+	description:
+		'Gateway de e-mails transacionais open-source. Gerencie credenciais SMTP, Google OAuth2, templates em MJML e audite envios em tempo real.',
+	keywords: [
+		'transactional email',
+		'email gateway',
+		'microservices',
+		'mjml',
+		'smtp',
+		'oauth2',
+		'hermes',
+	],
+	authors: [{ name: 'Ruan Lopes' }],
+	openGraph: {
+		title: 'Hermes | Transactional Email Gateway',
+		description:
+			'Plataforma multitenant para o envio, gerenciamento e auditoria de e-mails transacionais.',
+		type: 'website',
+		siteName: 'Hermes Gateway',
+	},
 	icons: '/hermes-icon.svg',
-	description: 'A transactional email microservice built with Node.js.',
 };
 
 export default function RootLayout({
@@ -27,7 +48,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<html
-			lang="en"
+			lang="pt-BR"
 			className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
 			suppressHydrationWarning
 		>

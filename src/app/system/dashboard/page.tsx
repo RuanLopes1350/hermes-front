@@ -41,8 +41,20 @@ import {
 	TableRow,
 } from '@/src/components/ui/table';
 import { Badge } from '@/src/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/src/components/ui/select';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/src/components/ui/sheet';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/src/components/ui/select';
+import {
+	Sheet,
+	SheetContent,
+	SheetHeader,
+	SheetTitle,
+	SheetDescription,
+} from '@/src/components/ui/sheet';
 import { authClient } from '@/src/lib/auth-client';
 import { apiFetch } from '@/src/lib/api';
 import { useToast } from '@/src/hooks/use-toast';
@@ -61,7 +73,7 @@ export default function DashboardPage() {
 	const [loading, setLoading] = useState(true);
 	const [data, setData] = useState<any>(null);
 	const [days, setDays] = useState(7);
-	
+
 	const [selectedEmail, setSelectedEmail] = useState<any>(null);
 	const [isSheetOpen, setIsSheetOpen] = useState(false);
 
@@ -100,7 +112,9 @@ export default function DashboardPage() {
 	const fetchDashboardData = async () => {
 		setLoading(true);
 		try {
-			const endpoint = isAdmin ? `/api/dashboard/admin?days=${days}` : `/api/dashboard/user?days=${days}`;
+			const endpoint = isAdmin
+				? `/api/dashboard/admin?days=${days}`
+				: `/api/dashboard/user?days=${days}`;
 			const response = await apiFetch(endpoint);
 			const result = await response.json();
 
@@ -152,18 +166,24 @@ export default function DashboardPage() {
 
 	// Calculations
 	const totalSent = isAdmin ? Number(data.summary.totalSent || 0) : Number(data.summary.sent || 0);
-	const totalFailed = isAdmin ? Number(data.summary.totalFailed || 0) : Number(data.summary.failed || 0);
+	const totalFailed = isAdmin
+		? Number(data.summary.totalFailed || 0)
+		: Number(data.summary.failed || 0);
 	const totalAttempts = totalSent + totalFailed;
 	const successRate = totalAttempts > 0 ? ((totalSent / totalAttempts) * 100).toFixed(1) : '100';
 
 	// Delta Today vs Yesterday
 	const todayCount = Number(data.summary.today || 0);
 	const yesterdayCount = Number(data.summary.yesterday || 0);
-	const deltaToday = yesterdayCount === 0 
-		? (todayCount > 0 ? 100 : 0) 
-		: ((todayCount - yesterdayCount) / yesterdayCount) * 100;
-	
-	const deltaIcon = deltaToday >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />;
+	const deltaToday =
+		yesterdayCount === 0
+			? todayCount > 0
+				? 100
+				: 0
+			: ((todayCount - yesterdayCount) / yesterdayCount) * 100;
+
+	const deltaIcon =
+		deltaToday >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />;
 	const deltaColor = deltaToday >= 0 ? 'text-emerald-600' : 'text-red-500';
 
 	// ==========================================
@@ -219,27 +239,27 @@ export default function DashboardPage() {
 	// 1b. Volume Multi-Série (Admin Only)
 	const getVolumeByServiceOption = (volumeData: any[]) => {
 		if (!volumeData || volumeData.length === 0) return {};
-		
+
 		const datesSet = new Set<string>();
 		const servicesSet = new Set<string>();
-		
+
 		volumeData.forEach((d: any) => {
 			datesSet.add(d.date);
 			servicesSet.add(d.serviceName);
 		});
-		
+
 		const dates = Array.from(datesSet).sort();
 		const services = Array.from(servicesSet);
-		
-		const series = services.map(service => {
+
+		const series = services.map((service) => {
 			return {
 				name: service,
 				type: 'line',
 				smooth: true,
-				data: dates.map(date => {
+				data: dates.map((date) => {
 					const entry = volumeData.find((d: any) => d.date === date && d.serviceName === service);
 					return entry ? entry.total : 0;
-				})
+				}),
 			};
 		});
 
@@ -251,11 +271,13 @@ export default function DashboardPage() {
 			xAxis: {
 				type: 'category',
 				boundaryGap: false,
-				data: dates.map(d => new Date(d).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })),
+				data: dates.map((d) =>
+					new Date(d).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }),
+				),
 				axisLine: { lineStyle: { color: '#cbd5e1' } },
 			},
 			yAxis: { type: 'value', splitLine: { lineStyle: { color: '#f1f5f9', type: 'dashed' } } },
-			series
+			series,
 		};
 	};
 
@@ -478,11 +500,18 @@ export default function DashboardPage() {
 				},
 				{
 					label: 'Próximo Agendado',
-					value: data.nextScheduled ? new Date(data.nextScheduled).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : 'Nenhum',
+					value: data.nextScheduled
+						? new Date(data.nextScheduled).toLocaleTimeString('pt-BR', {
+								hour: '2-digit',
+								minute: '2-digit',
+							})
+						: 'Nenhum',
 					icon: CalendarClock,
 					color: 'text-purple-600',
 					bg: 'bg-purple-100',
-					desc: data.nextScheduled ? new Date(data.nextScheduled).toLocaleDateString('pt-BR') : 'Sem fila agendada',
+					desc: data.nextScheduled
+						? new Date(data.nextScheduled).toLocaleDateString('pt-BR')
+						: 'Sem fila agendada',
 				},
 				{
 					label: 'Templates Ativos',
@@ -502,10 +531,15 @@ export default function DashboardPage() {
 					<ShieldAlert className="h-5 w-5 mt-0.5 shrink-0" />
 					<div>
 						<h4 className="font-bold text-sm">Atenção: Credenciais Inativas Detectadas</h4>
-						<p className="text-xs mt-1 mb-2">Os seguintes serviços estão com credenciais desativadas ou inválidas e as próximas entregas falharão silenciosamente:</p>
+						<p className="text-xs mt-1 mb-2">
+							Os seguintes serviços estão com credenciais desativadas ou inválidas e as próximas
+							entregas falharão silenciosamente:
+						</p>
 						<ul className="list-disc list-inside text-xs font-medium bg-white/50 p-2 rounded-md">
 							{data.inactiveCredentials.map((c: any) => (
-								<li key={c.credId}>Serviço <strong>{c.serviceName}</strong> (Credencial: {c.credName})</li>
+								<li key={c.credId}>
+									Serviço <strong>{c.serviceName}</strong> (Credencial: {c.credName})
+								</li>
 							))}
 						</ul>
 					</div>
@@ -651,7 +685,9 @@ export default function DashboardPage() {
 				<Card className="col-span-1 lg:col-span-2 flex flex-col max-h-[500px] shadow-sm">
 					<CardHeader>
 						<CardTitle>Últimos Envios e Disparos</CardTitle>
-						<CardDescription>Acompanhe o status e a latência de entrega em tempo real.</CardDescription>
+						<CardDescription>
+							Acompanhe o status e a latência de entrega em tempo real.
+						</CardDescription>
 					</CardHeader>
 					<CardContent className="flex-1 overflow-y-auto">
 						<div className="overflow-x-auto">
@@ -677,10 +713,16 @@ export default function DashboardPage() {
 											<TableRow key={mail.id} className="group">
 												<TableCell>
 													<div className="flex flex-col gap-0.5">
-														<span className="font-medium text-sm truncate max-w-[200px]" title={mail.recipient}>
+														<span
+															className="font-medium text-sm truncate max-w-[200px]"
+															title={mail.recipient}
+														>
 															{mail.recipient}
 														</span>
-														<span className="text-xs text-muted-foreground truncate max-w-[200px]" title={mail.subject}>
+														<span
+															className="text-xs text-muted-foreground truncate max-w-[200px]"
+															title={mail.subject}
+														>
 															{mail.subject}
 														</span>
 													</div>
@@ -716,9 +758,9 @@ export default function DashboardPage() {
 													</div>
 												</TableCell>
 												<TableCell className="text-right">
-													<Button 
-														variant="ghost" 
-														size="icon" 
+													<Button
+														variant="ghost"
+														size="icon"
 														className="h-8 w-8 text-muted-foreground hover:text-primary"
 														onClick={() => {
 															setSelectedEmail(mail);
@@ -790,9 +832,7 @@ export default function DashboardPage() {
 								</div>
 								<div className="p-4 rounded-lg bg-red-50 border border-red-100 flex flex-col items-center justify-center text-center">
 									<AlertCircle className="h-5 w-5 text-red-500 mb-1" />
-									<span className="text-2xl font-bold text-red-700">
-										{data.queue?.failed || 0}
-									</span>
+									<span className="text-2xl font-bold text-red-700">{data.queue?.failed || 0}</span>
 									<span className="text-[10px] font-bold text-red-600 uppercase tracking-wider">
 										Failed
 									</span>
@@ -815,7 +855,9 @@ export default function DashboardPage() {
 						<Card className="shadow-sm">
 							<CardHeader>
 								<CardTitle>Volume Multi-Tenants ({days} dias)</CardTitle>
-								<CardDescription>Carga de envios agrupada por serviço ao longo do tempo.</CardDescription>
+								<CardDescription>
+									Carga de envios agrupada por serviço ao longo do tempo.
+								</CardDescription>
 							</CardHeader>
 							<CardContent className="min-h-[250px]">
 								{!data.volumeByService || data.volumeByService.length === 0 ? (
@@ -839,9 +881,15 @@ export default function DashboardPage() {
 								</CardHeader>
 								<CardContent>
 									{!data.topServicesByVolume || data.topServicesByVolume.length === 0 ? (
-										<div className="h-[100px] flex items-center justify-center text-muted-foreground text-xs border border-dashed rounded">Nenhum dado.</div>
+										<div className="h-[100px] flex items-center justify-center text-muted-foreground text-xs border border-dashed rounded">
+											Nenhum dado.
+										</div>
 									) : (
-										<ReactECharts option={getTopServicesOption(data.topServicesByVolume)} style={{ height: '120px', width: '100%' }} opts={{ renderer: 'svg' }} />
+										<ReactECharts
+											option={getTopServicesOption(data.topServicesByVolume)}
+											style={{ height: '120px', width: '100%' }}
+											opts={{ renderer: 'svg' }}
+										/>
 									)}
 								</CardContent>
 							</Card>
@@ -852,9 +900,15 @@ export default function DashboardPage() {
 								</CardHeader>
 								<CardContent>
 									{!data.topServicesByFailureRate || data.topServicesByFailureRate.length === 0 ? (
-										<div className="h-[100px] flex items-center justify-center text-muted-foreground text-xs border border-dashed rounded">Nenhum dado.</div>
+										<div className="h-[100px] flex items-center justify-center text-muted-foreground text-xs border border-dashed rounded">
+											Nenhum dado.
+										</div>
 									) : (
-										<ReactECharts option={getTopServicesFailuresOption(data.topServicesByFailureRate)} style={{ height: '120px', width: '100%' }} opts={{ renderer: 'svg' }} />
+										<ReactECharts
+											option={getTopServicesFailuresOption(data.topServicesByFailureRate)}
+											style={{ height: '120px', width: '100%' }}
+											opts={{ renderer: 'svg' }}
+										/>
 									)}
 								</CardContent>
 							</Card>
@@ -905,50 +959,95 @@ export default function DashboardPage() {
 							Verifique as credenciais, logs de erro e latência desse disparo.
 						</SheetDescription>
 					</SheetHeader>
-					
+
 					{selectedEmail && (
 						<div className="space-y-6 w-full flex-1">
 							{/* Status e Infos */}
 							<div className="grid grid-cols-2 gap-x-4 gap-y-6 w-full">
 								<div className="space-y-1 min-w-0">
-									<label className="text-[10px] uppercase font-bold text-muted-foreground truncate block">Status Atual</label>
+									<label className="text-[10px] uppercase font-bold text-muted-foreground truncate block">
+										Status Atual
+									</label>
 									<div>
 										{selectedEmail.status === 'sent' ? (
-											<Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-none font-bold">Entregue</Badge>
+											<Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-none font-bold">
+												Entregue
+											</Badge>
 										) : selectedEmail.status === 'failed' ? (
-											<Badge className="bg-red-100 text-red-800 hover:bg-red-200 border-none font-bold">Falhou</Badge>
+											<Badge className="bg-red-100 text-red-800 hover:bg-red-200 border-none font-bold">
+												Falhou
+											</Badge>
 										) : (
-											<Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200 border-none font-bold truncate max-w-full block">{selectedEmail.status}</Badge>
+											<Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200 border-none font-bold truncate max-w-full block">
+												{selectedEmail.status}
+											</Badge>
 										)}
 									</div>
 								</div>
 								<div className="space-y-1 min-w-0">
-									<label className="text-[10px] uppercase font-bold text-muted-foreground truncate block">Prioridade</label>
-									<div><Badge variant="outline" className="text-[10px] uppercase truncate max-w-full block">{selectedEmail.priority}</Badge></div>
+									<label className="text-[10px] uppercase font-bold text-muted-foreground truncate block">
+										Prioridade
+									</label>
+									<div>
+										<Badge
+											variant="outline"
+											className="text-[10px] uppercase truncate max-w-full block"
+										>
+											{selectedEmail.priority}
+										</Badge>
+									</div>
 								</div>
-								
+
 								<div className="space-y-1 min-w-0">
-									<label className="text-[10px] uppercase font-bold text-muted-foreground truncate block" title="Latência BullMQ">Latência</label>
-									<div className="text-xs font-mono font-medium truncate w-full" title={selectedEmail.latencyMs ? `${selectedEmail.latencyMs} ms` : 'Processando...'}>{selectedEmail.latencyMs ? `${selectedEmail.latencyMs} ms` : 'Processando...'}</div>
+									<label
+										className="text-[10px] uppercase font-bold text-muted-foreground truncate block"
+										title="Latência BullMQ"
+									>
+										Latência
+									</label>
+									<div
+										className="text-xs font-mono font-medium truncate w-full"
+										title={
+											selectedEmail.latencyMs ? `${selectedEmail.latencyMs} ms` : 'Processando...'
+										}
+									>
+										{selectedEmail.latencyMs ? `${selectedEmail.latencyMs} ms` : 'Processando...'}
+									</div>
 								</div>
 								<div className="space-y-1 min-w-0">
-									<label className="text-[10px] uppercase font-bold text-muted-foreground truncate block">Tentativas</label>
-									<div className="text-xs font-mono font-medium truncate w-full">{selectedEmail.retryCount}x</div>
+									<label className="text-[10px] uppercase font-bold text-muted-foreground truncate block">
+										Tentativas
+									</label>
+									<div className="text-xs font-mono font-medium truncate w-full">
+										{selectedEmail.retryCount}x
+									</div>
 								</div>
 							</div>
 
 							<div className="border-t pt-4 space-y-4 w-full">
 								<div className="space-y-1 w-full min-w-0">
-									<label className="text-[10px] uppercase font-bold text-muted-foreground block">Destinatário</label>
-									<div className="text-sm font-medium p-2 bg-muted rounded-md break-words w-full overflow-hidden">{selectedEmail.recipient}</div>
+									<label className="text-[10px] uppercase font-bold text-muted-foreground block">
+										Destinatário
+									</label>
+									<div className="text-sm font-medium p-2 bg-muted rounded-md break-words w-full overflow-hidden">
+										{selectedEmail.recipient}
+									</div>
 								</div>
 								<div className="space-y-1 w-full min-w-0">
-									<label className="text-[10px] uppercase font-bold text-muted-foreground block">Assunto</label>
-									<div className="text-sm p-2 bg-muted rounded-md break-words w-full overflow-hidden">{selectedEmail.subject}</div>
+									<label className="text-[10px] uppercase font-bold text-muted-foreground block">
+										Assunto
+									</label>
+									<div className="text-sm p-2 bg-muted rounded-md break-words w-full overflow-hidden">
+										{selectedEmail.subject}
+									</div>
 								</div>
 								<div className="space-y-1 w-full min-w-0">
-									<label className="text-[10px] uppercase font-bold text-muted-foreground block">Serviço de Origem</label>
-									<div className="text-sm p-2 bg-primary/10 text-primary font-bold rounded-md break-words w-full overflow-hidden">{selectedEmail.serviceName}</div>
+									<label className="text-[10px] uppercase font-bold text-muted-foreground block">
+										Serviço de Origem
+									</label>
+									<div className="text-sm p-2 bg-primary/10 text-primary font-bold rounded-md break-words w-full overflow-hidden">
+										{selectedEmail.serviceName}
+									</div>
 								</div>
 							</div>
 
@@ -968,25 +1067,32 @@ export default function DashboardPage() {
 								<div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground w-full">
 									<div className="min-w-0">
 										<span className="block text-[10px] uppercase mb-0.5 truncate">Criado em:</span>
-										<span className="font-mono truncate block">{new Date(selectedEmail.createdAt).toLocaleString('pt-BR')}</span>
+										<span className="font-mono truncate block">
+											{new Date(selectedEmail.createdAt).toLocaleString('pt-BR')}
+										</span>
 									</div>
 									{selectedEmail.sentAt && (
 										<div className="min-w-0">
-											<span className="block text-[10px] uppercase mb-0.5 truncate">Enviado em:</span>
-											<span className="font-mono truncate block">{new Date(selectedEmail.sentAt).toLocaleString('pt-BR')}</span>
+											<span className="block text-[10px] uppercase mb-0.5 truncate">
+												Enviado em:
+											</span>
+											<span className="font-mono truncate block">
+												{new Date(selectedEmail.sentAt).toLocaleString('pt-BR')}
+											</span>
 										</div>
 									)}
 								</div>
 								<div className="flex flex-col items-start text-[10px] text-muted-foreground/80 mt-2 p-2 bg-muted/50 rounded-md w-full min-w-0">
 									<span className="uppercase mb-0.5 block truncate w-full">ID da Mensagem:</span>
-									<span className="font-mono break-all text-[11px] w-full overflow-hidden">{selectedEmail.id}</span>
+									<span className="font-mono break-all text-[11px] w-full overflow-hidden">
+										{selectedEmail.id}
+									</span>
 								</div>
 							</div>
 						</div>
 					)}
 				</SheetContent>
 			</Sheet>
-
 		</div>
 	);
 }

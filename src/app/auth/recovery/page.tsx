@@ -24,9 +24,11 @@ export default function RecoveryPage() {
 				<CardContent>
 					<form className="space-y-4">
 						<div className="space-y-2">
-							<label htmlFor="email" className="text-sm font-medium leading-none">
-								E-mail cadastrado
-							</label>
+							<div className="flex items-center justify-between">
+								<label htmlFor="email" className="text-sm font-medium leading-none">
+									E-mail cadastrado
+								</label>
+							</div>
 							<Input id="email" type="email" placeholder="exemplo@empresa.com" required />
 						</div>
 						<Button type="button" className="w-full">

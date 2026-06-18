@@ -16,11 +16,19 @@ import {
 	Server,
 	AlignLeft,
 	Trash2,
+	History,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { apiFetch } from '@/src/lib/api';
+import {
+	Sheet,
+	SheetContent,
+	SheetDescription,
+	SheetHeader,
+	SheetTitle,
+} from '@/src/components/ui/sheet';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { Card } from '@/src/components/ui/card';
@@ -54,6 +62,55 @@ export default function TemplateDetailsPage() {
 	const [deleting, setDeleting] = useState(false);
 	const [rendering, setRendering] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+	// History Modal
+	const [showHistoryModal, setShowHistoryModal] = useState(false);
+	const [logs, setLogs] = useState<any[]>([]);
+	const [loadingLogs, setLoadingLogs] = useState(false);
+	const [logsOffset, setLogsOffset] = useState(0);
+	const [hasMoreLogs, setHasMoreLogs] = useState(true);
+	const LOGS_LIMIT = 20;
+
+	const fetchLogs = useCallback(
+		async (offset = 0) => {
+			setLoadingLogs(true);
+			try {
+				const res = await apiFetch(
+					`/api/templates/${id}/logs?limit=${LOGS_LIMIT}&offset=${offset}`,
+				);
+				if (!res.ok) throw new Error();
+				const result = await res.json();
+
+				if (offset === 0) setLogs(result.data);
+				else setLogs((prev) => [...prev, ...result.data]);
+
+				if (result.data.length < LOGS_LIMIT) setHasMoreLogs(false);
+				else setHasMoreLogs(true);
+			} catch (e) {
+				toast({
+					variant: 'destructive',
+					title: 'Erro',
+					description: 'Não foi possível carregar o histórico.',
+				});
+			} finally {
+				setLoadingLogs(false);
+			}
+		},
+		[id, toast],
+	);
+
+	useEffect(() => {
+		if (showHistoryModal && logs.length === 0) {
+			setLogsOffset(0);
+			fetchLogs(0);
+		}
+	}, [showHistoryModal, logs.length, fetchLogs]);
+
+	const loadMoreLogs = () => {
+		const newOffset = logsOffset + LOGS_LIMIT;
+		setLogsOffset(newOffset);
+		fetchLogs(newOffset);
+	};
 
 	// Data States
 	const [name, setName] = useState('');
@@ -301,6 +358,14 @@ export default function TemplateDetailsPage() {
 					</Button>
 
 					<Button
+						variant="outline"
+						onClick={() => setShowHistoryModal(true)}
+						className="cursor-pointer gap-2 font-bold text-[10px] uppercase tracking-widest h-10 px-5 border-border-subtle hover:bg-white/5"
+					>
+						<History size={14} /> Histórico
+					</Button>
+
+					<Button
 						onClick={handleSave}
 						disabled={saving || deleting}
 						className="cursor-pointer gap-2 font-black text-[10px] uppercase tracking-widest h-10 px-6 bg-primary shadow-lg shadow-primary/20"
@@ -433,6 +498,71 @@ export default function TemplateDetailsPage() {
 				description={`Excluir "${name}" permanentemente? Esta ação não pode ser desfeita.`}
 				confirmText="Sim, Excluir"
 			/>
+
+			<Sheet open={showHistoryModal} onOpenChange={setShowHistoryModal}>
+				<SheetContent className="sm:max-w-[500px] w-[90vw] overflow-y-auto">
+					<SheetHeader className="mb-6">
+						<SheetTitle className="flex items-center gap-2">
+							<History className="h-5 w-5" /> Histórico de Ações
+						</SheetTitle>
+						<SheetDescription>
+							Registro de auditoria de tudo que aconteceu neste template.
+						</SheetDescription>
+					</SheetHeader>
+
+					<div className="space-y-6">
+						{logs.length === 0 && !loadingLogs ? (
+							<div className="text-center py-10 text-muted-foreground">
+								<p>Nenhum registro encontrado.</p>
+							</div>
+						) : (
+							<div className="relative border-l border-muted-foreground/20 ml-3 space-y-6 pb-6">
+								{logs.map((log) => (
+									<div key={log.id} className="relative pl-6">
+										<span className="absolute -left-1.5 top-1.5 flex h-3 w-3 rounded-full bg-primary ring-4 ring-background" />
+										<div className="flex flex-col gap-1">
+											<span className="text-xs text-muted-foreground font-medium">
+												{new Date(log.createdAt).toLocaleString('pt-BR', {
+													dateStyle: 'short',
+													timeStyle: 'medium',
+												})}
+											</span>
+											<p className="text-sm font-semibold">{log.action}</p>
+											<p className="text-sm text-muted-foreground">{log.description}</p>
+											{log.actorName && (
+												<p className="text-xs text-muted-foreground mt-1">
+													Realizado por:{' '}
+													<span className="font-medium text-foreground">{log.actorName}</span> (
+													{log.actorEmail})
+												</p>
+											)}
+										</div>
+									</div>
+								))}
+							</div>
+						)}
+
+						{loadingLogs && (
+							<div className="flex justify-center py-4">
+								<Loader2 className="h-6 w-6 animate-spin text-primary" />
+							</div>
+						)}
+
+						{hasMoreLogs && !loadingLogs && logs.length > 0 && (
+							<div className="flex justify-center pt-2">
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={loadMoreLogs}
+									className="cursor-pointer"
+								>
+									Carregar mais
+								</Button>
+							</div>
+						)}
+					</div>
+				</SheetContent>
+			</Sheet>
 		</div>
 	);
 }

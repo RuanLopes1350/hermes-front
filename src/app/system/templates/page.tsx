@@ -1,7 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, FileText, Globe, Server, Trash2, ArrowRight, Loader2, Layout } from 'lucide-react';
+import {
+	Plus,
+	FileText,
+	Globe,
+	Server,
+	Trash2,
+	ArrowRight,
+	Loader2,
+	Layout,
+	Copy,
+} from 'lucide-react';
 import { apiFetch } from '@/src/lib/api';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -173,9 +183,25 @@ export default function TemplatesPage() {
 								<p className="text-xs text-muted-foreground truncate font-mono">
 									{tmpl.subject_template}
 								</p>
+								<div
+									onClick={(e) => {
+										e.preventDefault();
+										e.stopPropagation();
+										navigator.clipboard.writeText(tmpl.id);
+										toast({
+											title: 'Copiado!',
+											description: 'ID do template copiado para a área de transferência.',
+										});
+									}}
+									className="flex items-center gap-1.5 mt-2 text-[10px] text-muted-foreground hover:text-primary cursor-pointer w-fit transition-colors"
+									title="Clique para copiar o ID"
+								>
+									<span className="font-mono">ID: {tmpl.id}</span>
+									<Copy className="h-3 w-3" />
+								</div>
 							</CardHeader>
 							<CardFooter className="mt-auto flex gap-2 pt-0">
-								<Button asChild variant="outline" className="flex-1">
+								<Button asChild variant="outline" className="mt-4 flex-1">
 									<Link href={`/system/templates/${tmpl.id}`}>
 										Editar <ArrowRight className="ml-2 h-4 w-4" />
 									</Link>
@@ -187,7 +213,7 @@ export default function TemplatesPage() {
 										setTemplateToDelete(tmpl);
 										setDeleteModalOpen(true);
 									}}
-									className="text-destructive hover:bg-destructive/10"
+									className="mt-4 text-destructive hover:bg-destructive/10"
 								>
 									<Trash2 className="h-4 w-4" />
 								</Button>

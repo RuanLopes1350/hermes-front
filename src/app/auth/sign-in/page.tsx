@@ -89,9 +89,11 @@ export default function SignInPage() {
 							</div>
 						)}
 						<div className="space-y-2">
-							<label htmlFor="email" className="text-sm font-medium leading-none">
-								E-mail corporativo
-							</label>
+							<div className="flex items-center justify-between">
+								<label htmlFor="email" className="text-sm font-medium leading-none">
+									E-mail corporativo
+								</label>
+							</div>
 							<Input
 								id="email"
 								type="email"
@@ -116,6 +118,7 @@ export default function SignInPage() {
 							<Input
 								id="password"
 								type="password"
+								placeholder="Digite sua senha"
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
 								required

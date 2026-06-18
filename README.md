@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hermes Console (Frontend) 💻
 
-## Getting Started
+O **hermes-front** é o painel administrativo moderno para o ecossistema **Hermes**, um Gateway de E-mails Transacionais open-source. Construído com **Next.js**, ele permite aos gestores e desenvolvedores gerenciar completamente sua infraestrutura de e-mails em um dashboard intuitivo e responsivo.
 
-First, run the development server:
+## 🌟 Principais Funcionalidades
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Gerenciamento de Serviços (Multi-tenant)**: Isole suas configurações (chaves de API, templates, logs) em namespaces diferentes ("Serviços").
+- **Dashboard Analítico**: Visualize estatísticas de envios (entregues, falhos, taxas de abertura) via gráficos usando **ECharts**.
+- **Gestão de Credenciais**: Adicione credenciais SMTP clássicas ou utilize o fluxo moderno e seguro do **Google OAuth2**.
+- **Chaves de API Seguras**: Crie e rotacione API Keys para uso nos seus projetos clientes.
+- **Editor de Templates MJML**: Crie e-mails visualmente responsivos utilizando o **Monaco Editor** integrado com visualização (preview) ao vivo.
+- **Logs e Auditoria**: Rastreamento em tempo real do status das mensagens (pendente, enviado, tentando novamente, falhou) via Server-Sent Events (SSE).
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Stack Tecnológico
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Framework**: [Next.js](https://nextjs.org/) (App Router)
+- **Linguagem**: TypeScript
+- **Estilização**: Tailwind CSS & [shadcn/ui](https://ui.shadcn.com/) & Radix UI
+- **Gráficos**: ECharts
+- **Editor de Código**: `@monaco-editor/react` para edição de templates (MJML/HTML)
+- **Autenticação**: Better Auth (compartilhado com a API)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## ⚙️ Pré-requisitos
 
-## Learn More
+Para que o frontend funcione adequadamente, você precisará ter o **hermes-api** rodando localmente (ou em um servidor de sua escolha).
 
-To learn more about Next.js, take a look at the following resources:
+## 🛠️ Como executar localmente
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Instale as dependências**:
+   ```bash
+   npm install
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. **Configure as Variáveis de Ambiente**:
+   Crie um arquivo `.env` na raiz do frontend (`hermes-front`) informando a URL da API, por exemplo:
+   ```env
+   NEXT_PUBLIC_API_URL=http://localhost:3333
+   ```
+   *(Ajuste de acordo com a sua configuração do backend).*
 
-## Deploy on Vercel
+3. **Inicie o servidor de desenvolvimento**:
+   ```bash
+   npm run dev
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. **Acesse o painel**:
+   Abra [http://localhost:3000](http://localhost:3000) com o seu navegador para acessar o console do Hermes. Faça o login ou registre-se utilizando a autenticação fornecida pela API.

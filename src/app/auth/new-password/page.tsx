@@ -24,16 +24,20 @@ export default function NewPasswordPage() {
 				<CardContent>
 					<form className="space-y-4">
 						<div className="space-y-2">
-							<label htmlFor="password" className="text-sm font-medium leading-none">
-								Nova Senha
-							</label>
-							<Input id="password" type="password" required />
+							<div className="flex items-center justify-between">
+								<label htmlFor="password" className="text-sm font-medium leading-none">
+									Nova Senha
+								</label>
+							</div>
+							<Input id="password" type="password" placeholder="Crie uma senha" required />
 						</div>
 						<div className="space-y-2">
-							<label htmlFor="confirm" className="text-sm font-medium leading-none">
-								Confirmar Nova Senha
-							</label>
-							<Input id="confirm" type="password" required />
+							<div className="flex items-center justify-between">
+								<label htmlFor="confirm" className="text-sm font-medium leading-none">
+									Confirmar Nova Senha
+								</label>
+							</div>
+							<Input id="confirm" type="password" placeholder="Repita a senha" required />
 						</div>
 						<Button type="button" className="w-full">
 							Salvar Senha
