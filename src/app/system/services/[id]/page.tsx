@@ -20,6 +20,7 @@ import {
 	UserMinus,
 	History,
 	ArrowRightLeft,
+	RefreshCw,
 } from 'lucide-react';
 import {
 	Sheet,
@@ -98,7 +99,9 @@ export default function ServiceDetailsPage() {
 	const [copied, setCopied] = useState(false);
 
 	const [showDeleteCredModal, setShowDeleteCredModal] = useState(false);
+	const [showRotateCredModal, setShowRotateCredModal] = useState(false);
 	const [itemToDelete, setItemToDelete] = useState<any>(null);
+	const [itemToRotate, setItemToRotate] = useState<any>(null);
 
 	// Edit credential state
 	const [showEditCredModal, setShowEditCredModal] = useState(false);
@@ -112,7 +115,9 @@ export default function ServiceDetailsPage() {
 		passkey: '',
 	});
 	const [savingCred, setSavingCred] = useState(false);
+	const [deletingMember, setDeletingMember] = useState<string | null>(null);
 	const [togglingKeyId, setTogglingKeyId] = useState<string | null>(null);
+	const [rotatingCredId, setRotatingCredId] = useState<string | null>(null);
 
 	// Member Modals
 	const [showAddMember, setShowAddMember] = useState(false);
@@ -278,6 +283,34 @@ export default function ServiceDetailsPage() {
 			toast({ variant: 'destructive', title: 'Erro', description: err.message });
 		} finally {
 			setTogglingKeyId(null);
+		}
+	};
+
+	const confirmRotateCredential = async () => {
+		if (!itemToRotate) return;
+		
+		setRotatingCredId(itemToRotate.id);
+		setShowRotateCredModal(false);
+		try {
+			const res = await apiFetch(`/api/services/${params.id}/credentials/${itemToRotate.id}/rotate`, { method: 'POST' });
+			const result = await res.json();
+			if (!res.ok) throw new Error(result.message);
+			
+			setGeneratedKey(result.data.key);
+			setShowConnModal(true);
+			
+			if (result.data.webhookDispatched) {
+				toast({ title: 'Sucesso', description: 'Chave rotacionada e webhook enviado com sucesso!' });
+			} else {
+				toast({ title: 'Aviso', description: 'Chave rotacionada, mas nenhum webhook foi disparado (verifique configurações).', variant: 'default' });
+			}
+			
+			fetchData();
+		} catch (error: any) {
+			toast({ variant: 'destructive', title: 'Erro', description: error.message || 'Falha ao rotacionar chave.' });
+		} finally {
+			setRotatingCredId(null);
+			setItemToRotate(null);
 		}
 	};
 
@@ -490,7 +523,7 @@ export default function ServiceDetailsPage() {
 								/>
 							</div>
 
-							{/* <div className="border-t pt-4">
+							<div className="border-t pt-4">
 								<h3 className="font-semibold mb-2 flex items-center gap-2"><KeyRound className="h-4 w-4" /> Rotação de Chaves e Webhooks</h3>
 								
 								<div className="space-y-4">
@@ -573,7 +606,7 @@ export default function ServiceDetailsPage() {
 										/>
 									</div>
 								</div>
-							</div> */}
+							</div>
 
 							{isOwner && (
 								<Button
@@ -695,6 +728,26 @@ export default function ServiceDetailsPage() {
 															<ToggleRight className="h-4 w-4" />
 														) : (
 															<ToggleLeft className="h-4 w-4" />
+														)}
+													</Button>
+												)}
+												{/* Botão Rotacionar Chave */}
+												{(isOwner || session?.user?.id === conn.creator_id) && (
+													<Button
+														variant="ghost"
+														size="icon"
+														className="h-6 w-6 text-blue-500 hover:text-blue-700 hover:bg-blue-50 cursor-pointer"
+														title="Rotacionar chave"
+														disabled={rotatingCredId === conn.id}
+														onClick={() => {
+															setItemToRotate(conn);
+															setShowRotateCredModal(true);
+														}}
+													>
+														{rotatingCredId === conn.id ? (
+															<Loader2 className="h-3.5 w-3.5 animate-spin" />
+														) : (
+															<RefreshCw className="h-4 w-4" />
 														)}
 													</Button>
 												)}
@@ -1138,6 +1191,18 @@ export default function ServiceDetailsPage() {
 				variant="danger"
 				title="Remover Conexão"
 				description={`Tem certeza que deseja apagar a conexão "${itemToDelete?.name}"? A API Key vinculada perderá o acesso imediatamente.`}
+			/>
+
+			<ConfirmModal
+				isOpen={showRotateCredModal}
+				onClose={() => {
+					setShowRotateCredModal(false);
+					setItemToRotate(null);
+				}}
+				onConfirm={confirmRotateCredential}
+				variant="danger"
+				title="Rotacionar API Key"
+				description={`Tem certeza que deseja rotacionar a chave "${itemToRotate?.name}"? A chave antiga será invalidada instantaneamente e suas aplicações precisarão da nova chave para enviar e-mails.`}
 			/>
 
 			{/* History Sidebar */}
