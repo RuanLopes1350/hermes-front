@@ -80,34 +80,55 @@ export default function DashboardPage() {
 	const user = session?.user as AppUser | undefined;
 	const isAdmin = user?.isAdmin;
 
+	const [sseStatus, setSseStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
+
+	const connectSSE = () => {
+		if (!session) return;
+		setSseStatus('connecting');
+
+		const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1350';
+		const eventSource = new EventSource(`${API_URL}/api/dashboard/stream`, {
+			withCredentials: true,
+		});
+
+		eventSource.onopen = () => {
+			setSseStatus('connected');
+		};
+
+		eventSource.onmessage = (event) => {
+			try {
+				const queueData = JSON.parse(event.data);
+				setData((prev: any) => {
+					if (!prev) return prev;
+					return { ...prev, queue: queueData };
+				});
+			} catch (e) {}
+		};
+
+		eventSource.onerror = (error) => {
+			console.error('SSE Conexão perdida. Fechando para evitar retries infinitos...', error);
+			// Fechar explicitamente para matar o loop nativo do navegador
+			eventSource.close();
+			setSseStatus('disconnected');
+		};
+
+		return eventSource;
+	};
+
 	useEffect(() => {
+		let currentEventSource: EventSource | undefined;
+
 		if (session) {
 			fetchDashboardData();
-
-			const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1350';
-			const eventSource = new EventSource(`${API_URL}/api/dashboard/stream`, {
-				withCredentials: true,
-			});
-
-			eventSource.onmessage = (event) => {
-				try {
-					const queueData = JSON.parse(event.data);
-					setData((prev: any) => {
-						if (!prev) return prev;
-						return { ...prev, queue: queueData };
-					});
-				} catch (e) {}
-			};
-
-			eventSource.onerror = (error) => {
-				console.error('SSE Conexão perdida. Tentando reconectar...', error);
-			};
-
-			return () => {
-				eventSource.close();
-			};
+			currentEventSource = connectSSE();
 		}
-	}, [session, days]); // Added days to dependencies
+
+		return () => {
+			if (currentEventSource) {
+				currentEventSource.close();
+			}
+		};
+	}, [session, days]);
 
 	const fetchDashboardData = async () => {
 		setLoading(true);
@@ -797,9 +818,31 @@ export default function DashboardPage() {
 
 					{/* Fila Real-Time */}
 					<Card className="shadow-sm">
-						<CardHeader>
-							<CardTitle>Saúde da Fila (Redis / BullMQ)</CardTitle>
-							<CardDescription>Monitoramento real-time dos workers de envio.</CardDescription>
+						<CardHeader className="flex flex-row items-center justify-between pb-2">
+							<div>
+								<CardTitle>Saúde da Fila (Redis / BullMQ)</CardTitle>
+								<CardDescription>Monitoramento real-time dos workers de envio.</CardDescription>
+							</div>
+							<div className="flex items-center gap-2">
+								{sseStatus === 'disconnected' && (
+									<Button size="sm" variant="outline" onClick={connectSSE} className="gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700">
+										<RefreshCw className="h-4 w-4" />
+										Reconectar Live
+									</Button>
+								)}
+								{sseStatus === 'connected' && (
+									<Badge variant="outline" className="bg-emerald-50 text-emerald-600 border-emerald-200 shadow-none">
+										<div className="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse" />
+										Live
+									</Badge>
+								)}
+								{sseStatus === 'connecting' && (
+									<Badge variant="outline" className="bg-amber-50 text-amber-600 border-amber-200 shadow-none">
+										<Loader2 className="h-3 w-3 mr-1 animate-spin" />
+										Conectando
+									</Badge>
+								)}
+							</div>
 						</CardHeader>
 						<CardContent>
 							<div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
