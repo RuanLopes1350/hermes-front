@@ -23,7 +23,7 @@ export async function sendHermesEmailAction(params: {
 		if (params.selectedTemplateId !== 'none') {
 			emailBuilder.useTemplate(
 				params.selectedTemplateId,
-				Object.keys(params.templateVars).length > 0 ? params.templateVars : undefined
+				Object.keys(params.templateVars).length > 0 ? params.templateVars : undefined,
 			);
 		} else {
 			emailBuilder.body(params.body);
@@ -31,7 +31,7 @@ export async function sendHermesEmailAction(params: {
 
 		// Executa o envio através do SDK no servidor
 		const result = await emailBuilder.send();
-		
+
 		return { success: true, data: result };
 	} catch (error: any) {
 		return {

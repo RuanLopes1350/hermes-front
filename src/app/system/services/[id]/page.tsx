@@ -288,26 +288,41 @@ export default function ServiceDetailsPage() {
 
 	const confirmRotateCredential = async () => {
 		if (!itemToRotate) return;
-		
+
 		setRotatingCredId(itemToRotate.id);
 		setShowRotateCredModal(false);
 		try {
-			const res = await apiFetch(`/api/services/${params.id}/credentials/${itemToRotate.id}/rotate`, { method: 'POST' });
+			const res = await apiFetch(
+				`/api/services/${params.id}/credentials/${itemToRotate.id}/rotate`,
+				{ method: 'POST' },
+			);
 			const result = await res.json();
 			if (!res.ok) throw new Error(result.message);
-			
+
 			setGeneratedKey(result.data.key);
 			setShowConnModal(true);
-			
+
 			if (result.data.webhookDispatched) {
-				toast({ title: 'Sucesso', description: 'Chave rotacionada e webhook enviado com sucesso!' });
+				toast({
+					title: 'Sucesso',
+					description: 'Chave rotacionada e webhook enviado com sucesso!',
+				});
 			} else {
-				toast({ title: 'Aviso', description: 'Chave rotacionada, mas nenhum webhook foi disparado (verifique configurações).', variant: 'default' });
+				toast({
+					title: 'Aviso',
+					description:
+						'Chave rotacionada, mas nenhum webhook foi disparado (verifique configurações).',
+					variant: 'default',
+				});
 			}
-			
+
 			fetchData();
 		} catch (error: any) {
-			toast({ variant: 'destructive', title: 'Erro', description: error.message || 'Falha ao rotacionar chave.' });
+			toast({
+				variant: 'destructive',
+				title: 'Erro',
+				description: error.message || 'Falha ao rotacionar chave.',
+			});
 		} finally {
 			setRotatingCredId(null);
 			setItemToRotate(null);
@@ -524,19 +539,23 @@ export default function ServiceDetailsPage() {
 							</div>
 
 							<div className="border-t pt-4">
-								<h3 className="font-semibold mb-2 flex items-center gap-2"><KeyRound className="h-4 w-4" /> Rotação de Chaves e Webhooks</h3>
-								
+								<h3 className="font-semibold mb-2 flex items-center gap-2">
+									<KeyRound className="h-4 w-4" /> Rotação de Chaves e Webhooks
+								</h3>
+
 								<div className="space-y-4">
 									<div className="flex items-center gap-2">
-										<input 
-											type="checkbox" 
+										<input
+											type="checkbox"
 											id="autoRotate"
 											className="h-4 w-4 rounded border-gray-300"
 											checked={editSettings?.security?.auto_rotate || false}
-											onChange={e => setEditSettings({
-												...editSettings, 
-												security: { ...editSettings?.security, auto_rotate: e.target.checked }
-											})}
+											onChange={(e) =>
+												setEditSettings({
+													...editSettings,
+													security: { ...editSettings?.security, auto_rotate: e.target.checked },
+												})
+											}
 										/>
 										<label htmlFor="autoRotate" className="text-sm font-medium cursor-pointer">
 											Ativar Rotação Automática de API Keys
@@ -544,28 +563,46 @@ export default function ServiceDetailsPage() {
 									</div>
 
 									<div className="grid gap-2">
-										<label className="text-sm font-medium">Dias de antecedência para rotacionar (Threshold)</label>
-										<p className="text-xs text-muted-foreground">Quantos dias antes do vencimento a rotação deve ocorrer.</p>
-										<Input 
+										<label className="text-sm font-medium">
+											Dias de antecedência para rotacionar (Threshold)
+										</label>
+										<p className="text-xs text-muted-foreground">
+											Quantos dias antes do vencimento a rotação deve ocorrer.
+										</p>
+										<Input
 											type="number"
 											placeholder="ex: 3"
 											value={editSettings?.security?.rotate_threshold_days || ''}
-											onChange={e => setEditSettings({
-												...editSettings, 
-												security: { ...editSettings?.security, rotate_threshold_days: Number(e.target.value) }
-											})}
+											onChange={(e) =>
+												setEditSettings({
+													...editSettings,
+													security: {
+														...editSettings?.security,
+														rotate_threshold_days: Number(e.target.value),
+													},
+												})
+											}
 										/>
 									</div>
 
 									<div className="grid gap-2">
-										<label className="text-sm font-medium">Intervalo de Validade da Chave (Dias)</label>
-										<p className="text-xs text-muted-foreground">Nova chave expira após esse período. Padrões: 30, 60, ou 90 dias.</p>
-										<Select 
-											value={String(editSettings?.security?.rotation_interval_days || 'none')} 
-											onValueChange={(val) => setEditSettings({
-												...editSettings, 
-												security: { ...editSettings?.security, rotation_interval_days: val === 'none' ? null : Number(val) }
-											})}
+										<label className="text-sm font-medium">
+											Intervalo de Validade da Chave (Dias)
+										</label>
+										<p className="text-xs text-muted-foreground">
+											Nova chave expira após esse período. Padrões: 30, 60, ou 90 dias.
+										</p>
+										<Select
+											value={String(editSettings?.security?.rotation_interval_days || 'none')}
+											onValueChange={(val) =>
+												setEditSettings({
+													...editSettings,
+													security: {
+														...editSettings?.security,
+														rotation_interval_days: val === 'none' ? null : Number(val),
+													},
+												})
+											}
 										>
 											<SelectTrigger>
 												<SelectValue placeholder="Selecione o intervalo de expiração" />
@@ -582,27 +619,41 @@ export default function ServiceDetailsPage() {
 
 									<div className="grid gap-2">
 										<label className="text-sm font-medium">URL do Webhook</label>
-										<p className="text-xs text-muted-foreground">Endpoint que receberá o POST quando uma chave for rotacionada ou expirar.</p>
-										<Input 
-											placeholder="https://api.empresa.com/hermes-webhook" 
-											value={editSettings?.notifications?.webhook_url || ''} 
-											onChange={e => setEditSettings({
-												...editSettings, 
-												notifications: { ...editSettings?.notifications, webhook_url: e.target.value }
-											})} 
+										<p className="text-xs text-muted-foreground">
+											Endpoint que receberá o POST quando uma chave for rotacionada ou expirar.
+										</p>
+										<Input
+											placeholder="https://api.empresa.com/hermes-webhook"
+											value={editSettings?.notifications?.webhook_url || ''}
+											onChange={(e) =>
+												setEditSettings({
+													...editSettings,
+													notifications: {
+														...editSettings?.notifications,
+														webhook_url: e.target.value,
+													},
+												})
+											}
 										/>
 									</div>
 
 									<div className="grid gap-2">
 										<label className="text-sm font-medium">Segredo do Webhook (HMAC SHA-256)</label>
-										<p className="text-xs text-muted-foreground">Usado para assinar o header X-Hermes-Signature.</p>
-										<Input 
-											placeholder="ex: super_secret_123" 
-											value={editSettings?.notifications?.webhook_secret || ''} 
-											onChange={e => setEditSettings({
-												...editSettings, 
-												notifications: { ...editSettings?.notifications, webhook_secret: e.target.value }
-											})} 
+										<p className="text-xs text-muted-foreground">
+											Usado para assinar o header X-Hermes-Signature.
+										</p>
+										<Input
+											placeholder="ex: super_secret_123"
+											value={editSettings?.notifications?.webhook_secret || ''}
+											onChange={(e) =>
+												setEditSettings({
+													...editSettings,
+													notifications: {
+														...editSettings?.notifications,
+														webhook_secret: e.target.value,
+													},
+												})
+											}
 										/>
 									</div>
 								</div>

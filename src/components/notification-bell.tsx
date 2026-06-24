@@ -6,11 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@/src/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/src/components/ui/popover';
 import { Button } from '@/src/components/ui/button';
 import { ScrollArea } from '@/src/components/ui/scroll-area';
 import { apiFetch } from '@/src/lib/api';
@@ -80,7 +76,11 @@ export function NotificationBell() {
 	return (
 		<Popover open={isOpen} onOpenChange={setIsOpen}>
 			<PopoverTrigger asChild>
-				<Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-full cursor-pointer">
+				<Button
+					variant="ghost"
+					size="icon"
+					className="relative h-9 w-9 rounded-full cursor-pointer"
+				>
 					<Bell className="h-5 w-5 text-muted-foreground" />
 					{unreadCount > 0 && (
 						<span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
@@ -109,7 +109,9 @@ export function NotificationBell() {
 					{notifications.length === 0 ? (
 						<div className="flex flex-col items-center justify-center py-8 text-center px-4">
 							<Bell className="h-8 w-8 text-muted-foreground/50 mb-3" />
-							<p className="text-sm text-muted-foreground">Você não tem notificações não lidas no momento.</p>
+							<p className="text-sm text-muted-foreground">
+								Você não tem notificações não lidas no momento.
+							</p>
 						</div>
 					) : (
 						<div className="flex flex-col">
@@ -120,7 +122,9 @@ export function NotificationBell() {
 								>
 									<div className="flex items-start justify-between gap-2">
 										<div className="flex items-center gap-2">
-											<div className={`h-2 w-2 rounded-full ${getTypeColor(notif.type).split(' ')[1]}`} />
+											<div
+												className={`h-2 w-2 rounded-full ${getTypeColor(notif.type).split(' ')[1]}`}
+											/>
 											<span className="font-medium text-sm leading-none">{notif.title}</span>
 										</div>
 										<span className="text-[10px] text-muted-foreground whitespace-nowrap">

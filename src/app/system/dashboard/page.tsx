@@ -80,7 +80,9 @@ export default function DashboardPage() {
 	const user = session?.user as AppUser | undefined;
 	const isAdmin = user?.isAdmin;
 
-	const [sseStatus, setSseStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
+	const [sseStatus, setSseStatus] = useState<'connecting' | 'connected' | 'disconnected'>(
+		'connecting',
+	);
 
 	const connectSSE = () => {
 		if (!session) return;
@@ -825,19 +827,30 @@ export default function DashboardPage() {
 							</div>
 							<div className="flex items-center gap-2">
 								{sseStatus === 'disconnected' && (
-									<Button size="sm" variant="outline" onClick={connectSSE} className="gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700">
+									<Button
+										size="sm"
+										variant="outline"
+										onClick={connectSSE}
+										className="gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+									>
 										<RefreshCw className="h-4 w-4" />
 										Reconectar Live
 									</Button>
 								)}
 								{sseStatus === 'connected' && (
-									<Badge variant="outline" className="bg-emerald-50 text-emerald-600 border-emerald-200 shadow-none">
+									<Badge
+										variant="outline"
+										className="bg-emerald-50 text-emerald-600 border-emerald-200 shadow-none"
+									>
 										<div className="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse" />
 										Live
 									</Badge>
 								)}
 								{sseStatus === 'connecting' && (
-									<Badge variant="outline" className="bg-amber-50 text-amber-600 border-amber-200 shadow-none">
+									<Badge
+										variant="outline"
+										className="bg-amber-50 text-amber-600 border-amber-200 shadow-none"
+									>
 										<Loader2 className="h-3 w-3 mr-1 animate-spin" />
 										Conectando
 									</Badge>

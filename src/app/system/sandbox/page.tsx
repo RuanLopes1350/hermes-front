@@ -49,7 +49,7 @@ export default function SandboxPage() {
 				const [srv, tmpl] = await Promise.all([srvRes.json(), tmplRes.json()]);
 				setServices(srv.data || []);
 				setTemplates(tmpl.data || []);
-			} catch (e) { }
+			} catch (e) {}
 		};
 		loadData();
 	}, []);
@@ -90,7 +90,12 @@ export default function SandboxPage() {
 			variables: Object.keys(templateVars).length > 0 ? templateVars : undefined,
 		};
 
-		setRequestLog({ method: 'POST', url: `${baseUrl}/api/emails`, headers: { 'x-api-key': '***' }, body: payload });
+		setRequestLog({
+			method: 'POST',
+			url: `${baseUrl}/api/emails`,
+			headers: { 'x-api-key': '***' },
+			body: payload,
+		});
 
 		try {
 			// Chama a Server Action (que roda no ambiente Node.js)
@@ -106,7 +111,10 @@ export default function SandboxPage() {
 
 			if (response.success) {
 				setResponseLog({ status: 'success', data: response.data });
-				toast({ title: 'Enviado', description: 'Requisição aceita usando o SDK Hermes (via Server Action).' });
+				toast({
+					title: 'Enviado',
+					description: 'Requisição aceita usando o SDK Hermes (via Server Action).',
+				});
 			} else {
 				setResponseLog({ error: response.error });
 			}

@@ -14,13 +14,23 @@ import {
 	TableRow,
 } from '@/src/components/ui/table';
 import { Badge } from '@/src/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@/src/components/ui/card';
 import { apiFetch } from '@/src/lib/api';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function AdminAlertsPage() {
-	const { data: alerts = [], isLoading, isError } = useQuery({
+	const {
+		data: alerts = [],
+		isLoading,
+		isError,
+	} = useQuery({
 		queryKey: ['admin-alerts'],
 		queryFn: async () => {
 			const res = await apiFetch('/api/notifications/admin?limit=100');
@@ -42,7 +52,9 @@ export default function AdminAlertsPage() {
 			<div className="flex h-[50vh] flex-col items-center justify-center text-center text-destructive">
 				<AlertCircle className="h-10 w-10 mb-4" />
 				<h2 className="text-xl font-bold">Acesso Negado</h2>
-				<p>Você não tem permissão para visualizar os alertas globais ou ocorreu um erro na conexão.</p>
+				<p>
+					Você não tem permissão para visualizar os alertas globais ou ocorreu um erro na conexão.
+				</p>
 			</div>
 		);
 	}
@@ -52,9 +64,19 @@ export default function AdminAlertsPage() {
 			case 'error':
 				return { variant: 'destructive' as const, icon: AlertCircle, label: 'Erro Crítico' };
 			case 'warning':
-				return { variant: 'default' as const, className: 'bg-yellow-500 hover:bg-yellow-600', icon: AlertTriangle, label: 'Aviso' };
+				return {
+					variant: 'default' as const,
+					className: 'bg-yellow-500 hover:bg-yellow-600',
+					icon: AlertTriangle,
+					label: 'Aviso',
+				};
 			case 'success':
-				return { variant: 'default' as const, className: 'bg-green-500 hover:bg-green-600', icon: CheckCircle2, label: 'Sucesso' };
+				return {
+					variant: 'default' as const,
+					className: 'bg-green-500 hover:bg-green-600',
+					icon: CheckCircle2,
+					label: 'Sucesso',
+				};
 			default:
 				return { variant: 'secondary' as const, icon: Info, label: 'Informação' };
 		}
@@ -64,7 +86,9 @@ export default function AdminAlertsPage() {
 		<div className="space-y-6">
 			<div>
 				<h1 className="text-3xl font-bold tracking-tight">Alertas Globais</h1>
-				<p className="text-muted-foreground">Monitoramento de eventos em todo o ecossistema Hermes.</p>
+				<p className="text-muted-foreground">
+					Monitoramento de eventos em todo o ecossistema Hermes.
+				</p>
 			</div>
 
 			<Card>
@@ -104,11 +128,16 @@ export default function AdminAlertsPage() {
 													</Badge>
 												</TableCell>
 												<TableCell className="font-medium">{alert.title}</TableCell>
-												<TableCell className="hidden md:table-cell max-w-[400px] truncate text-muted-foreground" title={alert.message}>
+												<TableCell
+													className="hidden md:table-cell max-w-[400px] truncate text-muted-foreground"
+													title={alert.message}
+												>
 													{alert.message}
 												</TableCell>
 												<TableCell className="text-right text-sm text-muted-foreground">
-													{format(new Date(alert.createdAt), "dd/MM/yy 'às' HH:mm", { locale: ptBR })}
+													{format(new Date(alert.createdAt), "dd/MM/yy 'às' HH:mm", {
+														locale: ptBR,
+													})}
 												</TableCell>
 											</TableRow>
 										);
