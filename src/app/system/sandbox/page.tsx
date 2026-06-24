@@ -1,17 +1,8 @@
 'use client';
 
-import {
-	Play,
-	RefreshCw,
-	Terminal,
-	CheckCircle2,
-	FileText,
-	Server,
-	Key,
-	User,
-	Hash,
-} from 'lucide-react';
-import { useState, useEffect, useMemo } from 'react';
+import { Hash, Key, Play, RefreshCw, Server, Terminal, User } from 'lucide-react';
+import { useMemo, useState, useEffect } from 'react';
+import { sendHermesEmailAction } from './actions';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import {
@@ -58,7 +49,7 @@ export default function SandboxPage() {
 				const [srv, tmpl] = await Promise.all([srvRes.json(), tmplRes.json()]);
 				setServices(srv.data || []);
 				setTemplates(tmpl.data || []);
-			} catch (e) {}
+			} catch (e) { }
 		};
 		loadData();
 	}, []);
@@ -88,6 +79,9 @@ export default function SandboxPage() {
 		}
 
 		setSending(true);
+		const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1350';
+
+		// Mantém o payload apenas para log visual do Request
 		const payload = {
 			recipient_to: recipientTo,
 			subject,
@@ -95,21 +89,29 @@ export default function SandboxPage() {
 			body: selectedTemplateId === 'none' ? body : undefined,
 			variables: Object.keys(templateVars).length > 0 ? templateVars : undefined,
 		};
-		const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1350'}/api/emails`;
 
-		setRequestLog({ method: 'POST', url, headers: { 'x-api-key': '***' }, body: payload });
+		setRequestLog({ method: 'POST', url: `${baseUrl}/api/emails`, headers: { 'x-api-key': '***' }, body: payload });
 
 		try {
-			const res = await fetch(url, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json', 'x-api-key': rawApiKey },
-				body: JSON.stringify(payload),
+			// Chama a Server Action (que roda no ambiente Node.js)
+			const response = await sendHermesEmailAction({
+				baseUrl,
+				apiKey: rawApiKey,
+				recipientTo,
+				subject,
+				selectedTemplateId,
+				body,
+				templateVars,
 			});
-			const result = await res.json();
-			setResponseLog({ status: res.status, data: result });
-			if (res.ok) toast({ title: 'Enviado', description: 'Requisição aceita.' });
+
+			if (response.success) {
+				setResponseLog({ status: 'success', data: response.data });
+				toast({ title: 'Enviado', description: 'Requisição aceita usando o SDK Hermes (via Server Action).' });
+			} else {
+				setResponseLog({ error: response.error });
+			}
 		} catch (err: any) {
-			setResponseLog({ error: err.message });
+			setResponseLog({ error: err.message || err });
 		} finally {
 			setSending(false);
 		}
