@@ -44,6 +44,7 @@ import {
 } from '@/src/components/ui/select';
 import Editor, { OnMount } from '@monaco-editor/react';
 import format from 'xml-formatter';
+import { onMount } from 'better-auth/react';
 
 interface Service {
 	id: string;
@@ -210,8 +211,7 @@ export default function TemplateDetailsPage() {
 	const handleSave = async () => {
 		setSaving(true);
 		try {
-			// CORREÇÃO: Enviamos o código do editor para 'html_content'
-			// e NÃO enviamos a versão renderizada, deixando a API lidar com isso.
+			// Enviamos o código para a api renderizar. Não tratamos isso no frontend.
 			await apiFetch(`/api/templates/${id}`, {
 				method: 'PATCH',
 				body: JSON.stringify({
