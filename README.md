@@ -4,6 +4,10 @@ O **hermes-front** é o painel administrativo moderno para o ecossistema **Herme
 
 ---
 
+[API Backend](https://github.com/RuanLopes1350/hermes-api) • [Pacote Client (NPM)](https://github.com/RuanLopes1350/hermes-client)
+
+---
+
 ## 🌟 Principais Funcionalidades
 
 - **Gerenciamento de Serviços (Multi-tenant):** Isole configurações (chaves de API, templates, logs) em namespaces separados ("Serviços").
