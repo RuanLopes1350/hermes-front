@@ -193,7 +193,7 @@ export default function UsersPage() {
 				confirmText="Excluir"
 				variant="danger"
 			/>
-			<div className="space-y-6 animate-in fade-in duration-500">
+			<div className="space-y-6 animate-in fade-in duration-300 ease-out">
 				<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 					<div>
 						<h2 className="text-2xl font-bold tracking-tight">Gestão de Usuários</h2>
@@ -214,7 +214,7 @@ export default function UsersPage() {
 					</div>
 				</div>
 
-				<Card>
+				<Card className="shadow-sm">
 					<CardHeader className="pb-3">
 						<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
 							<div>
@@ -265,8 +265,8 @@ export default function UsersPage() {
 														{user.name}
 														{user.id === currentUser?.id && (
 															<Badge
-																variant="secondary"
-																className="text-[10px] bg-primary text-primary-foreground hover:bg-primary/90"
+																variant="outline"
+																className="text-[10px] bg-primary/10 text-primary border-primary/20 hover:bg-primary/10 cursor-default"
 															>
 																Você
 															</Badge>
@@ -276,22 +276,22 @@ export default function UsersPage() {
 												</TableCell>
 												<TableCell>
 													{user.isActive !== false ? (
-														<Badge className="bg-emerald-500 hover:bg-emerald-600 cursor-default">
+														<Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 cursor-default hover:bg-emerald-500/10">
 															Ativa
 														</Badge>
 													) : (
-														<Badge variant="destructive" className="cursor-default">
+														<Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20 cursor-default hover:bg-destructive/10">
 															Suspensa
 														</Badge>
 													)}
 												</TableCell>
 												<TableCell>
 													{user.isAdmin ? (
-														<Badge className="bg-primary text-primary-foreground hover:bg-primary/90 flex w-fit items-center gap-1 cursor-default">
+														<Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 flex w-fit items-center gap-1 cursor-default hover:bg-primary/10">
 															<Shield className="h-3 w-3" /> Admin
 														</Badge>
 													) : (
-														<Badge variant="outline" className="cursor-default">
+														<Badge variant="secondary" className="cursor-default hover:bg-secondary">
 															Membro
 														</Badge>
 													)}

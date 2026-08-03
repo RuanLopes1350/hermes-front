@@ -62,28 +62,38 @@ export default function AdminAlertsPage() {
 	const getBadgeProps = (type: string) => {
 		switch (type) {
 			case 'error':
-				return { variant: 'destructive' as const, icon: AlertCircle, label: 'Erro Crítico' };
+				return {
+					variant: 'outline' as const,
+					className: 'bg-destructive/10 text-destructive border-destructive/20 cursor-default hover:bg-destructive/10',
+					icon: AlertCircle,
+					label: 'Erro Crítico',
+				};
 			case 'warning':
 				return {
-					variant: 'default' as const,
-					className: 'bg-yellow-500 hover:bg-yellow-600',
+					variant: 'outline' as const,
+					className: 'bg-amber-500/10 text-amber-600 border-amber-500/20 cursor-default hover:bg-amber-500/10',
 					icon: AlertTriangle,
 					label: 'Aviso',
 				};
 			case 'success':
 				return {
-					variant: 'default' as const,
-					className: 'bg-green-500 hover:bg-green-600',
+					variant: 'outline' as const,
+					className: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 cursor-default hover:bg-emerald-500/10',
 					icon: CheckCircle2,
 					label: 'Sucesso',
 				};
 			default:
-				return { variant: 'secondary' as const, icon: Info, label: 'Informação' };
+				return {
+					variant: 'secondary' as const,
+					className: 'cursor-default hover:bg-secondary',
+					icon: Info,
+					label: 'Informação',
+				};
 		}
 	};
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-6 animate-in fade-in duration-300 ease-out">
 			<div>
 				<h1 className="text-3xl font-bold tracking-tight">Alertas Globais</h1>
 				<p className="text-muted-foreground">
@@ -91,7 +101,7 @@ export default function AdminAlertsPage() {
 				</p>
 			</div>
 
-			<Card>
+			<Card className="shadow-sm">
 				<CardHeader>
 					<CardTitle>Histórico de Eventos</CardTitle>
 					<CardDescription>

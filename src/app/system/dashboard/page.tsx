@@ -4,7 +4,6 @@ import {
 	Activity,
 	AlertCircle,
 	Clock,
-	Layers,
 	Loader2,
 	Mail,
 	Server,
@@ -13,6 +12,7 @@ import {
 	Zap,
 	CheckCircle2,
 	CalendarClock,
+	CalendarDays,
 	FileText,
 	PlusCircle,
 	MinusCircle,
@@ -21,6 +21,9 @@ import {
 	TrendingDown,
 	Eye,
 	ShieldAlert,
+	Sun,
+	Sunrise,
+	Moon,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
@@ -107,8 +110,7 @@ export default function DashboardPage() {
 			} catch (e) {}
 		};
 
-		eventSource.onerror = (error) => {
-			console.error('SSE Conexão perdida. Fechando para evitar retries infinitos...', error);
+		eventSource.onerror = () => {
 			// Fechar explicitamente para matar o loop nativo do navegador
 			eventSource.close();
 			setSseStatus('disconnected');
@@ -150,8 +152,8 @@ export default function DashboardPage() {
 					description: result.message || 'Falha ao carregar métricas.',
 				});
 			}
-		} catch (error) {
-			console.error(error);
+		} catch {
+			// silent: toast already handles user-visible errors
 		} finally {
 			setLoading(false);
 		}
@@ -171,10 +173,11 @@ export default function DashboardPage() {
 	// Helper para Saudação
 	const getGreeting = () => {
 		const hour = new Date().getHours();
-		if (hour >= 6 && hour < 12) return '☀️ Bom dia';
-		if (hour >= 12 && hour < 18) return '🌤️ Boa tarde';
-		return '🌙 Boa noite';
+		if (hour >= 6 && hour < 12) return { text: 'Bom dia', Icon: Sunrise };
+		if (hour >= 12 && hour < 18) return { text: 'Boa tarde', Icon: Sun };
+		return { text: 'Boa noite', Icon: Moon };
 	};
+	const greeting = getGreeting();
 
 	// Helper para Action Icon (Timeline)
 	const getActionIcon = (action: string) => {
@@ -547,21 +550,21 @@ export default function DashboardPage() {
 			];
 
 	return (
-		<div className="space-y-6 animate-in fade-in duration-500 pb-12">
+		<div className="space-y-6 animate-in fade-in duration-300 ease-out">
 			{/* Alerta de Credenciais Inativas */}
 			{!isAdmin && data.inactiveCredentials && data.inactiveCredentials.length > 0 && (
-				<div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl flex items-start gap-3 shadow-sm">
+				<div className="bg-destructive/8 border border-destructive/20 text-destructive p-4 rounded-xl flex items-start gap-3">
 					<ShieldAlert className="h-5 w-5 mt-0.5 shrink-0" />
 					<div>
-						<h4 className="font-bold text-sm">Atenção: Credenciais Inativas Detectadas</h4>
-						<p className="text-xs mt-1 mb-2">
-							Os seguintes serviços estão com credenciais desativadas ou inválidas e as próximas
-							entregas falharão silenciosamente:
+						<h4 className="font-semibold text-sm">Credenciais Inativas Detectadas</h4>
+						<p className="text-xs mt-1 mb-2 text-destructive/80">
+							Os seguintes serviços estão com credenciais desativadas ou inválidas. As próximas
+							entregas falharão silenciosamente até serem corrigidas:
 						</p>
-						<ul className="list-disc list-inside text-xs font-medium bg-white/50 p-2 rounded-md">
+						<ul className="list-disc list-inside text-xs font-medium bg-destructive/5 p-2.5 rounded-lg">
 							{data.inactiveCredentials.map((c: any) => (
 								<li key={c.credId}>
-									Serviço <strong>{c.serviceName}</strong> (Credencial: {c.credName})
+									Serviço <strong>{c.serviceName}</strong> — {c.credName}
 								</li>
 							))}
 						</ul>
@@ -570,16 +573,17 @@ export default function DashboardPage() {
 			)}
 
 			{/* Cabeçalho */}
-			<div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+			<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
 				<div>
-					<h2 className="text-2xl font-bold tracking-tight">
-						{getGreeting()}, {user?.name?.split(' ')[0] || 'Usuário'}!{' '}
+					<h2 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+						<greeting.Icon className="h-5 w-5 text-muted-foreground shrink-0" />
+						{greeting.text}, {user?.name?.split(' ')[0] || 'Usuário'}!
 						{isAdmin && (
 							<Badge
 								variant="outline"
-								className="ml-2 bg-yellow-400 text-yellow-900 hover:bg-yellow-200 border-none"
+								className="ml-1 bg-primary/10 text-primary border-primary/20 font-medium text-xs"
 							>
-								Modo Admin
+								Admin
 							</Badge>
 						)}
 					</h2>
@@ -590,7 +594,8 @@ export default function DashboardPage() {
 
 				<div className="flex items-center gap-2">
 					<Select value={String(days)} onValueChange={(v) => setDays(Number(v))}>
-						<SelectTrigger className="w-[160px] bg-background">
+						<SelectTrigger className="w-[168px] bg-background gap-2">
+							<CalendarDays className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
 							<SelectValue placeholder="Período" />
 						</SelectTrigger>
 						<SelectContent>
@@ -607,13 +612,13 @@ export default function DashboardPage() {
 				{kpiCards.map((stat, i) => (
 					<Card key={i} className="shadow-sm">
 						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium">{stat.label}</CardTitle>
-							<div className={`p-2 rounded-md ${stat.bg} ${stat.color}`}>
+							<CardTitle className="text-sm font-medium text-muted-foreground">{stat.label}</CardTitle>
+							<div className={`p-2 rounded-xl ${stat.bg} ${stat.color}`}>
 								<stat.icon className="h-4 w-4" />
 							</div>
 						</CardHeader>
 						<CardContent>
-							<div className="text-2xl font-bold">{stat.value}</div>
+							<div className="text-2xl font-bold tracking-tight">{stat.value}</div>
 							<div className="text-xs text-muted-foreground mt-1">{stat.desc}</div>
 						</CardContent>
 					</Card>
@@ -630,7 +635,7 @@ export default function DashboardPage() {
 					</CardHeader>
 					<CardContent className="flex-1 min-h-[280px]">
 						{!data.volumeByDay || data.volumeByDay.length === 0 ? (
-							<div className="h-full flex items-center justify-center text-muted-foreground text-sm border-2 border-dashed rounded-lg">
+							<div className="h-full flex items-center justify-center text-muted-foreground text-sm border border-dashed rounded-xl py-10">
 								Aguardando tráfego para gerar gráficos.
 							</div>
 						) : (
@@ -651,7 +656,7 @@ export default function DashboardPage() {
 					</CardHeader>
 					<CardContent className="flex-1 min-h-[280px]">
 						{!data.statusDistribution || data.statusDistribution.length === 0 ? (
-							<div className="h-full flex items-center justify-center text-muted-foreground text-sm border-2 border-dashed rounded-lg">
+							<div className="h-full flex items-center justify-center text-muted-foreground text-sm border border-dashed rounded-xl py-10">
 								Sem dados disponíveis
 							</div>
 						) : (
@@ -674,7 +679,7 @@ export default function DashboardPage() {
 					</CardHeader>
 					<CardContent className="flex-1 overflow-y-auto">
 						{!data.recentActivity || data.recentActivity.length === 0 ? (
-							<div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg">
+							<div className="text-center py-10 text-muted-foreground border border-dashed rounded-xl">
 								<p className="text-sm">Nenhuma atividade recente.</p>
 							</div>
 						) : (
@@ -685,7 +690,7 @@ export default function DashboardPage() {
 											{getActionIcon(log.action)}
 										</span>
 										<div className="flex flex-col gap-0.5">
-											<span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+											<span className="text-xs text-muted-foreground">
 												{new Date(log.createdAt).toLocaleString('pt-BR', {
 													dateStyle: 'short',
 													timeStyle: 'short',
@@ -849,7 +854,7 @@ export default function DashboardPage() {
 								{sseStatus === 'connecting' && (
 									<Badge
 										variant="outline"
-										className="bg-amber-50 text-amber-600 border-amber-200 shadow-none"
+										className="bg-amber-50 text-amber-600 border-amber-200 shadow-none hover:bg-amber-50"
 									>
 										<Loader2 className="h-3 w-3 mr-1 animate-spin" />
 										Conectando
@@ -858,48 +863,48 @@ export default function DashboardPage() {
 							</div>
 						</CardHeader>
 						<CardContent>
-							<div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-								<div className="p-4 rounded-lg bg-amber-50 border border-amber-100 flex flex-col items-center justify-center text-center">
-									<Clock className="h-5 w-5 text-amber-500 mb-1" />
-									<span className="text-2xl font-bold text-amber-700">
+							<div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+								<div className="p-4 rounded-xl bg-amber-50 border border-amber-100 flex flex-col items-center justify-center text-center gap-0.5">
+									<Clock className="h-4 w-4 text-amber-500 mb-1" />
+									<span className="text-2xl font-bold tracking-tight text-amber-700">
 										{data.queue?.waiting || 0}
 									</span>
-									<span className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">
-										Waiting
+									<span className="text-xs font-medium text-amber-600">
+										Espera
 									</span>
 								</div>
-								<div className="p-4 rounded-lg bg-blue-50 border border-blue-100 flex flex-col items-center justify-center text-center">
-									<Activity className="h-5 w-5 text-blue-500 mb-1" />
-									<span className="text-2xl font-bold text-blue-700">
+								<div className="p-4 rounded-xl bg-blue-50 border border-blue-100 flex flex-col items-center justify-center text-center gap-0.5">
+									<Activity className="h-4 w-4 text-blue-500 mb-1" />
+									<span className="text-2xl font-bold tracking-tight text-blue-700">
 										{data.queue?.active || 0}
 									</span>
-									<span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">
-										Active
+									<span className="text-xs font-medium text-blue-600">
+										Ativo
 									</span>
 								</div>
-								<div className="p-4 rounded-lg bg-emerald-50 border border-emerald-100 flex flex-col items-center justify-center text-center">
-									<CheckCircle2 className="h-5 w-5 text-emerald-500 mb-1" />
-									<span className="text-2xl font-bold text-emerald-700">
+								<div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100 flex flex-col items-center justify-center text-center gap-0.5">
+									<CheckCircle2 className="h-4 w-4 text-emerald-500 mb-1" />
+									<span className="text-2xl font-bold tracking-tight text-emerald-700">
 										{data.queue?.completed || 0}
 									</span>
-									<span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
-										Completed
+									<span className="text-xs font-medium text-emerald-600">
+										Concluído
 									</span>
 								</div>
-								<div className="p-4 rounded-lg bg-red-50 border border-red-100 flex flex-col items-center justify-center text-center">
-									<AlertCircle className="h-5 w-5 text-red-500 mb-1" />
-									<span className="text-2xl font-bold text-red-700">{data.queue?.failed || 0}</span>
-									<span className="text-[10px] font-bold text-red-600 uppercase tracking-wider">
-										Failed
+								<div className="p-4 rounded-xl bg-red-50 border border-red-100 flex flex-col items-center justify-center text-center gap-0.5">
+									<AlertCircle className="h-4 w-4 text-red-500 mb-1" />
+									<span className="text-2xl font-bold tracking-tight text-red-700">{data.queue?.failed || 0}</span>
+									<span className="text-xs font-medium text-red-600">
+										Falha
 									</span>
 								</div>
-								<div className="p-4 rounded-lg bg-purple-50 border border-purple-100 flex flex-col items-center justify-center text-center">
-									<CalendarClock className="h-5 w-5 text-purple-500 mb-1" />
-									<span className="text-2xl font-bold text-purple-700">
+								<div className="p-4 rounded-xl bg-purple-50 border border-purple-100 flex flex-col items-center justify-center text-center gap-0.5">
+									<CalendarClock className="h-4 w-4 text-purple-500 mb-1" />
+									<span className="text-2xl font-bold tracking-tight text-purple-700">
 										{data.queue?.delayed || 0}
 									</span>
-									<span className="text-[10px] font-bold text-purple-600 uppercase tracking-wider">
-										Delayed
+									<span className="text-xs font-medium text-purple-600">
+										Agendado
 									</span>
 								</div>
 							</div>
@@ -1082,26 +1087,26 @@ export default function DashboardPage() {
 
 							<div className="border-t pt-4 space-y-4 w-full">
 								<div className="space-y-1 w-full min-w-0">
-									<label className="text-[10px] uppercase font-bold text-muted-foreground block">
+									<label className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground block">
 										Destinatário
 									</label>
-									<div className="text-sm font-medium p-2 bg-muted rounded-md break-words w-full overflow-hidden">
+									<div className="text-sm font-medium p-2.5 bg-muted rounded-xl break-words w-full overflow-hidden">
 										{selectedEmail.recipient}
 									</div>
 								</div>
 								<div className="space-y-1 w-full min-w-0">
-									<label className="text-[10px] uppercase font-bold text-muted-foreground block">
+									<label className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground block">
 										Assunto
 									</label>
-									<div className="text-sm p-2 bg-muted rounded-md break-words w-full overflow-hidden">
+									<div className="text-sm p-2.5 bg-muted rounded-xl break-words w-full overflow-hidden">
 										{selectedEmail.subject}
 									</div>
 								</div>
 								<div className="space-y-1 w-full min-w-0">
-									<label className="text-[10px] uppercase font-bold text-muted-foreground block">
+									<label className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground block">
 										Serviço de Origem
 									</label>
-									<div className="text-sm p-2 bg-primary/10 text-primary font-bold rounded-md break-words w-full overflow-hidden">
+									<div className="text-sm p-2.5 bg-primary/10 text-primary font-semibold rounded-xl break-words w-full overflow-hidden">
 										{selectedEmail.serviceName}
 									</div>
 								</div>

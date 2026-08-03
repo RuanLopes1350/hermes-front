@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Search, MoreVertical, Server, Trash2, Pencil } from 'lucide-react';
+import { Plus, Search, MoreVertical, Server, Trash2, Pencil, Loader2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 import { useServices } from '@/src/hooks/use-services';
@@ -86,7 +86,7 @@ export default function ServicesPage() {
 	);
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-6 animate-in fade-in duration-300 ease-out">
 			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 				<div>
 					<h2 className="text-2xl font-bold tracking-tight">Serviços</h2>
@@ -113,11 +113,12 @@ export default function ServicesPage() {
 			</div>
 
 			{loading ? (
-				<div className="flex items-center justify-center h-32 text-sm text-muted-foreground">
-					Carregando serviços...
+				<div className="flex flex-col items-center justify-center h-48 gap-3 text-sm text-muted-foreground">
+					<Loader2 className="h-6 w-6 animate-spin text-primary" />
+					<span>Carregando serviços...</span>
 				</div>
 			) : filteredServices.length === 0 ? (
-				<div className="flex flex-col items-center justify-center h-48 border border-dashed rounded-lg bg-card text-center p-6">
+				<div className="flex flex-col items-center justify-center h-48 border border-dashed rounded-xl bg-card text-center p-6">
 					<Server className="h-10 w-10 text-muted-foreground mb-4" />
 					<h3 className="text-lg font-semibold">Nenhum serviço encontrado</h3>
 					<p className="text-sm text-muted-foreground mt-2 max-w-sm">
@@ -130,7 +131,7 @@ export default function ServicesPage() {
 			) : (
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 					{filteredServices.map((service) => (
-						<Card key={service.id} className="flex flex-col">
+						<Card key={service.id} className="flex flex-col shadow-sm hover:shadow-md transition-shadow">
 							<CardHeader className="flex flex-row items-start justify-between pb-2">
 								<div className="space-y-1">
 									<CardTitle className="text-base font-semibold leading-none flex items-center gap-2">
@@ -140,13 +141,9 @@ export default function ServicesPage() {
 											<Badge
 												variant="secondary"
 												title={service.ownerEmail}
-												className="ml-2 text-xs font-medium bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-200 border border-violet-200 dark:border-violet-800/50"
+												className="ml-2 text-xs font-medium bg-primary/10 text-primary border border-primary/20"
 											>
-												Dono:{' '}
-												<span
-													title={service.ownerEmail}
-													className="ml-1 font-semibold hover:underline"
-												>
+												<span title={service.ownerEmail} className="font-semibold">
 													{service.ownerName.split(' ')[0]}
 												</span>
 											</Badge>
@@ -182,8 +179,9 @@ export default function ServicesPage() {
 							</CardHeader>
 							<CardContent className="mt-auto pt-4">
 								<Link href={`/system/services/${service.id}`} className="w-full">
-									<Button variant="secondary" className="w-full cursor-pointer">
+									<Button className="w-full cursor-pointer gap-2">
 										Acessar Painel
+										<ArrowRight className="h-3.5 w-3.5" />
 									</Button>
 								</Link>
 							</CardContent>
@@ -224,6 +222,7 @@ export default function ServicesPage() {
 							disabled={processing || !serviceName.trim()}
 							className="cursor-pointer"
 						>
+							{processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
 							{processing ? 'Salvando...' : 'Salvar'}
 						</Button>
 					</DialogFooter>

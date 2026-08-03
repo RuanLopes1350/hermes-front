@@ -13,22 +13,23 @@ export default function AuthLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<main className="min-h-screen flex flex-col items-center bg-slate-50 dark:bg-zinc-950 px-4 py-8 sm:py-12 w-full relative">
+		<main className="min-h-screen flex flex-col items-center bg-background px-4 py-8 sm:py-16 w-full relative">
 			<div className="absolute top-4 right-4 sm:top-6 sm:right-6">
 				<ThemeToggle />
 			</div>
-			<div className="flex flex-col items-center gap-2 mb-8 mt-4 sm:mt-8">
-				<div className="bg-primary/10 p-3 rounded-2xl">
+
+			<div className="flex flex-col items-center gap-3 mb-10">
+				<div className="bg-primary/10 p-3 rounded-xl shadow-sm ring-1 ring-primary/15">
 					<img className="w-10 h-10" src="/hermes-icon.svg" alt="Hermes Logo" />
 				</div>
-				<span className="font-extrabold text-3xl tracking-tight bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
+				<span className="font-extrabold text-3xl tracking-tight text-foreground">
 					Hermes
 				</span>
 			</div>
 
 			<div className="w-full max-w-md flex-1 flex flex-col justify-center">{children}</div>
 
-			<div className="flex flex-col items-center gap-4 text-xs text-muted-foreground mt-8">
+			<div className="flex flex-col items-center gap-3 text-xs text-muted-foreground mt-12">
 				<div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
 					<a
 						href={Documentacao}
@@ -55,8 +56,7 @@ export default function AuthLayout({
 						Privacidade
 					</a>
 				</div>
-				<p>Hermes - v{Version}</p>
-				<p>© {new Date().getFullYear()} Hermes. Todos os direitos reservados.</p>
+				<p>Hermes v{Version} · © {new Date().getFullYear()} Hermes. Todos os direitos reservados.</p>
 			</div>
 		</main>
 	);

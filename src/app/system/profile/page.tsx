@@ -91,7 +91,7 @@ export default function ProfilePage() {
 		);
 
 	return (
-		<div className="space-y-6 animate-in fade-in duration-500">
+		<div className="space-y-6 animate-in fade-in duration-300 ease-out">
 			<div>
 				<h2 className="text-2xl font-bold tracking-tight">Meu Perfil</h2>
 				<p className="text-sm text-muted-foreground">
@@ -100,7 +100,7 @@ export default function ProfilePage() {
 			</div>
 
 			<div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-				<Card className="md:col-span-1">
+				<Card className="md:col-span-1 shadow-sm">
 					<CardHeader className="text-center pb-4">
 						<div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
 							<UserCircle className="h-12 w-12" />
@@ -111,7 +111,7 @@ export default function ProfilePage() {
 				</Card>
 
 				<div className="space-y-6 md:col-span-2">
-					<Card>
+					<Card className="shadow-sm">
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
 								<User className="h-5 w-5" /> Dados Pessoais
@@ -130,7 +130,7 @@ export default function ProfilePage() {
 								</div>
 							</div>
 							<div className="flex justify-end pt-2">
-								<Button onClick={handleSaveProfile} disabled={isSavingProfile || !name.trim()}>
+								<Button onClick={handleSaveProfile} disabled={isSavingProfile || !name.trim()} className="cursor-pointer">
 									{isSavingProfile && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Salvar
 									Alterações
 								</Button>
@@ -138,7 +138,7 @@ export default function ProfilePage() {
 						</CardContent>
 					</Card>
 
-					<Card>
+					<Card className="shadow-sm">
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
 								<Lock className="h-5 w-5" /> Segurança
@@ -177,6 +177,7 @@ export default function ProfilePage() {
 									variant="secondary"
 									onClick={handleUpdatePassword}
 									disabled={isUpdatingPassword || !newPassword}
+									className="cursor-pointer"
 								>
 									{isUpdatingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{' '}
 									Atualizar Senha

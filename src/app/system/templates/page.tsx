@@ -129,7 +129,7 @@ export default function TemplatesPage() {
 	};
 
 	return (
-		<div className="space-y-6 animate-in fade-in duration-500">
+		<div className="space-y-6 animate-in fade-in duration-300 ease-out">
 			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 				<div>
 					<h2 className="text-2xl font-bold tracking-tight">Meus Templates</h2>
@@ -147,7 +147,7 @@ export default function TemplatesPage() {
 					<Loader2 className="h-8 w-8 animate-spin text-primary" />
 				</div>
 			) : templates.length === 0 ? (
-				<div className="flex flex-col items-center justify-center h-64 border border-dashed rounded-lg bg-card text-center p-6">
+				<div className="flex flex-col items-center justify-center h-64 border border-dashed rounded-xl bg-card text-center p-6">
 					<Layout className="h-10 w-10 text-muted-foreground mb-4" />
 					<h3 className="text-lg font-semibold">Nenhum Template</h3>
 					<p className="text-sm text-muted-foreground mt-2 max-w-sm">
@@ -160,18 +160,18 @@ export default function TemplatesPage() {
 			) : (
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 					{templates.map((tmpl) => (
-						<Card key={tmpl.id} className="flex flex-col">
+						<Card key={tmpl.id} className="flex flex-col shadow-sm hover:shadow-md transition-shadow">
 							<CardHeader className="pb-4">
 								<div className="flex justify-between items-start mb-2">
 									<div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center text-primary">
 										<FileText className="h-5 w-5" />
 									</div>
 									{tmpl.global ? (
-										<Badge className="bg-primary text-primary-foreground flex items-center gap-1 cursor-default">
+										<Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/10 flex items-center gap-1 cursor-default">
 											<Globe className="h-3 w-3" /> Global
 										</Badge>
 									) : (
-										<Badge variant="secondary" className="flex items-center gap-1 cursor-default">
+										<Badge variant="secondary" className="hover:bg-secondary flex items-center gap-1 cursor-default">
 											<Server className="h-3 w-3" />{' '}
 											{services.find((s) => s.id === tmpl.service_id)?.name || 'Específico'}
 										</Badge>
@@ -201,9 +201,9 @@ export default function TemplatesPage() {
 								</div>
 							</CardHeader>
 							<CardFooter className="mt-auto flex gap-2 pt-0">
-								<Button asChild variant="outline" className="mt-4 flex-1">
+								<Button asChild className="mt-4 flex-1 cursor-pointer gap-2">
 									<Link href={`/system/templates/${tmpl.id}`}>
-										Editar <ArrowRight className="ml-2 h-4 w-4" />
+										Editar <ArrowRight className="h-4 w-4" />
 									</Link>
 								</Button>
 								<Button

@@ -126,7 +126,7 @@ export default function SandboxPage() {
 	};
 
 	return (
-		<div className="space-y-6 animate-in fade-in duration-500">
+		<div className="space-y-6 animate-in fade-in duration-300 ease-out">
 			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 				<div>
 					<h2 className="text-2xl font-bold tracking-tight">Sandbox da API</h2>
@@ -136,6 +136,7 @@ export default function SandboxPage() {
 				</div>
 				<Button
 					variant="outline"
+					className="cursor-pointer"
 					onClick={() => {
 						setRequestLog(null);
 						setResponseLog(null);
@@ -146,7 +147,7 @@ export default function SandboxPage() {
 			</div>
 
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-				<Card>
+				<Card className="shadow-sm">
 					<CardHeader>
 						<CardTitle className="text-lg">Configuração da Requisição</CardTitle>
 					</CardHeader>
@@ -227,7 +228,7 @@ export default function SandboxPage() {
 				</Card>
 
 				<div className="space-y-6 flex flex-col h-full">
-					<Card>
+					<Card className="shadow-sm">
 						<CardHeader>
 							<CardTitle className="text-lg">Variáveis do Template</CardTitle>
 						</CardHeader>
@@ -258,14 +259,14 @@ export default function SandboxPage() {
 					<Button
 						onClick={handleSendTest}
 						disabled={sending}
-						className="w-full py-6 text-lg mt-auto"
+						className="w-full py-6 text-lg mt-auto cursor-pointer"
 					>
 						<Play className="mr-2 h-5 w-5" /> {sending ? 'Disparando...' : 'Executar Envio'}
 					</Button>
 				</div>
 			</div>
 
-			<Card className="bg-slate-950 text-slate-50 border-slate-800">
+			<Card className="bg-slate-950 text-slate-50 border-slate-800 shadow-sm">
 				<CardHeader className="border-b border-slate-800 py-3">
 					<CardTitle className="text-sm flex items-center gap-2">
 						<Terminal className="h-4 w-4" /> Terminal de Execução

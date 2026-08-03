@@ -465,7 +465,7 @@ export default function ServiceDetailsPage() {
 		);
 
 	return (
-		<div className="space-y-6 animate-in fade-in duration-500 pb-20">
+		<div className="space-y-6 animate-in fade-in duration-300 ease-out">
 			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 				<div className="flex items-center gap-4">
 					<Button variant="outline" size="icon" asChild className="cursor-pointer">
@@ -487,7 +487,7 @@ export default function ServiceDetailsPage() {
 						<Button
 							variant="outline"
 							onClick={() => setShowHistoryModal(true)}
-							className="cursor-pointer bg-white"
+							className="cursor-pointer"
 						>
 							<History className="mr-2 h-4 w-4" /> Histórico
 						</Button>
@@ -506,7 +506,7 @@ export default function ServiceDetailsPage() {
 
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 				<div className="lg:col-span-2 space-y-6">
-					<Card>
+					<Card className="shadow-sm">
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
 								<Settings className="h-5 w-5" /> Configurações do Projeto
@@ -671,7 +671,7 @@ export default function ServiceDetailsPage() {
 						</CardContent>
 					</Card>
 
-					<Card>
+					<Card className="shadow-sm">
 						<CardHeader className="flex flex-row items-center justify-between pb-4">
 							<div>
 								<CardTitle className="flex items-center gap-2">
@@ -687,17 +687,17 @@ export default function ServiceDetailsPage() {
 						</CardHeader>
 						<CardContent className="space-y-4">
 							{unifiedConnections.length === 0 ? (
-								<div className="text-center py-6 text-muted-foreground border-2 border-dashed rounded-lg">
+								<div className="text-center py-6 text-muted-foreground border border-dashed rounded-xl">
 									Nenhuma credencial configurada.
 								</div>
 							) : (
 								unifiedConnections.map((conn) => (
 									<div
 										key={conn.id}
-										className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg hover:border-primary/50 transition-colors gap-4"
+										className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-xl hover:border-primary/50 transition-colors gap-4"
 									>
 										<div className="flex items-center gap-4">
-											<div className="p-3 bg-secondary rounded-md">
+											<div className="p-2.5 bg-secondary rounded-lg">
 												{conn.auth_type === 'oauth2' ? (
 													<FaGoogle className="h-5 w-5" />
 												) : (
@@ -710,7 +710,7 @@ export default function ServiceDetailsPage() {
 													{conn.auth_type === 'oauth2' && !conn.refresh_token ? (
 														<Badge
 															variant="destructive"
-															className="cursor-pointer"
+															className="cursor-pointer hover:bg-destructive/90"
 															onClick={() => handleAuthorizeGoogle(conn.id)}
 														>
 															<AlertCircle className="mr-1 h-3 w-3" /> Requer Autorização
@@ -718,7 +718,7 @@ export default function ServiceDetailsPage() {
 													) : (
 														<Badge
 															variant="secondary"
-															className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
+															className="bg-emerald-100 text-emerald-800"
 														>
 															<Check className="mr-1 h-3 w-3" /> Pronto
 														</Badge>
@@ -728,7 +728,7 @@ export default function ServiceDetailsPage() {
 											</div>
 										</div>
 										<div className="flex flex-col items-end gap-2 w-full sm:w-auto">
-											<div className="flex items-center gap-2 bg-muted px-3 py-1.5 rounded-md w-full sm:w-auto">
+											<div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-lg w-full sm:w-auto">
 												<KeyRound className="h-4 w-4 text-primary shrink-0" />
 												<code
 													className={`text-sm font-mono flex-1 ${
@@ -766,8 +766,8 @@ export default function ServiceDetailsPage() {
 														size="icon"
 														className={`h-6 w-6 cursor-pointer ${
 															conn.is_active
-																? 'text-emerald-600 hover:text-amber-600 hover:bg-amber-50'
-																: 'text-red-500 hover:text-emerald-600 hover:bg-emerald-50'
+																? 'text-emerald-600 hover:text-amber-600'
+																: 'text-red-500 hover:text-emerald-600'
 														}`}
 														title={conn.is_active ? 'Desativar chave' : 'Ativar chave'}
 														disabled={togglingKeyId === conn.id}
@@ -787,7 +787,7 @@ export default function ServiceDetailsPage() {
 													<Button
 														variant="ghost"
 														size="icon"
-														className="h-6 w-6 text-blue-500 hover:text-blue-700 hover:bg-blue-50 cursor-pointer"
+														className="h-6 w-6 text-blue-500 hover:text-blue-700 cursor-pointer"
 														title="Rotacionar chave"
 														disabled={rotatingCredId === conn.id}
 														onClick={() => {
@@ -826,7 +826,7 @@ export default function ServiceDetailsPage() {
 
 				{/* Coluna da Direita (Equipe) */}
 				<div className="space-y-6">
-					<Card>
+					<Card className="shadow-sm">
 						<CardHeader className="pb-4">
 							<div className="flex items-center justify-between">
 								<CardTitle className="flex items-center gap-2">
@@ -920,7 +920,7 @@ export default function ServiceDetailsPage() {
 
 							<div className="py-4">
 								{error && (
-									<div className="p-3 mb-4 text-sm text-red-500 bg-red-50 rounded-md border border-red-200">
+									<div className="p-3 mb-4 text-sm text-destructive bg-destructive/10 rounded-lg border border-destructive/20">
 										{error}
 									</div>
 								)}
@@ -929,7 +929,7 @@ export default function ServiceDetailsPage() {
 									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 										<div
 											onClick={() => setSelectedType('plain')}
-											className="border rounded-lg p-4 cursor-pointer hover:border-primary text-center"
+											className="border rounded-xl p-6 cursor-pointer hover:border-primary transition-all hover:bg-secondary/50 text-center"
 										>
 											<Settings2 className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
 											<h4 className="font-semibold">SMTP Padrão</h4>
@@ -939,7 +939,7 @@ export default function ServiceDetailsPage() {
 										</div>
 										<div
 											onClick={() => setSelectedType('oauth2')}
-											className="border rounded-lg p-4 cursor-pointer hover:border-primary text-center"
+											className="border rounded-xl p-6 cursor-pointer hover:border-primary transition-all hover:bg-secondary/50 text-center"
 										>
 											<FaGoogle className="h-8 w-8 mx-auto mb-2 text-blue-500" />
 											<h4 className="font-semibold">Google OAuth2</h4>
@@ -1031,7 +1031,7 @@ export default function ServiceDetailsPage() {
 												</div>
 											</div>
 										) : (
-											<div className="bg-muted p-4 rounded-md text-sm">
+											<div className="bg-muted p-4 rounded-xl text-sm">
 												<p className="font-semibold mb-1">Integração simplificada Google</p>
 												<p className="text-muted-foreground">
 													Após salvar, você precisará autorizar o acesso à sua conta Google clicando
@@ -1071,11 +1071,11 @@ export default function ServiceDetailsPage() {
 								<DialogDescription>A API Key abaixo é exclusiva deste remetente.</DialogDescription>
 							</DialogHeader>
 							<div className="py-6 px-4">
-								<div className="bg-slate-100 p-4 rounded-lg">
-									<p className="text-xs font-semibold text-slate-500 mb-2 uppercase">
+								<div className="bg-muted p-4 rounded-xl">
+									<p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-widest">
 										Token de Acesso (API Key)
 									</p>
-									<code className="text-sm break-all text-slate-900">{generatedKey}</code>
+									<code className="text-sm break-all text-foreground font-mono">{generatedKey}</code>
 								</div>
 								<div className="flex justify-end mt-3">
 									<Button
@@ -1095,7 +1095,7 @@ export default function ServiceDetailsPage() {
 										{copied ? 'Copiado' : 'Copiar'}
 									</Button>
 								</div>
-								<p className="text-sm text-red-500 mt-4 text-center font-medium">
+								<p className="text-sm text-destructive mt-4 text-center font-medium">
 									Salve este token agora! Ele não será exibido novamente.
 								</p>
 							</div>

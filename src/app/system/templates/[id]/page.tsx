@@ -294,14 +294,14 @@ export default function TemplateDetailsPage() {
 	}
 
 	return (
-		<div className="h-[calc(100vh-140px)] flex flex-col gap-4 overflow-hidden text-left">
+		<div className="h-[calc(100vh-140px)] flex flex-col gap-4 overflow-hidden text-left animate-in fade-in duration-300 ease-out">
 			<div className="flex flex-col md:flex-row md:items-start justify-between gap-4 shrink-0">
 				<div className="flex items-center gap-4 text-left">
 					<Link href="/system/templates">
 						<Button
 							variant="outline"
 							size="icon"
-							className="cursor-pointer h-10 w-10 rounded-xl bg-surface border-border-subtle text-muted-foreground hover:text-primary text-left"
+							className="cursor-pointer h-10 w-10 rounded-xl bg-card border text-muted-foreground hover:text-primary text-left shadow-sm"
 						>
 							<ArrowLeft size={18} />
 						</Button>
@@ -312,7 +312,7 @@ export default function TemplateDetailsPage() {
 								{name}
 							</h2>
 							<Badge
-								className={`${isGlobal ? 'bg-primary/10 text-primary' : 'bg-success/10 text-success'} border-none text-[9px] font-bold uppercase gap-1 px-2 py-0.5 cursor-default`}
+								className={`${isGlobal ? 'bg-primary/10 text-primary hover:bg-primary/10' : 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/10'} border-none text-[9px] font-bold uppercase gap-1 px-2 py-0.5 cursor-default`}
 							>
 								{isGlobal ? <Globe size={10} /> : <Server size={10} />}
 								{isGlobal ? 'Global' : services.find((s) => s.id === serviceId)?.name || 'Privado'}
@@ -336,14 +336,14 @@ export default function TemplateDetailsPage() {
 				</div>
 
 				<div className="flex flex-wrap items-center gap-2 sm:gap-3 text-left">
-					<div className="flex items-center gap-2 bg-surface border border-border-subtle rounded-xl px-3 py-1 h-10 text-left flex-1 min-w-[180px]">
+					<div className="flex items-center gap-2 bg-card border rounded-xl px-3 py-1 h-10 text-left flex-1 min-w-[180px] shadow-sm">
 						<span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-left whitespace-nowrap">
 							Assunto:
 						</span>
 						<input
 							value={subject}
 							onChange={(e) => setSubject(e.target.value)}
-							className="bg-transparent border-none text-[11px] font-medium italic focus:ring-0 w-full text-foreground placeholder:opacity-30"
+							className="bg-transparent border-none text-[11px] font-medium italic focus:ring-0 w-full text-foreground placeholder:opacity-30 outline-none"
 							placeholder="Assunto do e-mail..."
 						/>
 					</div>
@@ -352,7 +352,7 @@ export default function TemplateDetailsPage() {
 						variant="outline"
 						onClick={() => handlePreview(content)}
 						disabled={rendering}
-						className="cursor-pointer gap-2 font-bold text-[10px] uppercase tracking-widest h-10 px-5 border-border-subtle hover:bg-white/5"
+						className="cursor-pointer gap-2 font-bold text-[10px] uppercase tracking-widest h-10 px-5 border hover:bg-muted shadow-sm"
 					>
 						<RefreshCw size={14} className={rendering ? 'animate-spin' : ''} /> Preview
 					</Button>
@@ -360,7 +360,7 @@ export default function TemplateDetailsPage() {
 					<Button
 						variant="outline"
 						onClick={() => setShowHistoryModal(true)}
-						className="cursor-pointer gap-2 font-bold text-[10px] uppercase tracking-widest h-10 px-5 border-border-subtle hover:bg-white/5"
+						className="cursor-pointer gap-2 font-bold text-[10px] uppercase tracking-widest h-10 px-5 border hover:bg-muted shadow-sm"
 					>
 						<History size={14} /> Histórico
 					</Button>
@@ -368,7 +368,7 @@ export default function TemplateDetailsPage() {
 					<Button
 						onClick={handleSave}
 						disabled={saving || deleting}
-						className="cursor-pointer gap-2 font-black text-[10px] uppercase tracking-widest h-10 px-6 bg-primary shadow-lg shadow-primary/20"
+						className="cursor-pointer gap-2 font-black text-[10px] uppercase tracking-widest h-10 px-6"
 					>
 						{saving ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />}
 						Salvar
@@ -378,7 +378,7 @@ export default function TemplateDetailsPage() {
 						variant="outline"
 						onClick={handleRequestDelete}
 						disabled={deleting || saving}
-						className="cursor-pointer h-10 w-10 p-0 rounded-xl border-border-subtle bg-danger/5 text-danger hover:bg-danger hover:text-white transition-all"
+						className="cursor-pointer h-10 w-10 p-0 rounded-xl border bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all shadow-sm"
 					>
 						{deleting ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={18} />}
 					</Button>
@@ -386,8 +386,8 @@ export default function TemplateDetailsPage() {
 			</div>
 
 			<div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0 text-left overflow-auto lg:overflow-hidden">
-				<Card className="flex-1 bg-surface border-border-subtle rounded-4xl border overflow-hidden flex flex-col text-left">
-					<div className="p-4 border-b border-border-subtle bg-background/30 flex items-center justify-between text-left">
+				<Card className="flex-1 bg-card rounded-xl border shadow-sm overflow-hidden flex flex-col text-left">
+					<div className="p-4 border-b bg-muted/30 flex items-center justify-between text-left">
 						<div className="flex items-center gap-2 text-left">
 							<Code size={14} className="text-primary" />
 							<span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground font-mono">
@@ -426,10 +426,10 @@ export default function TemplateDetailsPage() {
 				</Card>
 
 				<div className="w-full lg:w-[450px] flex flex-col gap-4 lg:gap-6 shrink-0 text-left">
-					<Card className="flex-1 bg-surface border-border-subtle rounded-4xl border overflow-hidden flex flex-col relative text-left">
-						<div className="p-4 border-b border-border-subtle bg-background/30 flex items-center justify-between text-left">
+					<Card className="flex-1 bg-card rounded-xl border shadow-sm overflow-hidden flex flex-col relative text-left">
+						<div className="p-4 border-b bg-muted/30 flex items-center justify-between text-left">
 							<div className="flex items-center gap-2 text-left">
-								<Eye size={14} className="text-success" />
+								<Eye size={14} className="text-emerald-500" />
 								<span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
 									Saída em Tempo Real
 								</span>
@@ -456,7 +456,7 @@ export default function TemplateDetailsPage() {
 						</div>
 					</Card>
 
-					<Card className="bg-surface border-border-subtle rounded-4xl p-5 border shrink-0 text-left">
+					<Card className="bg-card rounded-xl shadow-sm p-5 border shrink-0 text-left">
 						<div className="flex flex-col gap-5 text-left">
 							<div className="flex items-center justify-between text-left">
 								<div className="flex items-center gap-2 text-left">

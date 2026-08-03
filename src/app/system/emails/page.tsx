@@ -115,7 +115,7 @@ export default function EmailsPage() {
 		switch (status.toLowerCase()) {
 			case 'sent':
 				return (
-					<Badge variant="default" className="bg-emerald-500 hover:bg-emerald-600">
+					<Badge variant="secondary" className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">
 						Enviado
 					</Badge>
 				);
@@ -123,16 +123,23 @@ export default function EmailsPage() {
 				return (
 					<Badge
 						variant="secondary"
-						className="bg-amber-500/20 text-amber-600 hover:bg-amber-500/30 border-amber-500/50"
+						className="bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-100"
 					>
 						Pendente
 					</Badge>
 				);
 			case 'failed':
-				return <Badge variant="destructive">Falhou</Badge>;
+				return (
+					<Badge variant="secondary" className="bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/10">
+						Falhou
+					</Badge>
+				);
 			case 'retrying':
 				return (
-					<Badge className="bg-orange-500/20 text-orange-600 hover:bg-orange-500/30 border-orange-500/50">
+					<Badge 
+						variant="secondary" 
+						className="bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-100"
+					>
 						Reenviando
 					</Badge>
 				);
@@ -147,7 +154,7 @@ export default function EmailsPage() {
 	};
 
 	return (
-		<div className="space-y-6 animate-in fade-in duration-500">
+		<div className="space-y-6 animate-in fade-in duration-300 ease-out">
 			<div>
 				<h2 className="text-3xl font-bold tracking-tight mb-2">E-mails Enviados</h2>
 				<p className="text-muted-foreground text-sm">
@@ -156,7 +163,7 @@ export default function EmailsPage() {
 			</div>
 
 			{/* Filters */}
-			<div className="flex flex-col sm:flex-row items-end sm:items-center gap-4 bg-card p-4 rounded-xl border">
+			<div className="flex flex-col sm:flex-row items-end sm:items-center gap-4 bg-card p-4 rounded-xl border shadow-sm">
 				<div className="space-y-1 w-full sm:w-auto flex-1">
 					<label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
 						Serviço
@@ -220,7 +227,7 @@ export default function EmailsPage() {
 			</div>
 
 			{/* Table */}
-			<div className="rounded-xl border bg-card overflow-x-auto">
+			<div className="rounded-xl border bg-card shadow-sm overflow-x-auto">
 				<Table>
 					<TableHeader>
 						<TableRow>
@@ -316,14 +323,14 @@ export default function EmailsPage() {
 								</div>
 							</div>
 
-							<div className="space-y-1 bg-muted p-3 rounded-lg border min-w-0 overflow-hidden">
+							<div className="space-y-1 bg-muted/50 p-3 rounded-xl border min-w-0 overflow-hidden">
 								<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
 									Destinatário
 								</p>
 								<p className="text-sm font-medium break-all">{selectedEmail.recipient_to}</p>
 							</div>
 
-							<div className="space-y-1 bg-muted p-3 rounded-lg border min-w-0 overflow-hidden">
+							<div className="space-y-1 bg-muted/50 p-3 rounded-xl border min-w-0 overflow-hidden">
 								<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
 									Assunto
 								</p>
@@ -331,7 +338,7 @@ export default function EmailsPage() {
 							</div>
 
 							{selectedEmail.template_id || selectedEmail.service_template_id ? (
-								<div className="space-y-1 bg-primary/5 p-3 rounded-lg border border-primary/20 min-w-0 overflow-hidden">
+								<div className="space-y-1 bg-primary/5 p-3 rounded-xl border border-primary/20 min-w-0 overflow-hidden">
 									<p className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-2">
 										<span className="h-2 w-2 rounded-full bg-primary inline-block shrink-0"></span>
 										Template Usado
@@ -353,7 +360,7 @@ export default function EmailsPage() {
 										Variáveis
 									</p>
 									<div className="overflow-hidden rounded-xl border w-full">
-										<pre className="bg-black/10 dark:bg-black p-4 text-xs font-mono overflow-x-auto w-full">
+										<pre className="bg-muted/30 p-4 text-xs font-mono overflow-x-auto w-full">
 											{JSON.stringify(selectedEmail.variables, null, 2)}
 										</pre>
 									</div>
