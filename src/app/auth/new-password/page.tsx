@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { AlertCircle, ArrowLeft, CheckCircle2, Eye, EyeOff, Loader2 } from 'lucide-react';
@@ -17,7 +17,7 @@ import {
 	CardTitle,
 } from '@/src/components/ui/card';
 
-export default function NewPasswordPage() {
+function NewPasswordForm() {
 	const [password, setPassword] = useState('');
 	const [confirmPassword, setConfirmPassword] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
@@ -196,4 +196,12 @@ export default function NewPasswordPage() {
 			</Card>
 		</div>
 	);
+}
+
+export default function NewPasswordPage() {
+    return (
+        <Suspense>
+            <NewPasswordForm />
+        </Suspense>
+    );
 }
