@@ -91,7 +91,7 @@ export default function SignInPage() {
 						<div className="space-y-2">
 							<div className="flex items-center justify-between">
 								<label htmlFor="email" className="text-sm font-medium leading-none">
-									E-mail corporativo
+									E-mail
 								</label>
 							</div>
 							<Input
