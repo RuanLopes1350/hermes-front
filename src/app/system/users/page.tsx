@@ -49,14 +49,14 @@ interface User {
 	id: string;
 	name: string;
 	email: string;
-	isAdmin: boolean | null;
+	role: 'super_admin' | 'admin' | 'user';
 	isActive: boolean | null;
 	createdAt: string;
 }
 
 interface AppUser {
 	id: string;
-	isAdmin: boolean;
+	role: 'super_admin' | 'admin' | 'user';
 }
 
 export default function UsersPage() {
@@ -71,7 +71,7 @@ export default function UsersPage() {
 	const currentUser = session?.user as AppUser | undefined;
 
 	useEffect(() => {
-		if (!isPending && currentUser && !currentUser.isAdmin) {
+		if (!isPending && currentUser && !(currentUser.role === 'super_admin' || currentUser.role === 'admin')) {
 			notFound();
 		}
 	}, [currentUser, isPending]);
@@ -96,7 +96,7 @@ export default function UsersPage() {
 	}, [toast]);
 
 	useEffect(() => {
-		if (!isPending && currentUser?.isAdmin) {
+		if (!isPending && (currentUser?.role === 'super_admin' || currentUser?.role === 'admin')) {
 			fetchUsers();
 		}
 	}, [fetchUsers, isPending, currentUser]);
@@ -286,7 +286,7 @@ export default function UsersPage() {
 													)}
 												</TableCell>
 												<TableCell>
-													{user.isAdmin ? (
+													{(user.role === 'super_admin' || user.role === 'admin') ? (
 														<Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 flex w-fit items-center gap-1 cursor-default hover:bg-primary/10">
 															<Shield className="h-3 w-3" /> Admin
 														</Badge>
@@ -314,11 +314,11 @@ export default function UsersPage() {
 																<DropdownMenuItem
 																	className="cursor-pointer"
 																	onClick={() =>
-																		handleUpdateUser(user.id, user.name, { isAdmin: !user.isAdmin })
+																		handleUpdateUser(user.id, user.name, { role: (user.role === 'super_admin' || user.role === 'admin') ? 'user' : 'admin' })
 																	}
 																>
 																	<UserCog className="mr-2 h-4 w-4" />
-																	{user.isAdmin ? 'Remover privilégios Admin' : 'Promover a Admin'}
+																	{(user.role === 'super_admin' || user.role === 'admin') ? 'Remover privilégios Admin' : 'Promover a Admin'}
 																</DropdownMenuItem>
 
 																<DropdownMenuItem

@@ -201,7 +201,7 @@ export default function TutorialPage() {
 												<h4 className="text-foreground font-bold">Controle de Privilégios</h4>
 												<p className="text-sm text-muted-foreground">
 													O primeiro usuário registrado na base ganha perfil Administrador (
-													<code className="text-primary text-xs">isAdmin: true</code>), permitindo
+													<code className="text-primary text-xs">role: 'super_admin'</code>), permitindo
 													gerenciar outros usuários e visualizar auditorias completas de envios.
 												</p>
 											</div>

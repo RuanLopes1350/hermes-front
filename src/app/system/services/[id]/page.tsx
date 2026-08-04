@@ -482,7 +482,7 @@ export default function ServiceDetailsPage() {
 					</div>
 				</div>
 				{/* TODO: Add a proper type definition for session user when better-auth client is fully typed. */}
-				{(isOwner || (session?.user as any)?.isAdmin) && (
+				{(isOwner || ((session?.user as any)?.role === 'super_admin' || (session?.user as any)?.role === 'admin')) && (
 					<div className="flex items-center gap-2">
 						<Button
 							variant="outline"

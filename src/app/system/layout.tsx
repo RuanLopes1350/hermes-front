@@ -21,7 +21,7 @@ import { NotificationBell } from '@/src/components/notification-bell';
 interface AppUser {
 	id: string;
 	name: string;
-	isAdmin: boolean;
+	role: 'super_admin' | 'admin' | 'user';
 	isActive: boolean;
 }
 
@@ -114,7 +114,7 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 									<div className="flex flex-col space-y-1">
 										<p className="text-sm font-medium leading-none">{user?.name}</p>
 										<p className="text-xs leading-none text-muted-foreground">
-											{user?.isAdmin ? 'Administrador' : 'Usuário Padrão'}
+											{(user?.role === 'super_admin' || user?.role === 'admin') ? 'Administrador' : 'Usuário Padrão'}
 										</p>
 									</div>
 								</DropdownMenuLabel>
@@ -126,7 +126,7 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 									</Link>
 								</DropdownMenuItem>
 
-								{user?.isAdmin && (
+								{(user?.role === 'super_admin' || user?.role === 'admin') && (
 									<>
 										<DropdownMenuItem asChild>
 											<Link href="/system/users" className="cursor-pointer flex w-full">

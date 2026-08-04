@@ -86,7 +86,7 @@ interface AppUser {
 	id: string;
 	name: string;
 	email: string;
-	isAdmin: boolean;
+	role: 'super_admin' | 'admin' | 'user';
 }
 
 export default function DashboardPage() {
@@ -100,7 +100,7 @@ export default function DashboardPage() {
 	const [isSheetOpen, setIsSheetOpen] = useState(false);
 
 	const user = session?.user as AppUser | undefined;
-	const isAdmin = user?.isAdmin;
+	const isAdmin = (user?.role === 'super_admin' || user?.role === 'admin');
 
 	const [sseStatus, setSseStatus] = useState<'connecting' | 'connected' | 'disconnected'>(
 		'connecting',
