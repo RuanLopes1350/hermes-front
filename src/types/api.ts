@@ -53,6 +53,12 @@ export interface RecentEmail {
 	status: 'pending' | 'sent' | 'failed' | 'retrying';
 	retryCount: number;
 	latencyMs: number | null;
+	priority?: string;
+	serviceName?: string;
+	serviceId?: string;
+	errorLog?: string;
+	createdAt?: string;
+	sentAt?: string;
 }
 
 export interface TopService {

@@ -27,6 +27,15 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
+import { z } from 'zod';
+
+const sseQueueSchema = z.object({
+	waiting: z.number().nonnegative().default(0),
+	active: z.number().nonnegative().default(0),
+	completed: z.number().nonnegative().default(0),
+	failed: z.number().nonnegative().default(0),
+	delayed: z.number().nonnegative().default(0),
+});
 import {
 	DashboardData,
 	VolumeData,
@@ -97,6 +106,29 @@ export default function DashboardPage() {
 		'connecting',
 	);
 
+	const handleRetryEmail = async () => {
+		if (!selectedEmail || !selectedEmail.serviceId) return;
+		try {
+			const res = await apiFetch(`/api/services/${selectedEmail.serviceId}/emails/${selectedEmail.id}/retry`, {
+				method: 'POST',
+			});
+			if (res.error) throw new Error(res.message || 'Erro ao reprocessar');
+
+			toast({
+				title: 'E-mail reenfileirado',
+				description: res.message || 'O e-mail retornou para a fila (DLQ).',
+			});
+
+			setSelectedEmail((prev) => prev ? { ...prev, status: 'pending' } : prev);
+		} catch (error: any) {
+			toast({
+				title: 'Erro ao reprocessar',
+				description: error.message,
+				variant: 'destructive',
+			});
+		}
+	};
+
 	useEffect(() => {
 		let currentEventSource: EventSource | undefined;
 		let reconnectTimeout: NodeJS.Timeout;
@@ -118,12 +150,15 @@ export default function DashboardPage() {
 
 			currentEventSource.onmessage = (event) => {
 				try {
-					const queueData = JSON.parse(event.data);
+					const rawData = JSON.parse(event.data);
+					const queueData = sseQueueSchema.parse(rawData);
 					setData((prev: DashboardData | null) => {
-					if (!prev) return prev;
-					return { ...prev, queue: queueData };
-				});
-				} catch (e) { }
+						if (!prev) return prev;
+						return { ...prev, queue: queueData };
+					});
+				} catch (e) {
+					console.warn('[SSE] Evento malformado recebido, ignorando...', e);
+				}
 			};
 
 			currentEventSource.onerror = () => {
@@ -1134,10 +1169,17 @@ export default function DashboardPage() {
 
 							{/* Erro */}
 							{selectedEmail.errorLog && (
-								<div className="border-t border-red-200 pt-4 space-y-2 w-full min-w-0">
-									<label className="text-[10px] uppercase font-bold text-red-600 flex items-center gap-1">
-										<AlertCircle className="h-3 w-3 shrink-0" /> Log de Erro / Exception
-									</label>
+								<div className="border-t pt-4 w-full">
+									<div className="flex items-center justify-between mb-2">
+										<label className="text-[10px] uppercase font-bold text-red-600 flex items-center gap-1">
+											<AlertCircle className="h-3 w-3 shrink-0" /> Log de Erro / Exception
+										</label>
+										{selectedEmail.status === 'failed' && (
+											<Button size="sm" variant="outline" className="h-6 text-[10px] gap-1" onClick={handleRetryEmail}>
+												<RefreshCw className="h-3 w-3" /> Reprocessar
+											</Button>
+										)}
+									</div>
 									<pre className="text-[10px] p-3 bg-red-50 text-red-900 border border-red-200 rounded-md whitespace-pre-wrap break-all max-h-[150px] overflow-y-auto w-full overflow-x-hidden">
 										{selectedEmail.errorLog}
 									</pre>
