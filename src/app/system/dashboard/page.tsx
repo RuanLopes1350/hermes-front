@@ -27,6 +27,16 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
+import {
+	DashboardData,
+	VolumeData,
+	StatusData,
+	ActivityLog,
+	RecentEmail,
+	TopService,
+	TopTemplate,
+	InactiveCredential,
+} from '@/src/types/api';
 
 import {
 	Card,
@@ -74,10 +84,10 @@ export default function DashboardPage() {
 	const { data: session, isPending } = authClient.useSession();
 	const { toast } = useToast();
 	const [loading, setLoading] = useState(true);
-	const [data, setData] = useState<any>(null);
+	const [data, setData] = useState<DashboardData | null>(null);
 	const [days, setDays] = useState(7);
 
-	const [selectedEmail, setSelectedEmail] = useState<any>(null);
+	const [selectedEmail, setSelectedEmail] = useState<RecentEmail | null>(null);
 	const [isSheetOpen, setIsSheetOpen] = useState(false);
 
 	const user = session?.user as AppUser | undefined;
@@ -109,10 +119,10 @@ export default function DashboardPage() {
 			currentEventSource.onmessage = (event) => {
 				try {
 					const queueData = JSON.parse(event.data);
-					setData((prev: any) => {
-						if (!prev) return prev;
-						return { ...prev, queue: queueData };
-					});
+					setData((prev: DashboardData | null) => {
+					if (!prev) return prev;
+					return { ...prev, queue: queueData };
+				});
 				} catch (e) { }
 			};
 
@@ -227,12 +237,12 @@ export default function DashboardPage() {
 	// ==========================================
 
 	// 1. Gráfico de Volume por Dia (Stacked Bar)
-	const getVolumeByDayOption = (volumeData: any[]) => {
-		const dates = (volumeData || []).map((d: any) =>
+	const getVolumeByDayOption = (volumeData: VolumeData[]) => {
+		const dates = (volumeData || []).map((d: VolumeData) =>
 			new Date(d.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }),
 		);
-		const sentValues = (volumeData || []).map((d: any) => Number(d.sent || 0));
-		const failedValues = (volumeData || []).map((d: any) => Number(d.failed || 0));
+		const sentValues = (volumeData || []).map((d: VolumeData) => Number(d.sent || 0));
+		const failedValues = (volumeData || []).map((d: VolumeData) => Number(d.failed || 0));
 
 		return {
 			backgroundColor: 'transparent',
@@ -273,15 +283,15 @@ export default function DashboardPage() {
 	};
 
 	// 1b. Volume Multi-Série (Admin Only)
-	const getVolumeByServiceOption = (volumeData: any[]) => {
+	const getVolumeByServiceOption = (volumeData: VolumeData[]) => {
 		if (!volumeData || volumeData.length === 0) return {};
 
 		const datesSet = new Set<string>();
 		const servicesSet = new Set<string>();
 
-		volumeData.forEach((d: any) => {
+		volumeData.forEach((d: VolumeData) => {
 			datesSet.add(d.date);
-			servicesSet.add(d.serviceName);
+			if (d.serviceName) servicesSet.add(d.serviceName);
 		});
 
 		const dates = Array.from(datesSet).sort();
@@ -293,7 +303,7 @@ export default function DashboardPage() {
 				type: 'line',
 				smooth: true,
 				data: dates.map((date) => {
-					const entry = volumeData.find((d: any) => d.date === date && d.serviceName === service);
+					const entry = volumeData.find((d: VolumeData) => d.date === date && d.serviceName === service);
 					return entry ? entry.total : 0;
 				}),
 			};
@@ -318,7 +328,7 @@ export default function DashboardPage() {
 	};
 
 	// 2. Gráfico de Distribuição de Status (Donut)
-	const getStatusDistributionOption = (statusData: any[]) => {
+	const getStatusDistributionOption = (statusData: StatusData[]) => {
 		const colorMap: Record<string, string> = {
 			sent: '#10b981', // Emerald
 			pending: '#f59e0b', // Amber
@@ -326,7 +336,7 @@ export default function DashboardPage() {
 			retrying: '#3b82f6', // Blue
 		};
 
-		const formattedData = (statusData || []).map((d: any) => ({
+		const formattedData = (statusData || []).map((d: StatusData) => ({
 			value: Number(d.total),
 			name: d.status.charAt(0).toUpperCase() + d.status.slice(1),
 			itemStyle: { color: colorMap[d.status] || '#94a3b8' },
@@ -359,9 +369,9 @@ export default function DashboardPage() {
 	};
 
 	// 3. Admin: Top Serviços por Volume (Horizontal Bar)
-	const getTopServicesOption = (topServices: any[]) => {
-		const names = (topServices || []).map((s: any) => s.name);
-		const counts = (topServices || []).map((s: any) => Number(s.emailCount || s.total));
+	const getTopServicesOption = (topServices: TopService[]) => {
+		const names = (topServices || []).map((s: TopService) => s.name);
+		const counts = (topServices || []).map((s: TopService) => Number(s.emailCount || s.total || 0));
 		return {
 			backgroundColor: 'transparent',
 			tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
@@ -398,9 +408,9 @@ export default function DashboardPage() {
 		};
 	};
 
-	const getTopServicesFailuresOption = (topServices: any[]) => {
-		const names = (topServices || []).map((s: any) => s.name);
-		const rates = (topServices || []).map((s: any) => Number(s.failureRate));
+	const getTopServicesFailuresOption = (topServices: TopService[]) => {
+		const names = (topServices || []).map((s: TopService) => s.name);
+		const rates = (topServices || []).map((s: TopService) => Number(s.failureRate || 0));
 		return {
 			backgroundColor: 'transparent',
 			tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: '{b}: {c}% Falhas' },
@@ -428,9 +438,9 @@ export default function DashboardPage() {
 	};
 
 	// 4. User: Top templates por uso
-	const getTopTemplatesOption = (topTemplates: any[]) => {
-		const names = (topTemplates || []).map((t: any) => t.name);
-		const counts = (topTemplates || []).map((t: any) => Number(t.usage_count));
+	const getTopTemplatesOption = (topTemplates: TopTemplate[]) => {
+		const names = (topTemplates || []).map((t: TopTemplate) => t.name);
+		const counts = (topTemplates || []).map((t: TopTemplate) => Number(t.usage_count || 0));
 		return {
 			backgroundColor: 'transparent',
 			tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
@@ -572,7 +582,7 @@ export default function DashboardPage() {
 							entregas falharão silenciosamente até serem corrigidas:
 						</p>
 						<ul className="list-disc list-inside text-xs font-medium bg-destructive/5 p-2.5 rounded-lg">
-							{data.inactiveCredentials.map((c: any) => (
+							{data.inactiveCredentials.map((c: InactiveCredential) => (
 								<li key={c.credId}>
 									Serviço <strong>{c.serviceName}</strong> — {c.credName}
 								</li>
@@ -694,7 +704,7 @@ export default function DashboardPage() {
 							</div>
 						) : (
 							<div className="relative border-l border-muted-foreground/20 ml-3 space-y-6 pb-2">
-								{data.recentActivity.map((log: any, idx: number) => (
+								{data.recentActivity.map((log: ActivityLog, idx: number) => (
 									<div key={idx} className="relative pl-6">
 										<span className="absolute -left-2 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-background border border-border">
 											{getActionIcon(log.action)}
@@ -747,7 +757,7 @@ export default function DashboardPage() {
 											</TableCell>
 										</TableRow>
 									) : (
-										data.recentEmails.map((mail: any) => (
+										data.recentEmails.map((mail: RecentEmail) => (
 											<TableRow key={mail.id} className="group">
 												<TableCell>
 													<div className="flex flex-col gap-0.5">
