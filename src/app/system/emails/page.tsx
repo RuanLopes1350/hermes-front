@@ -136,8 +136,8 @@ export default function EmailsPage() {
 				);
 			case 'retrying':
 				return (
-					<Badge 
-						variant="secondary" 
+					<Badge
+						variant="secondary"
 						className="bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-100"
 					>
 						Reenviando

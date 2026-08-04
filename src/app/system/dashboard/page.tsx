@@ -107,7 +107,7 @@ export default function DashboardPage() {
 					if (!prev) return prev;
 					return { ...prev, queue: queueData };
 				});
-			} catch (e) {}
+			} catch (e) { }
 		};
 
 		eventSource.onerror = () => {
@@ -466,88 +466,88 @@ export default function DashboardPage() {
 	// ==========================================
 	const kpiCards = isAdmin
 		? [
-				{
-					label: 'E-mails Hoje',
-					value: todayCount.toLocaleString('pt-BR'),
-					icon: Zap,
-					color: 'text-blue-600',
-					bg: 'bg-blue-100',
-					desc: (
-						<span className={`flex items-center gap-1 ${deltaColor}`}>
-							{deltaIcon} {Math.abs(deltaToday).toFixed(1)}% vs Ontem
-						</span>
-					),
-				},
-				{
-					label: 'Taxa de Entrega Global',
-					value: `${successRate}%`,
-					icon: CheckCircle2,
-					color: 'text-emerald-600',
-					bg: 'bg-emerald-100',
-					desc: 'Taxa histórica',
-				},
-				{
-					label: 'Sessões Ativas',
-					value: data.summary.activeSessions || 0,
-					icon: Users,
-					color: 'text-slate-600',
-					bg: 'bg-slate-200',
-					desc: 'Usuários online (tokens válidos)',
-				},
-				{
-					label: 'Serviços Registrados',
-					value: data.summary.totalServices || 0,
-					icon: Server,
-					color: 'text-indigo-600',
-					bg: 'bg-indigo-100',
-					desc: 'Projetos ativos na plataforma',
-				},
-			]
+			{
+				label: 'E-mails Hoje',
+				value: todayCount.toLocaleString('pt-BR'),
+				icon: Zap,
+				color: 'text-blue-600',
+				bg: 'bg-blue-100',
+				desc: (
+					<span className={`flex items-center gap-1 ${deltaColor}`}>
+						{deltaIcon} {Math.abs(deltaToday).toFixed(1)}% vs Ontem
+					</span>
+				),
+			},
+			{
+				label: 'Taxa de Entrega Global',
+				value: `${successRate}%`,
+				icon: CheckCircle2,
+				color: 'text-emerald-600',
+				bg: 'bg-emerald-100',
+				desc: 'Taxa histórica',
+			},
+			{
+				label: 'Sessões Ativas',
+				value: data.summary.activeSessions || 0,
+				icon: Users,
+				color: 'text-slate-600',
+				bg: 'bg-slate-200',
+				desc: 'Usuários online (tokens válidos)',
+			},
+			{
+				label: 'Serviços Registrados',
+				value: data.summary.totalServices || 0,
+				icon: Server,
+				color: 'text-indigo-600',
+				bg: 'bg-indigo-100',
+				desc: 'Projetos ativos na plataforma',
+			},
+		]
 		: [
-				{
-					label: 'E-mails Hoje',
-					value: todayCount.toLocaleString('pt-BR'),
-					icon: Mail,
-					color: 'text-blue-600',
-					bg: 'bg-blue-100',
-					desc: (
-						<span className={`flex items-center gap-1 ${deltaColor}`}>
-							{deltaIcon} {Math.abs(deltaToday).toFixed(1)}% vs Ontem
-						</span>
-					),
-				},
-				{
-					label: 'Status Pendentes / Falhas',
-					value: `${data.summary.failed || 0} / ${data.summary.retrying || 0}`,
-					icon: AlertCircle,
-					color: 'text-red-600',
-					bg: 'bg-red-100',
-					desc: 'Falhas permanentes / Em retentativa',
-				},
-				{
-					label: 'Próximo Agendado',
-					value: data.nextScheduled
-						? new Date(data.nextScheduled).toLocaleTimeString('pt-BR', {
-								hour: '2-digit',
-								minute: '2-digit',
-							})
-						: 'Nenhum',
-					icon: CalendarClock,
-					color: 'text-purple-600',
-					bg: 'bg-purple-100',
-					desc: data.nextScheduled
-						? new Date(data.nextScheduled).toLocaleDateString('pt-BR')
-						: 'Sem fila agendada',
-				},
-				{
-					label: 'Templates Ativos',
-					value: data.summary.templates || 0,
-					icon: FileText,
-					color: 'text-indigo-600',
-					bg: 'bg-indigo-100',
-					desc: 'Prontos para uso',
-				},
-			];
+			{
+				label: 'E-mails Hoje',
+				value: todayCount.toLocaleString('pt-BR'),
+				icon: Mail,
+				color: 'text-blue-600',
+				bg: 'bg-blue-100',
+				desc: (
+					<span className={`flex items-center gap-1 ${deltaColor}`}>
+						{deltaIcon} {Math.abs(deltaToday).toFixed(1)}% vs Ontem
+					</span>
+				),
+			},
+			{
+				label: 'Status Pendentes / Falhas',
+				value: `${data.summary.failed || 0} / ${data.summary.retrying || 0}`,
+				icon: AlertCircle,
+				color: 'text-red-600',
+				bg: 'bg-red-100',
+				desc: 'Falhas permanentes / Em retentativa',
+			},
+			{
+				label: 'Próximo Agendado',
+				value: data.nextScheduled
+					? new Date(data.nextScheduled).toLocaleTimeString('pt-BR', {
+						hour: '2-digit',
+						minute: '2-digit',
+					})
+					: 'Nenhum',
+				icon: CalendarClock,
+				color: 'text-purple-600',
+				bg: 'bg-purple-100',
+				desc: data.nextScheduled
+					? new Date(data.nextScheduled).toLocaleDateString('pt-BR')
+					: 'Sem fila agendada',
+			},
+			{
+				label: 'Templates Ativos',
+				value: data.summary.templates || 0,
+				icon: FileText,
+				color: 'text-indigo-600',
+				bg: 'bg-indigo-100',
+				desc: 'Prontos para uso',
+			},
+		];
 
 	return (
 		<div className="space-y-6 animate-in fade-in duration-300 ease-out">
