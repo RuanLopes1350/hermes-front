@@ -87,50 +87,60 @@ export default function DashboardPage() {
 		'connecting',
 	);
 
-	const connectSSE = () => {
-		if (!session) return;
-		setSseStatus('connecting');
-
-		const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1350';
-		const eventSource = new EventSource(`${API_URL}/api/dashboard/stream`, {
-			withCredentials: true,
-		});
-
-		eventSource.onopen = () => {
-			setSseStatus('connected');
-		};
-
-		eventSource.onmessage = (event) => {
-			try {
-				const queueData = JSON.parse(event.data);
-				setData((prev: any) => {
-					if (!prev) return prev;
-					return { ...prev, queue: queueData };
-				});
-			} catch (e) { }
-		};
-
-		eventSource.onerror = () => {
-			// Fechar explicitamente para matar o loop nativo do navegador
-			eventSource.close();
-			setSseStatus('disconnected');
-		};
-
-		return eventSource;
-	};
-
 	useEffect(() => {
 		let currentEventSource: EventSource | undefined;
+		let reconnectTimeout: NodeJS.Timeout;
+		let retryDelay = 1000;
+
+		const initSSE = () => {
+			if (!session) return;
+			setSseStatus('connecting');
+
+			const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1350';
+			currentEventSource = new EventSource(`${API_URL}/api/dashboard/stream`, {
+				withCredentials: true,
+			});
+
+			currentEventSource.onopen = () => {
+				setSseStatus('connected');
+				retryDelay = 1000; // Reseta o delay ao conectar com sucesso
+			};
+
+			currentEventSource.onmessage = (event) => {
+				try {
+					const queueData = JSON.parse(event.data);
+					setData((prev: any) => {
+						if (!prev) return prev;
+						return { ...prev, queue: queueData };
+					});
+				} catch (e) { }
+			};
+
+			currentEventSource.onerror = () => {
+				if (currentEventSource) {
+					currentEventSource.close();
+				}
+				setSseStatus('disconnected');
+				
+				// Reconexão com backoff exponencial (máx 30s)
+				clearTimeout(reconnectTimeout);
+				reconnectTimeout = setTimeout(() => {
+					retryDelay = Math.min(retryDelay * 2, 30000);
+					initSSE();
+				}, retryDelay);
+			};
+		};
 
 		if (session) {
 			fetchDashboardData();
-			currentEventSource = connectSSE();
+			initSSE();
 		}
 
 		return () => {
 			if (currentEventSource) {
 				currentEventSource.close();
 			}
+			clearTimeout(reconnectTimeout);
 		};
 	}, [session, days]);
 
