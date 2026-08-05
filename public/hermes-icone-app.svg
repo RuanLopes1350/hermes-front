@@ -1,0 +1,13 @@
+<svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <symbol id="mark-frame" viewBox="0 0 100 100">
+      <path d="M26,22 L26,78 M74,22 L74,78" stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none"/>
+    </symbol>
+    <symbol id="mark-arrow" viewBox="0 0 100 100">
+      <path d="M26,58 L80,20 M68,20 L80,20 L80,32" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </symbol>
+  </defs>
+  <rect x="0" y="0" width="160" height="160" rx="28" fill="#4f46e5"/>
+  <use href="#mark-frame" x="32" y="32" width="96" height="96" color="#ffffff"/>
+  <use href="#mark-arrow" x="32" y="32" width="96" height="96" color="#c7d2fe"/>
+</svg>

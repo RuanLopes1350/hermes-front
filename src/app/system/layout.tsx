@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import { authClient } from '@/src/lib/auth-client';
 import { Loader2, LogOut, Settings, User as UserIcon, Menu, X, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import LogoPrimarioClaro from '@/public/hermes-primario.svg';
+import LogoPrimarioEscuro from '@/public/hermes-escuro.svg';
 
 import {
 	DropdownMenu,
@@ -38,7 +40,6 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 		{ name: 'E-mails', path: '/system/emails' },
 		{ name: 'Templates', path: '/system/templates' },
 		{ name: 'Sandbox', path: '/system/sandbox' },
-		{ name: 'Como usar?', path: '/tutorial' },
 	];
 
 	useEffect(() => {
@@ -61,12 +62,14 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 			<header className="sticky top-0 z-50 w-full border-b bg-card">
 				<div className="container mx-auto max-w-7xl flex h-16 items-center justify-between px-4 sm:px-6">
 					{/* Left: Brand & Links */}
-					<div className="flex items-center gap-8">
-						<div className="flex items-center gap-3">
-							<img src="/hermes-icon.svg" alt="Hermes Icon" className="h-6 w-6" />
-							<span className="font-extrabold text-xl tracking-tight text-foreground">
-								Hermes
-							</span>
+					<div className="flex items-center gap-10">
+						<div className="flex items-center">
+							<Link href='/system/dashboard'>
+								{/* Logo renderizado no tema claro */}
+								<LogoPrimarioClaro className='block dark:hidden w-40 h-20' />
+								{/* Logo renderizado no tema escuro */}
+								<LogoPrimarioEscuro className='hidden dark:block w-40 h-20' />
+							</Link>
 						</div>
 
 						<nav className="hidden md:flex items-center space-x-1">
@@ -76,11 +79,10 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 									<Link
 										key={item.path}
 										href={item.path}
-										className={`px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
-											isActive
-												? 'bg-secondary text-secondary-foreground'
-												: 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
-										}`}
+										className={`px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${isActive
+											? 'bg-secondary text-secondary-foreground'
+											: 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
+											}`}
 									>
 										{item.name}
 									</Link>
@@ -178,11 +180,10 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 									key={item.path}
 									href={item.path}
 									onClick={() => setIsMobileMenuOpen(false)}
-									className={`block px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-										isActive
-											? 'bg-secondary text-secondary-foreground'
-											: 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
-									}`}
+									className={`block px-4 py-2 rounded-md text-sm font-medium transition-colors ${isActive
+										? 'bg-secondary text-secondary-foreground'
+										: 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
+										}`}
 								>
 									{item.name}
 								</Link>

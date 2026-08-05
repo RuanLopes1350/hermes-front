@@ -1,0 +1,6 @@
+<svg viewBox="0 0 210 56" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .wordmark { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; font-weight: 800; letter-spacing: -0.5px; }
+  </style>
+  <text x="105" y="40" text-anchor="middle" class="wordmark" font-size="36" fill="#0f172a">Hermes</text>
+</svg>

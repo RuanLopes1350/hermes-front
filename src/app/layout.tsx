@@ -39,7 +39,7 @@ export const metadata: Metadata = {
 		type: 'website',
 		siteName: 'Hermes Gateway',
 	},
-	icons: '/hermes-icon.svg',
+	icons: '/hermes-icone-app.svg',
 };
 
 export default function RootLayout({

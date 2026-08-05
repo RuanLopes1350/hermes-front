@@ -90,7 +90,7 @@ export function NotificationBell() {
 					)}
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent align="end" className="w-80 p-0" sideOffset={8}>
+			<PopoverContent align="end" className="w-[calc(100vw-2rem)] sm:w-80 p-0" sideOffset={8}>
 				<div className="flex items-center justify-between border-b px-4 py-3">
 					<span className="font-semibold text-sm">Notificações</span>
 					{unreadCount > 0 && (
@@ -105,7 +105,7 @@ export function NotificationBell() {
 						</Button>
 					)}
 				</div>
-				<ScrollArea className="h-max max-h-80">
+				<div className="max-h-[350px] sm:max-h-[400px] overflow-y-auto overscroll-contain">
 					{notifications.length === 0 ? (
 						<div className="flex flex-col items-center justify-center py-8 text-center px-4">
 							<Bell className="h-8 w-8 text-muted-foreground/50 mb-3" />
@@ -123,25 +123,25 @@ export function NotificationBell() {
 									<div className="flex items-start justify-between gap-2">
 										<div className="flex items-center gap-2">
 											<div
-												className={`h-2 w-2 rounded-full ${getTypeColor(notif.type).split(' ')[1]}`}
+												className={`h-2 w-2 shrink-0 rounded-full ${getTypeColor(notif.type).split(' ')[1]}`}
 											/>
 											<span className="font-medium text-sm leading-none">{notif.title}</span>
 										</div>
-										<span className="text-[10px] text-muted-foreground whitespace-nowrap">
+										<span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
 											{formatDistanceToNow(new Date(notif.createdAt), {
 												addSuffix: true,
 												locale: ptBR,
 											})}
 										</span>
 									</div>
-									<p className="text-xs text-muted-foreground mt-1.5 leading-snug">
+									<p className="text-xs text-muted-foreground mt-1.5 leading-snug break-words">
 										{notif.message}
 									</p>
 									<div className="flex justify-end mt-2">
 										<Button
 											variant="ghost"
 											size="sm"
-											className="h-6 px-2 text-[10px] cursor-pointer"
+											className="h-6 px-2 text-[10px] cursor-pointer shrink-0"
 											onClick={() => markAsRead.mutate(notif.id)}
 										>
 											Marcar como lida
@@ -151,7 +151,7 @@ export function NotificationBell() {
 							))}
 						</div>
 					)}
-				</ScrollArea>
+				</div>
 			</PopoverContent>
 		</Popover>
 	);

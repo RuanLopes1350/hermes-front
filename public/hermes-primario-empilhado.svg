@@ -1,0 +1,16 @@
+<svg viewBox="0 0 160 170" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .wordmark { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; font-weight: 800; letter-spacing: -0.5px; }
+  </style>
+  <defs>
+    <symbol id="mark-frame" viewBox="0 0 100 100">
+      <path d="M26,22 L26,78 M74,22 L74,78" stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none"/>
+    </symbol>
+    <symbol id="mark-arrow" viewBox="0 0 100 100">
+      <path d="M26,58 L80,20 M68,20 L80,20 L80,32" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </symbol>
+  </defs>
+  <use href="#mark-frame" x="40" y="10" width="80" height="80" color="#0f172a"/>
+  <use href="#mark-arrow" x="40" y="10" width="80" height="80" color="#4f46e5"/>
+  <text x="80" y="138" text-anchor="middle" class="wordmark" font-size="30" fill="#0f172a">Hermes</text>
+</svg>

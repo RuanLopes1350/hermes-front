@@ -348,14 +348,14 @@ export default function TemplateDetailsPage() {
 						/>
 					</div>
 
-					<Button
+					{/* <Button
 						variant="outline"
 						onClick={() => handlePreview(content)}
 						disabled={rendering}
 						className="cursor-pointer gap-2 font-bold text-[10px] uppercase tracking-widest h-10 px-5 border hover:bg-muted shadow-sm"
 					>
 						<RefreshCw size={14} className={rendering ? 'animate-spin' : ''} /> Preview
-					</Button>
+					</Button> */}
 
 					<Button
 						variant="outline"

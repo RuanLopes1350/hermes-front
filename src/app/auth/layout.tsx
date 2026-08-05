@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Documentacao, Tutorial, Privacidade, Version } from '@/src/constants/links';
 import { ThemeToggle } from '@/src/components/theme-toggle';
 import Link from 'next/link';
+import LogoEmpilhadoClaro from '@/public/hermes-primario-empilhado.svg'
+import LogoEmpilhadoEscuro from '@/public/hermes-escuro-empilhado.svg'
 
 export const metadata: Metadata = {
 	title: 'Hermes | Autenticação',
@@ -18,13 +20,9 @@ export default function AuthLayout({
 				<ThemeToggle />
 			</div>
 
-			<div className="flex flex-col items-center gap-3 mb-10">
-				<div className="bg-primary/10 p-3 rounded-xl shadow-sm ring-1 ring-primary/15">
-					<img className="w-10 h-10" src="/hermes-icon.svg" alt="Hermes Logo" />
-				</div>
-				<span className="font-extrabold text-3xl tracking-tight text-foreground">
-					Hermes
-				</span>
+			<div className="flex flex-col items-center">
+				<LogoEmpilhadoClaro className="block dark:hidden w-40 h-40" />
+				<LogoEmpilhadoEscuro className="hidden dark:block w-40 h-40" />
 			</div>
 
 			<div className="w-full max-w-md flex-1 flex flex-col justify-center">{children}</div>
@@ -37,23 +35,7 @@ export default function AuthLayout({
 						rel="noreferrer"
 						className="hover:text-primary transition-colors"
 					>
-						Documentação
-					</a>
-					<Link
-						href={Tutorial}
-						target="_blank"
-						rel="noreferrer"
-						className="hover:text-primary transition-colors"
-					>
-						Tutorial
-					</Link>
-					<a
-						href={Privacidade}
-						target="_blank"
-						rel="noreferrer"
-						className="hover:text-primary transition-colors"
-					>
-						Privacidade
+						Documentação API
 					</a>
 				</div>
 				<p>Hermes v{Version} · © {new Date().getFullYear()} Hermes. Todos os direitos reservados.</p>
