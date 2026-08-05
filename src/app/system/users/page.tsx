@@ -134,7 +134,7 @@ export default function UsersPage() {
 	const handleUpdateUser = async (
 		id: string,
 		name: string,
-		payload: { isAdmin?: boolean; isActive?: boolean },
+		payload: { role?: 'super_admin' | 'admin' | 'user'; isActive?: boolean },
 	) => {
 		if (id === currentUser?.id) {
 			toast({

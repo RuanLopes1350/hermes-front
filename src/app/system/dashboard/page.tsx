@@ -112,11 +112,12 @@ export default function DashboardPage() {
 			const res = await apiFetch(`/api/services/${selectedEmail.serviceId}/emails/${selectedEmail.id}/retry`, {
 				method: 'POST',
 			});
-			if (res.error) throw new Error(res.message || 'Erro ao reprocessar');
+			const data = await res.json();
+			if (!res.ok) throw new Error(data.message || 'Erro ao reprocessar');
 
 			toast({
 				title: 'E-mail reenfileirado',
-				description: res.message || 'O e-mail retornou para a fila (DLQ).',
+				description: data.message || 'O e-mail retornou para a fila (DLQ).',
 			});
 
 			setSelectedEmail((prev) => prev ? { ...prev, status: 'pending' } : prev);
@@ -890,7 +891,7 @@ export default function DashboardPage() {
 									<Button
 										size="sm"
 										variant="outline"
-										onClick={connectSSE}
+										onClick={() => window.location.reload()}
 										className="gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
 									>
 										<RefreshCw className="h-4 w-4" />
@@ -1015,13 +1016,13 @@ export default function DashboardPage() {
 									<CardTitle className="text-sm">Top Serviços: Falhas (Crítico)</CardTitle>
 								</CardHeader>
 								<CardContent>
-									{!data.topServicesByFailureRate || data.topServicesByFailureRate.length === 0 ? (
+									{!data.topServicesByFailures || data.topServicesByFailures.length === 0 ? (
 										<div className="h-[100px] flex items-center justify-center text-muted-foreground text-xs border border-dashed rounded">
 											Nenhum dado.
 										</div>
 									) : (
 										<ReactECharts
-											option={getTopServicesFailuresOption(data.topServicesByFailureRate)}
+											option={getTopServicesFailuresOption(data.topServicesByFailures)}
 											style={{ height: '120px', width: '100%' }}
 											opts={{ renderer: 'svg' }}
 										/>
@@ -1191,7 +1192,7 @@ export default function DashboardPage() {
 									<div className="min-w-0">
 										<span className="block text-[10px] uppercase mb-0.5 truncate">Criado em:</span>
 										<span className="font-mono truncate block">
-											{new Date(selectedEmail.createdAt).toLocaleString('pt-BR')}
+											{selectedEmail.createdAt ? new Date(selectedEmail.createdAt).toLocaleString('pt-BR') : '-'}
 										</span>
 									</div>
 									{selectedEmail.sentAt && (

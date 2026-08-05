@@ -86,9 +86,11 @@ export interface DashboardData {
 	recentActivity: ActivityLog[];
 	recentEmails: RecentEmail[];
 	topServices?: TopService[];
+	topServicesByVolume?: TopService[];
 	topServicesByFailures?: TopService[];
 	topTemplates?: TopTemplate[];
 	inactiveCredentials?: InactiveCredential[];
 	nextScheduled?: string | null;
+	volumeByService?: any[];
 	queue?: any;
 }
