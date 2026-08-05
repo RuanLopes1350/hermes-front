@@ -200,7 +200,7 @@ function NewPasswordForm() {
 
 export default function NewPasswordPage() {
     return (
-        <Suspense>
+        <Suspense fallback={<div className="w-full flex justify-center py-10"><div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" /></div>}>
             <NewPasswordForm />
         </Suspense>
     );
