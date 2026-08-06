@@ -1,7 +1,5 @@
 import { ImageResponse } from 'next/og';
 
-export const runtime = 'edge';
-
 // Tamanho recomendado pelo OpenGraph e Twitter Cards
 export const size = {
   width: 1200,

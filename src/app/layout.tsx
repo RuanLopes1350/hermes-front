@@ -53,9 +53,9 @@ export const metadata: Metadata = {
 		creator: '@ruanlopes1350',
 	},
 	icons: {
-		icon: '/hermes-icone-app.svg',
-		shortcut: '/hermes-icone-app.svg',
-		apple: '/hermes-icone-app.svg',
+		icon: '/hermes-icone-app.svg?v=2',
+		shortcut: '/hermes-icone-app.svg?v=2',
+		apple: '/hermes-icone-app.svg?v=2',
 	},
 	robots: {
 		index: true,
