@@ -43,6 +43,7 @@ export const metadata: Metadata = {
 			'Plataforma multitenant para o envio, gerenciamento e auditoria de e-mails transacionais.',
 		type: 'website',
 		siteName: 'Hermes Gateway',
+		url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
 		locale: 'pt_BR',
 	},
 	twitter: {
