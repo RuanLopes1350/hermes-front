@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+	metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
 	title: {
 		template: '%s | Hermes',
 		default: 'Hermes | Transactional Email Gateway',
@@ -30,16 +31,42 @@ export const metadata: Metadata = {
 		'smtp',
 		'oauth2',
 		'hermes',
+		'email marketing',
+		'webhook',
 	],
 	authors: [{ name: 'Ruan Lopes' }],
+	creator: 'Ruan Lopes',
+	publisher: 'Hermes',
 	openGraph: {
 		title: 'Hermes | Transactional Email Gateway',
 		description:
 			'Plataforma multitenant para o envio, gerenciamento e auditoria de e-mails transacionais.',
 		type: 'website',
 		siteName: 'Hermes Gateway',
+		locale: 'pt_BR',
 	},
-	icons: '/hermes-icone-app.svg',
+	twitter: {
+		card: 'summary_large_image',
+		title: 'Hermes | Transactional Email Gateway',
+		description: 'O Gateway open-source definitivo para gerenciar seus e-mails transacionais com SMTP e OAuth2.',
+		creator: '@ruanlopes1350',
+	},
+	icons: {
+		icon: '/hermes-icone-app.svg',
+		shortcut: '/hermes-icone-app.svg',
+		apple: '/hermes-icone-app.svg',
+	},
+	robots: {
+		index: true,
+		follow: true,
+		googleBot: {
+			index: true,
+			follow: true,
+			'max-video-preview': -1,
+			'max-image-preview': 'large',
+			'max-snippet': -1,
+		},
+	},
 };
 
 export default function RootLayout({
