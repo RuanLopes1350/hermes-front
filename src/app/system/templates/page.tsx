@@ -21,6 +21,7 @@ import { Input } from '@/src/components/ui/input';
 import { Badge } from '@/src/components/ui/badge';
 import { ConfirmModal } from '@/src/components/ui/confirm-modal';
 import { useToast } from '@/src/hooks/use-toast';
+import { useTour } from '@/src/hooks/use-tour';
 import {
 	Dialog,
 	DialogContent,
@@ -128,6 +129,51 @@ export default function TemplatesPage() {
 		}
 	};
 
+	const { startTour, moveNext, movePrevious, destroy } = useTour([
+		{
+			element: '#tour-templates-new',
+			popover: {
+				title: 'Novo Template',
+				description: 'Vamos criar um template de exemplo. Clique em Próximo para abrir o formulário.',
+				side: 'bottom',
+				onNextClick: () => {
+					setShowCreateModal(true);
+					moveNext();
+				},
+			},
+		},
+		{
+			element: '#tour-templates-modal-fields',
+			// Aguarda o modal (renderizado via portal pelo Radix) montar de verdade no DOM.
+			waitForElement: 1000,
+			popover: {
+				title: 'Nome e Escopo',
+				description: 'Dê um nome ao template e escolha se ele é "Global" (disponível para todos os serviços) ou exclusivo de um serviço específico.',
+				side: 'top',
+				onNextClick: () => {
+					setShowCreateModal(false);
+					moveNext();
+				},
+				onPrevClick: () => {
+					setShowCreateModal(false);
+					movePrevious();
+				},
+				onCloseClick: () => {
+					setShowCreateModal(false);
+					destroy();
+				},
+			},
+		},
+		{
+			element: '#tour-templates-grid',
+			popover: {
+				title: 'Seus Templates',
+				description: 'Templates já criados aparecem aqui. Clique em "Editar" para abrir o editor MJML com preview ao vivo.',
+				side: 'top',
+			},
+		},
+	]);
+
 	return (
 		<div className="space-y-6 animate-in fade-in duration-300 ease-out">
 			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -137,9 +183,18 @@ export default function TemplatesPage() {
 						Gerencie seus layouts de e-mail transacionais.
 					</p>
 				</div>
-				<Button onClick={() => setShowCreateModal(true)}>
-					<Plus className="mr-2 h-4 w-4" /> Novo Template
-				</Button>
+				<div className="flex gap-2">
+					<Button
+						onClick={startTour}
+						variant="outline"
+						className="cursor-pointer border-primary text-primary hover:bg-primary/10"
+					>
+						Tour Guiado
+					</Button>
+					<Button id="tour-templates-new" onClick={() => setShowCreateModal(true)}>
+						<Plus className="mr-2 h-4 w-4" /> Novo Template
+					</Button>
+				</div>
 			</div>
 
 			{loading ? (
@@ -147,7 +202,7 @@ export default function TemplatesPage() {
 					<Loader2 className="h-8 w-8 animate-spin text-primary" />
 				</div>
 			) : templates.length === 0 ? (
-				<div className="flex flex-col items-center justify-center h-64 border border-dashed rounded-xl bg-card text-center p-6">
+				<div id="tour-templates-grid" className="flex flex-col items-center justify-center h-64 border border-dashed rounded-xl bg-card text-center p-6">
 					<Layout className="h-10 w-10 text-muted-foreground mb-4" />
 					<h3 className="text-lg font-semibold">Nenhum Template</h3>
 					<p className="text-sm text-muted-foreground mt-2 max-w-sm">
@@ -158,7 +213,7 @@ export default function TemplatesPage() {
 					</Button>
 				</div>
 			) : (
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+				<div id="tour-templates-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 					{templates.map((tmpl) => (
 						<Card key={tmpl.id} className="flex flex-col shadow-sm hover:shadow-md transition-shadow">
 							<CardHeader className="pb-4">
@@ -228,7 +283,7 @@ export default function TemplatesPage() {
 					<DialogHeader>
 						<DialogTitle>Criar Novo Template</DialogTitle>
 					</DialogHeader>
-					<div className="grid gap-4 py-4">
+					<div id="tour-templates-modal-fields" className="grid gap-4 py-4">
 						<div className="grid gap-2">
 							<label className="text-sm font-medium">Nome do Template</label>
 							<Input

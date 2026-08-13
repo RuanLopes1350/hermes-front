@@ -22,6 +22,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/src/components/ui/dialog';
 import { Loader2, Eye, FilterX } from 'lucide-react';
 import { apiFetch } from '@/src/lib/api';
+import { useTour } from '@/src/hooks/use-tour';
 
 interface EmailRecord {
 	id: string;
@@ -153,17 +154,45 @@ export default function EmailsPage() {
 		setDialogOpen(true);
 	};
 
+	const { startTour } = useTour([
+		{
+			element: '#tour-emails-filters',
+			popover: {
+				title: 'Filtros',
+				description: 'Filtre o histórico por serviço, status de entrega ou uma data específica.',
+				side: 'bottom',
+			},
+		},
+		{
+			element: '#tour-emails-table',
+			popover: {
+				title: 'Histórico de Envios',
+				description: 'Todos os e-mails processados aparecem aqui. Clique no ícone de olho em qualquer linha para ver o payload completo, variáveis e corpo da mensagem.',
+				side: 'top',
+			},
+		},
+	]);
+
 	return (
 		<div className="space-y-6 animate-in fade-in duration-300 ease-out">
-			<div>
-				<h2 className="text-3xl font-bold tracking-tight mb-2">E-mails Enviados</h2>
-				<p className="text-muted-foreground text-sm">
-					Acompanhe o histórico de envios e o status de entrega de todos os serviços.
-				</p>
+			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+				<div>
+					<h2 className="text-3xl font-bold tracking-tight mb-2">E-mails Enviados</h2>
+					<p className="text-muted-foreground text-sm">
+						Acompanhe o histórico de envios e o status de entrega de todos os serviços.
+					</p>
+				</div>
+				<Button
+					onClick={startTour}
+					variant="outline"
+					className="cursor-pointer border-primary text-primary hover:bg-primary/10 w-fit"
+				>
+					Tour Guiado
+				</Button>
 			</div>
 
 			{/* Filters */}
-			<div className="flex flex-col sm:flex-row items-end sm:items-center gap-4 bg-card p-4 rounded-xl border shadow-sm">
+			<div id="tour-emails-filters" className="flex flex-col sm:flex-row items-end sm:items-center gap-4 bg-card p-4 rounded-xl border shadow-sm">
 				<div className="space-y-1 w-full sm:w-auto flex-1">
 					<label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
 						Serviço
@@ -227,7 +256,7 @@ export default function EmailsPage() {
 			</div>
 
 			{/* Table */}
-			<div className="rounded-xl border bg-card shadow-sm overflow-x-auto">
+			<div id="tour-emails-table" className="rounded-xl border bg-card shadow-sm overflow-x-auto">
 				<Table>
 					<TableHeader>
 						<TableRow>

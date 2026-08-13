@@ -19,6 +19,9 @@ import {
 import { Button } from '@/src/components/ui/button';
 import { ThemeToggle } from '@/src/components/theme-toggle';
 import { NotificationBell } from '@/src/components/notification-bell';
+import { useTour } from '@/src/hooks/use-tour';
+
+const WELCOME_TOUR_STORAGE_KEY = 'hermes_welcome_tour_seen';
 
 interface AppUser {
 	id: string;
@@ -48,6 +51,65 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 		}
 	}, [user, router]);
 
+	const { startTour: startWelcomeTour } = useTour([
+		{
+			element: '#tour-welcome-logo',
+			popover: {
+				title: 'Bem-vindo ao Hermes! 🕊️',
+				description: 'Este é o painel administrativo do seu gateway de e-mails transacionais. Vamos fazer um tour rápido pela barra superior.',
+				side: 'bottom',
+			},
+		},
+		{
+			element: '#tour-welcome-nav',
+			popover: {
+				title: 'Navegação Principal',
+				description: 'Dashboard (métricas), Serviços (seus namespaces de API Keys), E-mails (histórico), Templates (editor MJML) e Sandbox (teste de envios).',
+				side: 'bottom',
+			},
+		},
+		{
+			element: '#tour-welcome-bell',
+			popover: {
+				title: 'Notificações',
+				description: 'Avisos sobre rotação de chaves, falhas de webhook e outros eventos importantes aparecem aqui.',
+				side: 'bottom',
+			},
+		},
+		{
+			element: '#tour-welcome-theme',
+			popover: {
+				title: 'Tema Claro/Escuro',
+				description: 'Alterne entre os temas a qualquer momento.',
+				side: 'bottom',
+			},
+		},
+		{
+			element: '#tour-welcome-account',
+			popover: {
+				title: 'Sua Conta',
+				description: 'Acesse seu perfil, gerencie usuários (se você for administrador) e saia da plataforma por aqui. Você pode refazer os tours guiados de cada tela a qualquer momento clicando em "Tour Guiado".',
+				side: 'bottom',
+				align: 'end',
+			},
+		},
+	]);
+
+	useEffect(() => {
+		if (isPending || !user) return;
+		if (typeof window === 'undefined') return;
+		if (window.localStorage.getItem(WELCOME_TOUR_STORAGE_KEY)) return;
+
+		// Pequeno delay para garantir que o header já pintou antes de calcular as posições.
+		const timer = setTimeout(() => {
+			window.localStorage.setItem(WELCOME_TOUR_STORAGE_KEY, 'true');
+			startWelcomeTour();
+		}, 600);
+
+		return () => clearTimeout(timer);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [isPending, user]);
+
 	if (isPending) {
 		return (
 			<div className="flex h-screen items-center justify-center bg-background">
@@ -63,7 +125,7 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 				<div className="container mx-auto max-w-7xl flex h-16 items-center justify-between px-4 sm:px-6">
 					{/* Left: Brand & Links */}
 					<div className="flex items-center gap-10">
-						<div className="flex items-center">
+						<div id="tour-welcome-logo" className="flex items-center">
 							<Link href='/system/dashboard'>
 								{/* Logo renderizado no tema claro */}
 								<LogoPrimarioClaro className='block dark:hidden w-40 h-20' />
@@ -72,7 +134,7 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 							</Link>
 						</div>
 
-						<nav className="hidden md:flex items-center space-x-1">
+						<nav id="tour-welcome-nav" className="hidden md:flex items-center space-x-1">
 							{navItems.map((item) => {
 								const isActive = pathname?.startsWith(item.path);
 								return (
@@ -93,11 +155,16 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 
 					{/* Right: Actions & Profile */}
 					<div className="flex items-center gap-4">
-						<NotificationBell />
-						<ThemeToggle />
+						<div id="tour-welcome-bell" className="flex">
+							<NotificationBell />
+						</div>
+						<div id="tour-welcome-theme" className="flex">
+							<ThemeToggle />
+						</div>
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button
+									id="tour-welcome-account"
 									variant="ghost"
 									className="relative h-9 rounded-full pl-2 pr-4 border border-border/50 hover:bg-secondary/50 cursor-pointer"
 								>

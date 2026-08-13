@@ -80,6 +80,7 @@ import {
 import { authClient } from '@/src/lib/auth-client';
 import { apiFetch } from '@/src/lib/api';
 import { useToast } from '@/src/hooks/use-toast';
+import { useTour } from '@/src/hooks/use-tour';
 import { Button } from '@/src/components/ui/button';
 
 interface AppUser {
@@ -105,6 +106,78 @@ export default function DashboardPage() {
 	const [sseStatus, setSseStatus] = useState<'connecting' | 'connected' | 'disconnected'>(
 		'connecting',
 	);
+
+	const { startTour } = useTour([
+		{
+			element: '#tour-kpi-cards',
+			popover: {
+				title: 'Indicadores Principais',
+				description: 'Visão rápida do volume de e-mails de hoje, taxa de entrega e os principais números da sua operação.',
+				side: 'bottom',
+			},
+		},
+		{
+			element: '#tour-volume-chart',
+			popover: {
+				title: 'Volume de Envios',
+				description: 'Compara enviados x falhas ao longo do período selecionado. Use o seletor de período no topo para ajustar a janela de análise.',
+				side: 'top',
+			},
+		},
+		{
+			element: '#tour-status-chart',
+			popover: {
+				title: 'Distribuição por Status',
+				description: 'Proporção de e-mails em cada status (enviado, pendente, falha, retentando) na janela atual.',
+				side: 'left',
+			},
+		},
+		{
+			element: '#tour-activity-timeline',
+			popover: {
+				title: 'Atividade Recente',
+				description: 'Linha do tempo de auditoria: criação de credenciais, templates, rotação de chaves e outras ações relevantes.',
+				side: 'right',
+			},
+		},
+		{
+			element: '#tour-recent-emails',
+			popover: {
+				title: 'Últimos Envios',
+				description: 'Os disparos mais recentes com status e latência. Clique no ícone de olho para ver detalhes e reprocessar envios falhos.',
+				side: 'top',
+			},
+		},
+		...(isAdmin
+			? [
+					{
+						element: '#tour-queue-health',
+						popover: {
+							title: 'Saúde da Fila (Redis / BullMQ)',
+							description: 'Métricas em tempo real (via SSE) da fila de processamento: quantos jobs estão esperando, ativos, concluídos ou falhados agora.',
+							side: 'bottom' as const,
+						},
+					},
+					{
+						element: '#tour-infra-charts',
+						popover: {
+							title: 'Infraestrutura Global',
+							description: 'Volume por serviço ao longo do tempo e ranking dos serviços com mais envios e mais falhas — útil para identificar tenants com problemas.',
+							side: 'top' as const,
+						},
+					},
+				]
+			: [
+					{
+						element: '#tour-top-templates',
+						popover: {
+							title: 'Top Templates',
+							description: 'Os templates mais usados nos seus serviços, ordenados por quantidade de disparos.',
+							side: 'top' as const,
+						},
+					},
+				]),
+	]);
 
 	const handleRetryEmail = async () => {
 		if (!selectedEmail || !selectedEmail.serviceId) return;
@@ -649,6 +722,13 @@ export default function DashboardPage() {
 				</div>
 
 				<div className="flex items-center gap-2">
+					<Button
+						onClick={startTour}
+						variant="outline"
+						className="cursor-pointer border-primary text-primary hover:bg-primary/10"
+					>
+						Tour Guiado
+					</Button>
 					<Select value={String(days)} onValueChange={(v) => setDays(Number(v))}>
 						<SelectTrigger className="w-[168px] bg-background gap-2">
 							<CalendarDays className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
@@ -664,7 +744,7 @@ export default function DashboardPage() {
 			</div>
 
 			{/* KPI Cards */}
-			<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+			<div id="tour-kpi-cards" className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
 				{kpiCards.map((stat, i) => (
 					<Card key={i} className="shadow-sm">
 						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -684,7 +764,7 @@ export default function DashboardPage() {
 			{/* Gráficos e Timeline */}
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 				{/* Gráfico 1: Volume de Envios */}
-				<Card className="col-span-1 lg:col-span-2 flex flex-col shadow-sm">
+				<Card id="tour-volume-chart" className="col-span-1 lg:col-span-2 flex flex-col shadow-sm">
 					<CardHeader>
 						<CardTitle>Volume de Envios ({days} dias)</CardTitle>
 						<CardDescription>Quantidade de e-mails enviados e falhas acumuladas</CardDescription>
@@ -705,7 +785,7 @@ export default function DashboardPage() {
 				</Card>
 
 				{/* Gráfico 2: Distribuição de Status */}
-				<Card className="flex flex-col shadow-sm">
+				<Card id="tour-status-chart" className="flex flex-col shadow-sm">
 					<CardHeader>
 						<CardTitle>Distribuição por Status</CardTitle>
 						<CardDescription>Visualização do estado atual de envios</CardDescription>
@@ -728,7 +808,7 @@ export default function DashboardPage() {
 
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 				{/* Timeline de Atividades */}
-				<Card className="col-span-1 flex flex-col max-h-[500px] shadow-sm">
+				<Card id="tour-activity-timeline" className="col-span-1 flex flex-col max-h-[500px] shadow-sm">
 					<CardHeader>
 						<CardTitle>Atividade Recente</CardTitle>
 						<CardDescription>Últimas ações na plataforma</CardDescription>
@@ -766,7 +846,7 @@ export default function DashboardPage() {
 				</Card>
 
 				{/* Envios Recentes */}
-				<Card className="col-span-1 lg:col-span-2 flex flex-col max-h-[500px] shadow-sm">
+				<Card id="tour-recent-emails" className="col-span-1 lg:col-span-2 flex flex-col max-h-[500px] shadow-sm">
 					<CardHeader>
 						<CardTitle>Últimos Envios e Disparos</CardTitle>
 						<CardDescription>
@@ -880,7 +960,7 @@ export default function DashboardPage() {
 					</div>
 
 					{/* Fila Real-Time */}
-					<Card className="shadow-sm">
+					<Card id="tour-queue-health" className="shadow-sm">
 						<CardHeader className="flex flex-row items-center justify-between pb-2">
 							<div>
 								<CardTitle>Saúde da Fila (Redis / BullMQ)</CardTitle>
@@ -968,7 +1048,7 @@ export default function DashboardPage() {
 					</Card>
 
 					{/* Grafico Multi-Serie e Top Serviços */}
-					<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+					<div id="tour-infra-charts" className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 						<Card className="shadow-sm">
 							<CardHeader>
 								<CardTitle>Volume Multi-Tenants ({days} dias)</CardTitle>
@@ -1038,7 +1118,7 @@ export default function DashboardPage() {
 			{/* CONTEXTO USER (Templates)                  */}
 			{/* ========================================== */}
 			{!isAdmin && (
-				<Card className="shadow-sm">
+				<Card id="tour-top-templates" className="shadow-sm">
 					<CardHeader>
 						<CardTitle>Top 5 Templates por Uso</CardTitle>
 						<CardDescription>

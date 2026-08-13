@@ -44,6 +44,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/src/components/ui/dropdown-menu';
 import { ConfirmModal } from '@/src/components/ui/confirm-modal';
+import { useTour } from '@/src/hooks/use-tour';
 
 interface User {
 	id: string;
@@ -174,6 +175,25 @@ export default function UsersPage() {
 		);
 	}, [users, searchTerm]);
 
+	const { startTour } = useTour([
+		{
+			element: '#tour-users-search',
+			popover: {
+				title: 'Busca Rápida',
+				description: 'Encontre um usuário específico rapidamente pelo nome ou e-mail.',
+				side: 'bottom',
+			},
+		},
+		{
+			element: '#tour-users-table',
+			popover: {
+				title: 'Base de Usuários',
+				description: 'Cada linha traz status, nível de acesso e data de entrada. Clique nos "⋮" ao lado de um usuário para promover a Admin, suspender ou excluir a conta.',
+				side: 'top',
+			},
+		},
+	]);
+
 	if (isPending) {
 		return (
 			<div className="flex h-64 items-center justify-center">
@@ -203,6 +223,13 @@ export default function UsersPage() {
 					</div>
 					<div className="flex items-center gap-2">
 						<Button
+							onClick={startTour}
+							variant="outline"
+							className="cursor-pointer border-primary text-primary hover:bg-primary/10"
+						>
+							Tour Guiado
+						</Button>
+						<Button
 							variant="outline"
 							size="icon"
 							onClick={fetchUsers}
@@ -221,7 +248,7 @@ export default function UsersPage() {
 								<CardTitle>Base de Usuários</CardTitle>
 								<CardDescription>Visualizando {users.length} membros registrados.</CardDescription>
 							</div>
-							<div className="relative w-full sm:w-64 mt-2 sm:mt-0">
+							<div id="tour-users-search" className="relative w-full sm:w-64 mt-2 sm:mt-0">
 								<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
 								<Input
 									placeholder="Buscar por nome ou e-mail..."
@@ -233,7 +260,7 @@ export default function UsersPage() {
 						</div>
 					</CardHeader>
 					<CardContent>
-						<div className="rounded-md border overflow-x-auto">
+						<div id="tour-users-table" className="rounded-md border overflow-x-auto">
 							<Table>
 								<TableHeader>
 									<TableRow>

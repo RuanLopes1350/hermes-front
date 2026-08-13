@@ -5,6 +5,7 @@ import { Plus, Search, MoreVertical, Server, Trash2, Pencil, Loader2, ArrowRight
 import Link from 'next/link';
 
 import { useServices } from '@/src/hooks/use-services';
+import { useTour } from '@/src/hooks/use-tour';
 import { Service } from '@/src/types';
 
 import { Button } from '@/src/components/ui/button';
@@ -85,6 +86,63 @@ export default function ServicesPage() {
 		s.name.toLowerCase().includes(search.toLowerCase()),
 	);
 
+	const { startTour, moveNext, movePrevious, destroy } = useTour([
+		{
+			element: '#tour-new-service',
+			popover: {
+				title: 'Novo Serviço',
+				description: 'Crie uma nova instância isolada de mensageria clicando aqui.',
+				side: 'bottom',
+				// Abre o modal e avança — o próximo step usa "waitForElement" para
+				// esperar o input aparecer de verdade no DOM (o modal é montado via portal
+				// pelo Radix, então não existe no primeiro render após o setModalOpen).
+				onNextClick: () => {
+					setModalOpen(true);
+					moveNext();
+				},
+			},
+		},
+		{
+			element: '#name',
+			// Espera até 1s pelo input do modal ser montado no DOM antes de destacá-lo.
+			waitForElement: 1000,
+			popover: {
+				title: 'Nome do Projeto',
+				description: 'Dê um nome amigável para identificar sua aplicação ou projeto.',
+				side: 'top',
+				onNextClick: () => {
+					setModalOpen(false);
+					moveNext();
+				},
+				onPrevClick: () => {
+					setModalOpen(false);
+					movePrevious();
+				},
+				// Garante que o modal não fique aberto "órfão" se o usuário fechar o tour aqui.
+				onCloseClick: () => {
+					setModalOpen(false);
+					destroy();
+				},
+			},
+		},
+		{
+			element: '#tour-search-service',
+			popover: {
+				title: 'Busca Rápida',
+				description: 'Encontre serviços rapidamente pelo nome usando a busca.',
+				side: 'right',
+			},
+		},
+		{
+			element: '#tour-service-list',
+			popover: {
+				title: 'Seus Serviços',
+				description: 'Aqui ficam listados todos os seus serviços. Clique em "Acessar Painel" para gerenciar credenciais, templates e ver as métricas do serviço.',
+				side: 'top',
+			},
+		},
+	]);
+
 	return (
 		<div className="space-y-6 animate-in fade-in duration-300 ease-out">
 			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -94,13 +152,18 @@ export default function ServicesPage() {
 						Gerencie as instâncias isoladas de mensageria da sua infraestrutura.
 					</p>
 				</div>
-				<Button onClick={handleOpenCreate} className="cursor-pointer">
-					<Plus className="mr-2 h-4 w-4" /> Novo Serviço
-				</Button>
+				<div className="flex gap-2">
+					<Button onClick={startTour} variant="outline" className="cursor-pointer border-primary text-primary hover:bg-primary/10">
+						Tour Guiado
+					</Button>
+					<Button id="tour-new-service" onClick={handleOpenCreate} className="cursor-pointer">
+						<Plus className="mr-2 h-4 w-4" /> Novo Serviço
+					</Button>
+				</div>
 			</div>
 
 			<div className="flex items-center space-x-2">
-				<div className="relative w-full sm:w-72">
+				<div id="tour-search-service" className="relative w-full sm:w-72">
 					<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
 					<Input
 						type="search"
@@ -118,7 +181,7 @@ export default function ServicesPage() {
 					<span>Carregando serviços...</span>
 				</div>
 			) : filteredServices.length === 0 ? (
-				<div className="flex flex-col items-center justify-center h-48 border border-dashed rounded-xl bg-card text-center p-6">
+				<div id="tour-service-list" className="flex flex-col items-center justify-center h-48 border border-dashed rounded-xl bg-card text-center p-6">
 					<Server className="h-10 w-10 text-muted-foreground mb-4" />
 					<h3 className="text-lg font-semibold">Nenhum serviço encontrado</h3>
 					<p className="text-sm text-muted-foreground mt-2 max-w-sm">
@@ -129,7 +192,7 @@ export default function ServicesPage() {
 					</Button>
 				</div>
 			) : (
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+				<div id="tour-service-list" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 					{filteredServices.map((service) => (
 						<Card key={service.id} className="flex flex-col shadow-sm hover:shadow-md transition-shadow">
 							<CardHeader className="flex flex-row items-start justify-between pb-2">

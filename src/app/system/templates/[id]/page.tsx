@@ -35,6 +35,7 @@ import { Card } from '@/src/components/ui/card';
 import { Badge } from '@/src/components/ui/badge';
 import { ConfirmModal } from '@/src/components/ui/confirm-modal';
 import { useToast } from '@/src/hooks/use-toast';
+import { useTour } from '@/src/hooks/use-tour';
 import {
 	Select,
 	SelectContent,
@@ -253,6 +254,85 @@ export default function TemplateDetailsPage() {
 		setShowDeleteModal(false);
 	};
 
+	const { startTour, moveNext, movePrevious, destroy } = useTour([
+		{
+			element: '#tour-template-subject',
+			popover: {
+				title: 'Assunto do E-mail',
+				description: 'Defina o assunto que será usado quando este template for disparado.',
+				side: 'bottom',
+			},
+		},
+		{
+			element: '#tour-template-editor',
+			// O Monaco Editor é carregado de forma assíncrona; espera ele montar de verdade.
+			waitForElement: 1500,
+			popover: {
+				title: 'Editor MJML',
+				description: 'Escreva o layout do e-mail em MJML. Use {{variavel}} para marcar pontos que serão preenchidos dinamicamente pelo Handlebars.',
+				side: 'right',
+			},
+		},
+		{
+			element: '#tour-template-preview',
+			popover: {
+				title: 'Preview em Tempo Real',
+				description: 'O HTML final compilado aparece aqui automaticamente, poucos segundos depois de você parar de digitar.',
+				side: 'left',
+			},
+		},
+		{
+			element: '#tour-template-vars',
+			popover: {
+				title: 'Variáveis Detectadas',
+				description: 'Toda variável {{assim}} usada no código MJML é detectada automaticamente e listada aqui — sem precisar declarar nada manualmente.',
+				side: 'left',
+			},
+		},
+		{
+			element: '#tour-template-save',
+			popover: {
+				title: 'Salvar',
+				description: 'Salva o template. Ele fica disponível imediatamente para uso via template_id nas requisições de e-mail.',
+				side: 'bottom',
+			},
+		},
+		{
+			element: '#tour-template-history',
+			popover: {
+				title: 'Histórico',
+				description: 'Vamos abrir o histórico de alterações deste template. Clique em Próximo.',
+				side: 'bottom',
+				onNextClick: () => {
+					setShowHistoryModal(true);
+					moveNext();
+				},
+			},
+		},
+		{
+			element: '#tour-template-history-panel',
+			// Aguarda o painel (Sheet, renderizado via portal pelo Radix) montar no DOM.
+			waitForElement: 1000,
+			popover: {
+				title: 'Registro de Auditoria',
+				description: 'Toda edição, criação e exclusão relacionada a este template fica registrada aqui, com autor e data/hora.',
+				side: 'left',
+				onNextClick: () => {
+					setShowHistoryModal(false);
+					moveNext();
+				},
+				onPrevClick: () => {
+					setShowHistoryModal(false);
+					movePrevious();
+				},
+				onCloseClick: () => {
+					setShowHistoryModal(false);
+					destroy();
+				},
+			},
+		},
+	]);
+
 	// 5. UTILITÁRIOS DO EDITOR
 	const formatCode = useCallback(() => {
 		if (!content) return;
@@ -336,7 +416,15 @@ export default function TemplateDetailsPage() {
 				</div>
 
 				<div className="flex flex-wrap items-center gap-2 sm:gap-3 text-left">
-					<div className="flex items-center gap-2 bg-card border rounded-xl px-3 py-1 h-10 text-left flex-1 min-w-[180px] shadow-sm">
+					<Button
+						onClick={startTour}
+						variant="outline"
+						className="cursor-pointer border-primary text-primary hover:bg-primary/10 gap-2 font-bold text-[10px] uppercase tracking-widest h-10 px-5 shadow-sm"
+					>
+						Tour Guiado
+					</Button>
+
+					<div id="tour-template-subject" className="flex items-center gap-2 bg-card border rounded-xl px-3 py-1 h-10 text-left flex-1 min-w-[180px] shadow-sm">
 						<span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-left whitespace-nowrap">
 							Assunto:
 						</span>
@@ -358,6 +446,7 @@ export default function TemplateDetailsPage() {
 					</Button> */}
 
 					<Button
+						id="tour-template-history"
 						variant="outline"
 						onClick={() => setShowHistoryModal(true)}
 						className="cursor-pointer gap-2 font-bold text-[10px] uppercase tracking-widest h-10 px-5 border hover:bg-muted shadow-sm"
@@ -366,6 +455,7 @@ export default function TemplateDetailsPage() {
 					</Button>
 
 					<Button
+						id="tour-template-save"
 						onClick={handleSave}
 						disabled={saving || deleting}
 						className="cursor-pointer gap-2 font-black text-[10px] uppercase tracking-widest h-10 px-6"
@@ -386,7 +476,7 @@ export default function TemplateDetailsPage() {
 			</div>
 
 			<div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0 text-left overflow-auto lg:overflow-hidden">
-				<Card className="flex-1 bg-card rounded-xl border shadow-sm overflow-hidden flex flex-col text-left">
+				<Card id="tour-template-editor" className="flex-1 bg-card rounded-xl border shadow-sm overflow-hidden flex flex-col text-left">
 					<div className="p-4 border-b bg-muted/30 flex items-center justify-between text-left">
 						<div className="flex items-center gap-2 text-left">
 							<Code size={14} className="text-primary" />
@@ -426,7 +516,7 @@ export default function TemplateDetailsPage() {
 				</Card>
 
 				<div className="w-full lg:w-[450px] flex flex-col gap-4 lg:gap-6 shrink-0 text-left">
-					<Card className="flex-1 bg-card rounded-xl border shadow-sm overflow-hidden flex flex-col relative text-left">
+					<Card id="tour-template-preview" className="flex-1 bg-card rounded-xl border shadow-sm overflow-hidden flex flex-col relative text-left">
 						<div className="p-4 border-b bg-muted/30 flex items-center justify-between text-left">
 							<div className="flex items-center gap-2 text-left">
 								<Eye size={14} className="text-emerald-500" />
@@ -456,7 +546,7 @@ export default function TemplateDetailsPage() {
 						</div>
 					</Card>
 
-					<Card className="bg-card rounded-xl shadow-sm p-5 border shrink-0 text-left">
+					<Card id="tour-template-vars" className="bg-card rounded-xl shadow-sm p-5 border shrink-0 text-left">
 						<div className="flex flex-col gap-5 text-left">
 							<div className="flex items-center justify-between text-left">
 								<div className="flex items-center gap-2 text-left">
@@ -500,7 +590,7 @@ export default function TemplateDetailsPage() {
 			/>
 
 			<Sheet open={showHistoryModal} onOpenChange={setShowHistoryModal}>
-				<SheetContent className="sm:max-w-[500px] w-[90vw] overflow-y-auto">
+				<SheetContent id="tour-template-history-panel" className="sm:max-w-[500px] w-[90vw] overflow-y-auto">
 					<SheetHeader className="mb-6">
 						<SheetTitle className="flex items-center gap-2">
 							<History className="h-5 w-5" /> Histórico de Ações

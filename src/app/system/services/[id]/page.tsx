@@ -36,6 +36,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { apiFetch } from '@/src/lib/api';
 import { authClient } from '@/src/lib/auth-client';
 import { useToast } from '@/src/hooks/use-toast';
+import { useTour } from '@/src/hooks/use-tour';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import {
@@ -457,6 +458,62 @@ export default function ServiceDetailsPage() {
 		});
 	};
 
+	const { startTour, moveNext, movePrevious, destroy } = useTour([
+		{
+			element: '#tour-settings',
+			popover: {
+				title: 'Configurações do Projeto',
+				description: 'Edite o nome, adicione BCC de auditoria e configure a rotação automática das suas chaves de API.',
+				side: 'bottom',
+			},
+		},
+		{
+			element: '#tour-credentials',
+			popover: {
+				title: 'Credenciais e Conexões',
+				description: 'Crie ou edite credenciais SMTP (plain) e OAuth2. Aqui você também pode ativar/desativar as API Keys de envio.',
+				side: 'left',
+			},
+		},
+		{
+			element: '#tour-new-connection-btn',
+			popover: {
+				title: 'Nova Conexão',
+				description: 'Vamos criar uma nova conexão agora. Clique em Próximo para abrir as opções.',
+				side: 'top',
+				// Abre o modal e avança — o próximo step usa "waitForElement" para esperar
+				// o conteúdo do modal (montado via portal pelo Radix) aparecer no DOM.
+				onNextClick: () => {
+					setShowConnModal(true);
+					moveNext();
+				},
+			},
+		},
+		{
+			element: '#tour-conn-type',
+			// Espera até 1s pelo conteúdo do modal ser montado no DOM antes de destacá-lo.
+			waitForElement: 1000,
+			popover: {
+				title: 'Tipos de Conexão',
+				description: 'Você pode escolher conectar via SMTP tradicional ou usando a autorização segura do Google OAuth2. Clique em próximo para fechar.',
+				side: 'top',
+				onNextClick: () => {
+					closeModal();
+					moveNext();
+				},
+				onPrevClick: () => {
+					closeModal();
+					movePrevious();
+				},
+				// Garante que o modal não fique aberto "órfão" se o usuário fechar o tour aqui.
+				onCloseClick: () => {
+					closeModal();
+					destroy();
+				},
+			},
+		},
+	]);
+
 	if (loading)
 		return (
 			<div className="flex h-64 items-center justify-center">
@@ -486,6 +543,13 @@ export default function ServiceDetailsPage() {
 					<div className="flex items-center gap-2">
 						<Button
 							variant="outline"
+							onClick={startTour}
+							className="cursor-pointer border-primary text-primary hover:bg-primary/10"
+						>
+							Tour Guiado
+						</Button>
+						<Button
+							variant="outline"
 							onClick={() => setShowHistoryModal(true)}
 							className="cursor-pointer"
 						>
@@ -506,7 +570,7 @@ export default function ServiceDetailsPage() {
 
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 				<div className="lg:col-span-2 space-y-6">
-					<Card className="shadow-sm">
+					<Card id="tour-settings" className="shadow-sm">
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
 								<Settings className="h-5 w-5" /> Configurações do Projeto
@@ -671,7 +735,7 @@ export default function ServiceDetailsPage() {
 						</CardContent>
 					</Card>
 
-					<Card className="shadow-sm">
+					<Card id="tour-credentials" className="shadow-sm">
 						<CardHeader className="flex flex-row items-center justify-between pb-4">
 							<div>
 								<CardTitle className="flex items-center gap-2">
@@ -681,7 +745,7 @@ export default function ServiceDetailsPage() {
 									Conexões e chaves de API vinculadas a este projeto.
 								</CardDescription>
 							</div>
-							<Button onClick={() => setShowConnModal(true)} className="cursor-pointer">
+							<Button id="tour-new-connection-btn" onClick={() => setShowConnModal(true)} className="cursor-pointer">
 								<Plus className="mr-2 h-4 w-4" /> Nova Conexão
 							</Button>
 						</CardHeader>
@@ -926,7 +990,7 @@ export default function ServiceDetailsPage() {
 								)}
 
 								{!selectedType ? (
-									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+									<div id="tour-conn-type" className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 										<div
 											onClick={() => setSelectedType('plain')}
 											className="border rounded-xl p-6 cursor-pointer hover:border-primary transition-all hover:bg-secondary/50 text-center"

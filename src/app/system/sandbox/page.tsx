@@ -21,6 +21,7 @@ import {
 } from '@/src/components/ui/select';
 import { apiFetch } from '@/src/lib/api';
 import { useToast } from '@/src/hooks/use-toast';
+import { useTour } from '@/src/hooks/use-tour';
 
 export default function SandboxPage() {
 	const { toast } = useToast();
@@ -38,6 +39,65 @@ export default function SandboxPage() {
 	const [sending, setSending] = useState(false);
 	const [requestLog, setRequestLog] = useState<any>(null);
 	const [responseLog, setResponseLog] = useState<any>(null);
+
+	const { startTour } = useTour([
+		{
+			element: '#tour-sandbox-service',
+			popover: {
+				title: 'Escolha o Serviço',
+				description: 'Selecione qual Serviço (namespace) você quer usar para testar o envio.',
+				side: 'bottom',
+			},
+		},
+		{
+			element: '#tour-sandbox-apikey',
+			popover: {
+				title: 'Chave de API',
+				description: 'Cole aqui a API Key da credencial do serviço escolhido. Ela nunca é salva, só usada para este teste.',
+				side: 'bottom',
+			},
+		},
+		{
+			element: '#tour-sandbox-recipient',
+			popover: {
+				title: 'Destinatário',
+				description: 'O e-mail que vai receber o disparo de teste.',
+				side: 'bottom',
+			},
+		},
+		{
+			element: '#tour-sandbox-template',
+			popover: {
+				title: 'Template (opcional)',
+				description: 'Escolha um template MJML já cadastrado ou use "Nenhum" para enviar um conteúdo direto.',
+				side: 'bottom',
+			},
+		},
+		{
+			element: '#tour-sandbox-vars',
+			popover: {
+				title: 'Variáveis do Template',
+				description: 'Se o template tiver variáveis do tipo {{nome}}, elas aparecem aqui automaticamente para você preencher.',
+				side: 'left',
+			},
+		},
+		{
+			element: '#tour-sandbox-send',
+			popover: {
+				title: 'Executar Envio',
+				description: 'Dispara o e-mail de verdade usando o SDK hermes-client, direto do servidor (Server Action).',
+				side: 'top',
+			},
+		},
+		{
+			element: '#tour-sandbox-terminal',
+			popover: {
+				title: 'Terminal de Execução',
+				description: 'Acompanhe aqui o payload exato enviado (Request) e a resposta da API (Response) — ótimo para depurar integrações.',
+				side: 'top',
+			},
+		},
+	]);
 
 	useEffect(() => {
 		const loadData = async () => {
@@ -134,16 +194,25 @@ export default function SandboxPage() {
 						Teste suas integrações e variáveis de ambiente.
 					</p>
 				</div>
-				<Button
-					variant="outline"
-					className="cursor-pointer"
-					onClick={() => {
-						setRequestLog(null);
-						setResponseLog(null);
-					}}
-				>
-					<RefreshCw className="mr-2 h-4 w-4" /> Limpar Console
-				</Button>
+				<div className="flex gap-2">
+					<Button
+						onClick={startTour}
+						variant="outline"
+						className="cursor-pointer border-primary text-primary hover:bg-primary/10"
+					>
+						Tour Guiado
+					</Button>
+					<Button
+						variant="outline"
+						className="cursor-pointer"
+						onClick={() => {
+							setRequestLog(null);
+							setResponseLog(null);
+						}}
+					>
+						<RefreshCw className="mr-2 h-4 w-4" /> Limpar Console
+					</Button>
+				</div>
 			</div>
 
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -153,7 +222,7 @@ export default function SandboxPage() {
 					</CardHeader>
 					<CardContent className="space-y-6">
 						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-							<div className="space-y-2">
+							<div id="tour-sandbox-service" className="space-y-2">
 								<label className="text-sm font-medium">Serviço</label>
 								<Select value={selectedServiceId} onValueChange={setSelectedServiceId}>
 									<SelectTrigger>
@@ -168,7 +237,7 @@ export default function SandboxPage() {
 									</SelectContent>
 								</Select>
 							</div>
-							<div className="space-y-2">
+							<div id="tour-sandbox-apikey" className="space-y-2">
 								<label className="text-sm font-medium">Chave de API</label>
 								<Input
 									type="password"
@@ -181,7 +250,7 @@ export default function SandboxPage() {
 						</div>
 
 						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-							<div className="space-y-2">
+							<div id="tour-sandbox-recipient" className="space-y-2">
 								<label className="text-sm font-medium">Destinatário</label>
 								<Input
 									value={recipientTo}
@@ -189,7 +258,7 @@ export default function SandboxPage() {
 									placeholder="email@exemplo.com"
 								/>
 							</div>
-							<div className="space-y-2">
+							<div id="tour-sandbox-template" className="space-y-2">
 								<label className="text-sm font-medium">Template HTML</label>
 								<Select value={selectedTemplateId} onValueChange={setSelectedTemplateId}>
 									<SelectTrigger>
@@ -228,7 +297,7 @@ export default function SandboxPage() {
 				</Card>
 
 				<div className="space-y-6 flex flex-col h-full">
-					<Card className="shadow-sm">
+					<Card id="tour-sandbox-vars" className="shadow-sm">
 						<CardHeader>
 							<CardTitle className="text-lg">Variáveis do Template</CardTitle>
 						</CardHeader>
@@ -257,6 +326,7 @@ export default function SandboxPage() {
 					</Card>
 
 					<Button
+						id="tour-sandbox-send"
 						onClick={handleSendTest}
 						disabled={sending}
 						className="w-full py-6 text-lg mt-auto cursor-pointer"
@@ -266,7 +336,7 @@ export default function SandboxPage() {
 				</div>
 			</div>
 
-			<Card className="bg-slate-950 text-slate-50 border-slate-800 shadow-sm">
+			<Card id="tour-sandbox-terminal" className="bg-slate-950 text-slate-50 border-slate-800 shadow-sm">
 				<CardHeader className="border-b border-slate-800 py-3">
 					<CardTitle className="text-sm flex items-center gap-2">
 						<Terminal className="h-4 w-4" /> Terminal de Execução

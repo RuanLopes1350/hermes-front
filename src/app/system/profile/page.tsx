@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { authClient } from '@/src/lib/auth-client';
 import { apiFetch } from '@/src/lib/api';
 import { useToast } from '@/src/hooks/use-toast';
+import { useTour } from '@/src/hooks/use-tour';
 import {
 	Card,
 	CardContent,
@@ -27,6 +28,25 @@ export default function ProfilePage() {
 	const [newPassword, setNewPassword] = useState('');
 	const [confirmPassword, setConfirmPassword] = useState('');
 	const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+
+	const { startTour } = useTour([
+		{
+			element: '#tour-profile-personal',
+			popover: {
+				title: 'Dados Pessoais',
+				description: 'Atualize seu nome de exibição aqui. O e-mail é imutável por ser sua identidade de login.',
+				side: 'bottom',
+			},
+		},
+		{
+			element: '#tour-profile-security',
+			popover: {
+				title: 'Segurança',
+				description: 'Troque sua senha por aqui. Ao salvar, todas as outras sessões ativas são revogadas automaticamente.',
+				side: 'top',
+			},
+		},
+	]);
 
 	useEffect(() => {
 		if (session?.user) {
@@ -92,11 +112,20 @@ export default function ProfilePage() {
 
 	return (
 		<div className="space-y-6 animate-in fade-in duration-300 ease-out">
-			<div>
-				<h2 className="text-2xl font-bold tracking-tight">Meu Perfil</h2>
-				<p className="text-sm text-muted-foreground">
-					Gerencie suas credenciais e identidade visual.
-				</p>
+			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+				<div>
+					<h2 className="text-2xl font-bold tracking-tight">Meu Perfil</h2>
+					<p className="text-sm text-muted-foreground">
+						Gerencie suas credenciais e identidade visual.
+					</p>
+				</div>
+				<Button
+					onClick={startTour}
+					variant="outline"
+					className="cursor-pointer border-primary text-primary hover:bg-primary/10 w-fit"
+				>
+					Tour Guiado
+				</Button>
 			</div>
 
 			<div className="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -111,7 +140,7 @@ export default function ProfilePage() {
 				</Card>
 
 				<div className="space-y-6 md:col-span-2">
-					<Card className="shadow-sm">
+					<Card id="tour-profile-personal" className="shadow-sm">
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
 								<User className="h-5 w-5" /> Dados Pessoais
@@ -138,7 +167,7 @@ export default function ProfilePage() {
 						</CardContent>
 					</Card>
 
-					<Card className="shadow-sm">
+					<Card id="tour-profile-security" className="shadow-sm">
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
 								<Lock className="h-5 w-5" /> Segurança
