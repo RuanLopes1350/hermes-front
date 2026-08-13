@@ -308,12 +308,18 @@ export default function ServiceDetailsPage() {
 					title: 'Sucesso',
 					description: 'Chave rotacionada e webhook enviado com sucesso!',
 				});
-			} else {
+			} else if (result.data.webhookSkipped) {
 				toast({
 					title: 'Aviso',
 					description:
-						'Chave rotacionada, mas nenhum webhook foi disparado (verifique configurações).',
+						'Chave rotacionada, mas nenhum webhook foi disparado: nenhuma URL/segredo de webhook configurado para este serviço.',
 					variant: 'default',
+				});
+			} else {
+				toast({
+					title: 'Chave rotacionada, mas o webhook falhou',
+					description: `A nova chave já está ativa. O disparo do webhook falhou: ${result.data.webhookError || 'erro desconhecido'}. Verifique se o endpoint configurado está no ar e com a rota correta.`,
+					variant: 'destructive',
 				});
 			}
 
