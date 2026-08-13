@@ -53,10 +53,16 @@ export const metadata: Metadata = {
 		creator: '@ruanlopes1350',
 	},
 	icons: {
-		icon: '/hermes-icone-app.svg?v=2',
-		shortcut: '/hermes-icone-app.svg?v=2',
-		apple: '/hermes-icone-app.svg?v=2',
+		icon: [
+			{ url: '/favicon.ico', sizes: 'any' },
+			{ url: '/hermes-icone-app.svg?v=2', type: 'image/svg+xml' },
+			{ url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+			{ url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+		],
+		shortcut: '/favicon.ico',
+		apple: '/apple-touch-icon.png',
 	},
+	manifest: '/site.webmanifest',
 	robots: {
 		index: true,
 		follow: true,
