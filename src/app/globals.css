@@ -178,3 +178,16 @@
 		@apply font-sans;
 	}
 }
+
+/* Shiki (CodeBlock) — troca entre os temas light/dark gerados via defaultColor: false */
+.shiki,
+.shiki span {
+	color: var(--shiki-light);
+	background-color: var(--shiki-light-bg) !important;
+}
+
+.dark .shiki,
+.dark .shiki span {
+	color: var(--shiki-dark);
+	background-color: var(--shiki-dark-bg) !important;
+}
