@@ -110,7 +110,20 @@ export default function TemplatesPage() {
 			if (response.ok) {
 				setShowCreateModal(false);
 				router.push(`/system/templates/${result.data.id}`);
+			} else {
+				toast({
+					variant: 'destructive',
+					title: 'Erro ao criar template',
+					description: result?.message || 'Não foi possível criar o template.',
+				});
 			}
+		} catch (err) {
+			console.error('Erro ao criar template:', err);
+			toast({
+				variant: 'destructive',
+				title: 'Erro ao criar template',
+				description: 'Não foi possível criar o template.',
+			});
 		} finally {
 			setCreating(false);
 		}

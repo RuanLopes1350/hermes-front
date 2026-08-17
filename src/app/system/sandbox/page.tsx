@@ -1,6 +1,6 @@
 'use client';
 
-import { Hash, Key, Play, RefreshCw, Server, Terminal, User } from 'lucide-react';
+import { Eye, Hash, Key, Play, RefreshCw, Server, Terminal, User } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
 import { sendHermesEmailAction } from './actions';
 import { Button } from '@/src/components/ui/button';
@@ -35,6 +35,10 @@ export default function SandboxPage() {
 	const [subject, setSubject] = useState('');
 	const [body, setBody] = useState('');
 	const [templateVars, setTemplateVars] = useState<Record<string, string>>({});
+
+	const [previewHtml, setPreviewHtml] = useState('');
+	const [previewErrors, setPreviewErrors] = useState<string[]>([]);
+	const [previewing, setPreviewing] = useState(false);
 
 	const [sending, setSending] = useState(false);
 	const [requestLog, setRequestLog] = useState<any>(null);
@@ -90,6 +94,14 @@ export default function SandboxPage() {
 			},
 		},
 		{
+			element: '#tour-sandbox-preview',
+			popover: {
+				title: 'Preview do E-mail',
+				description: 'Mostra exatamente como o e-mail vai chegar, já com os valores reais que você digitou nas variáveis — como esse é um envio de verdade, confira aqui antes de disparar.',
+				side: 'top',
+			},
+		},
+		{
 			element: '#tour-sandbox-terminal',
 			popover: {
 				title: 'Terminal de Execução',
@@ -127,6 +139,56 @@ export default function SandboxPage() {
 		const tmpl = templates.find((t) => t.id === selectedTemplateId);
 		setSubject(tmpl ? tmpl.subject_template : '');
 	}, [selectedTemplateId, templates]);
+
+	// Preview do e-mail com os dados REAIS digitados (isso aqui dispara envio de verdade,
+	// então mostrar exatamente o que vai sair evita surpresa).
+	useEffect(() => {
+		if (selectedTemplateId === 'none') {
+			// Sem template: o corpo digitado já É o HTML final, sem chamada à API.
+			setPreviewHtml(body);
+			setPreviewErrors([]);
+			setPreviewing(false);
+			return;
+		}
+
+		const tmpl = templates.find((t) => t.id === selectedTemplateId);
+		if (!tmpl?.html_content) {
+			setPreviewHtml('');
+			setPreviewErrors([]);
+			return;
+		}
+
+		setPreviewing(true);
+		const timer = setTimeout(async () => {
+			try {
+				const response = await apiFetch('/api/templates/preview', {
+					method: 'POST',
+					body: JSON.stringify({ mjml: tmpl.html_content, variables: templateVars }),
+				});
+				const result = await response.json().catch(() => null);
+				if (response.ok) {
+					setPreviewHtml(result?.html || '');
+					setPreviewErrors(result?.errors || []);
+				} else {
+					setPreviewHtml('');
+					setPreviewErrors([result?.message || 'Falha ao gerar o preview.']);
+				}
+			} catch {
+				setPreviewHtml('');
+				setPreviewErrors(['Falha de conexão ao gerar o preview.']);
+			} finally {
+				setPreviewing(false);
+			}
+		}, 1500);
+
+		return () => clearTimeout(timer);
+	}, [selectedTemplateId, templates, templateVars, body]);
+
+	// Só pra exibição no cabeçalho do preview — substitui {{var}} pelos valores já digitados.
+	const previewSubject = useMemo(() => {
+		if (!subject) return '';
+		return subject.replace(/{{\s*([\w.]+)\s*}}/g, (_match, key) => templateVars[key] || `{{${key}}}`);
+	}, [subject, templateVars]);
 
 	const handleSendTest = async () => {
 		if (!selectedServiceId || !rawApiKey || !recipientTo) {
@@ -335,6 +397,60 @@ export default function SandboxPage() {
 					</Button>
 				</div>
 			</div>
+
+			<Card id="tour-sandbox-preview" className="shadow-sm overflow-hidden">
+				<CardHeader className="border-b py-3">
+					<CardTitle className="text-lg flex items-center gap-2">
+						<Eye className="h-4 w-4 text-emerald-500" /> Preview do E-mail
+						{previewing && (
+							<span className="text-[9px] font-bold uppercase tracking-widest text-primary bg-primary/10 rounded-full px-2 py-0.5 animate-pulse">
+								Renderizando
+							</span>
+						)}
+					</CardTitle>
+					<CardDescription>
+						Isso dispara um envio real — confira exatamente o que vai chegar antes de clicar em
+						&quot;Executar Envio&quot;.
+					</CardDescription>
+				</CardHeader>
+				<CardContent className="p-0">
+					<div className="border-b bg-muted/30 px-4 py-2 text-xs text-muted-foreground space-y-0.5">
+						<p>
+							<span className="font-semibold text-foreground">Para:</span> {recipientTo || '—'}
+						</p>
+						<p>
+							<span className="font-semibold text-foreground">Assunto:</span> {previewSubject || '—'}
+						</p>
+					</div>
+
+					{previewErrors.length > 0 && (
+						<div className="border-b bg-warning/10 px-4 py-3 flex gap-2 text-xs text-foreground">
+							<span className="font-semibold text-warning shrink-0">Erro ao renderizar:</span>
+							<div className="flex flex-col gap-1">
+								{previewErrors.map((e, i) => (
+									<span key={i} className="text-muted-foreground">
+										{e}
+									</span>
+								))}
+							</div>
+						</div>
+					)}
+
+					{previewHtml ? (
+						<iframe
+							srcDoc={previewHtml}
+							className="w-full h-[500px] bg-white border-none"
+							title="Preview do e-mail"
+						/>
+					) : (
+						<div className="h-40 flex items-center justify-center text-sm text-muted-foreground italic">
+							{selectedTemplateId === 'none'
+								? 'Digite um conteúdo em "Conteúdo (HTML/TXT)" para pré-visualizar.'
+								: 'Selecione um template para pré-visualizar.'}
+						</div>
+					)}
+				</CardContent>
+			</Card>
 
 			<Card id="tour-sandbox-terminal" className="bg-slate-950 text-slate-50 border-slate-800 shadow-sm">
 				<CardHeader className="border-b border-slate-800 py-3">
