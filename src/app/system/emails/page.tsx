@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
 	Table,
 	TableBody,
@@ -12,6 +12,7 @@ import {
 import { Badge } from '@/src/components/ui/badge';
 import { Input } from '@/src/components/ui/input';
 import { Button } from '@/src/components/ui/button';
+import { Checkbox } from '@/src/components/ui/checkbox';
 import {
 	Select,
 	SelectContent,
@@ -20,9 +21,21 @@ import {
 	SelectValue,
 } from '@/src/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/src/components/ui/dialog';
-import { Loader2, Eye, FilterX } from 'lucide-react';
+import { ConfirmModal } from '@/src/components/ui/confirm-modal';
+import {
+	Loader2,
+	Eye,
+	FilterX,
+	RefreshCw,
+	Ban,
+	Download,
+	AlertCircle,
+	ChevronLeft,
+	ChevronRight,
+} from 'lucide-react';
 import { apiFetch } from '@/src/lib/api';
 import { useTour } from '@/src/hooks/use-tour';
+import { useToast } from '@/src/hooks/use-toast';
 
 interface EmailRecord {
 	id: string;
@@ -39,6 +52,9 @@ interface EmailRecord {
 	createdAt?: string;
 	serviceName?: string;
 	credentialName?: string;
+	retry_count?: number;
+	error_log?: string | null;
+	sent_at?: string | null;
 }
 
 interface Service {
@@ -46,101 +62,124 @@ interface Service {
 	name: string;
 }
 
+const LIMIT = 25;
+
 export default function EmailsPage() {
+	const { toast } = useToast();
+
 	const [services, setServices] = useState<Service[]>([]);
 	const [emails, setEmails] = useState<EmailRecord[]>([]);
 	const [templates, setTemplates] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [total, setTotal] = useState(0);
+	const [page, setPage] = useState(1);
 
 	const [filterService, setFilterService] = useState('all');
 	const [filterStatus, setFilterStatus] = useState('all');
-	const [filterDate, setFilterDate] = useState('');
+	const [filterStartDate, setFilterStartDate] = useState('');
+	const [filterEndDate, setFilterEndDate] = useState('');
+	const [search, setSearch] = useState('');
+	const [debouncedSearch, setDebouncedSearch] = useState('');
 
 	const [selectedEmail, setSelectedEmail] = useState<EmailRecord | null>(null);
 	const [dialogOpen, setDialogOpen] = useState(false);
 
+	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+	const [bulkLoading, setBulkLoading] = useState(false);
+	const [showBulkCancelModal, setShowBulkCancelModal] = useState(false);
+	const [emailToCancel, setEmailToCancel] = useState<EmailRecord | null>(null);
+	const [exporting, setExporting] = useState(false);
+
+	const totalPages = Math.max(1, Math.ceil(total / LIMIT));
+
+	// Busca com debounce — evita disparar uma requisição a cada tecla digitada.
 	useEffect(() => {
-		async function fetchData() {
-			setLoading(true);
+		const timer = setTimeout(() => setDebouncedSearch(search.trim()), 500);
+		return () => clearTimeout(timer);
+	}, [search]);
+
+	// Qualquer mudança de filtro volta pra primeira página.
+	useEffect(() => {
+		setPage(1);
+	}, [filterService, filterStatus, filterStartDate, filterEndDate, debouncedSearch]);
+
+	const buildFilterParams = useCallback(() => {
+		const params = new URLSearchParams();
+		if (filterService !== 'all') params.set('serviceId', filterService);
+		if (filterStatus !== 'all') params.set('status', filterStatus);
+		if (debouncedSearch) params.set('search', debouncedSearch);
+		if (filterStartDate) params.set('startDate', filterStartDate);
+		if (filterEndDate) params.set('endDate', filterEndDate);
+		return params;
+	}, [filterService, filterStatus, debouncedSearch, filterStartDate, filterEndDate]);
+
+	const fetchEmails = useCallback(async () => {
+		setLoading(true);
+		try {
+			const params = buildFilterParams();
+			params.set('limit', String(LIMIT));
+			params.set('offset', String((page - 1) * LIMIT));
+
+			const res = await apiFetch(`/api/emails?${params.toString()}`);
+			if (res.ok) {
+				const result = await res.json();
+				setEmails(result.data || []);
+				setTotal(result.metadata?.total ?? 0);
+				setSelectedIds(new Set());
+			} else {
+				toast({ variant: 'destructive', title: 'Erro', description: 'Falha ao carregar e-mails.' });
+			}
+		} catch (err) {
+			console.error('Erro ao buscar e-mails', err);
+			toast({ variant: 'destructive', title: 'Erro', description: 'Falha de conexão ao carregar e-mails.' });
+		} finally {
+			setLoading(false);
+		}
+	}, [buildFilterParams, page, toast]);
+
+	useEffect(() => {
+		async function fetchAux() {
 			try {
-				const [srvRes, tmplRes, emailsRes] = await Promise.all([
+				const [srvRes, tmplRes] = await Promise.all([
 					apiFetch('/api/services'),
 					apiFetch('/api/templates'),
-					apiFetch('/api/emails?limit=100'),
 				]);
-
-				if (tmplRes.ok) {
-					const tmplData = await tmplRes.json();
-					setTemplates(tmplData.data || []);
-				}
-
-				if (srvRes.ok) {
-					const srvData = await srvRes.json();
-					const srvs: Service[] = srvData.data || [];
-					setServices(srvs);
-				}
-
-				if (emailsRes.ok) {
-					const emailsData = await emailsRes.json();
-					const allEmails: EmailRecord[] = emailsData.data || [];
-					allEmails.sort(
-						(a, b) =>
-							new Date(b.created_at || b.createdAt || '').getTime() -
-							new Date(a.created_at || a.createdAt || '').getTime(),
-					);
-					setEmails(allEmails);
-				}
+				if (tmplRes.ok) setTemplates((await tmplRes.json()).data || []);
+				if (srvRes.ok) setServices((await srvRes.json()).data || []);
 			} catch (err) {
-				console.error('Erro ao buscar dados', err);
-			} finally {
-				setLoading(false);
+				console.error('Erro ao buscar dados auxiliares', err);
 			}
 		}
-
-		fetchData();
+		fetchAux();
 	}, []);
 
-	const filteredEmails = useMemo(() => {
-		return emails.filter((e) => {
-			if (filterService !== 'all' && e.service_id !== filterService) return false;
-			if (filterStatus !== 'all' && e.status !== filterStatus) return false;
-			if (filterDate) {
-				const eDate = new Date(e.created_at || e.createdAt || '').toISOString().split('T')[0];
-				if (eDate !== filterDate) return false;
-			}
-			return true;
-		});
-	}, [emails, filterService, filterStatus, filterDate]);
+	useEffect(() => {
+		fetchEmails();
+	}, [fetchEmails]);
 
 	const getStatusBadge = (status: string) => {
 		switch (status.toLowerCase()) {
 			case 'sent':
 				return (
-					<Badge variant="secondary" className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">
+					<Badge variant="secondary" className="bg-success/15 text-success hover:bg-success/15">
 						Enviado
 					</Badge>
 				);
 			case 'pending':
 				return (
-					<Badge
-						variant="secondary"
-						className="bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-100"
-					>
+					<Badge variant="secondary" className="bg-warning/15 text-warning hover:bg-warning/15">
 						Pendente
 					</Badge>
 				);
 			case 'failed':
 				return (
-					<Badge variant="secondary" className="bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/10">
+					<Badge variant="secondary" className="bg-destructive/15 text-destructive hover:bg-destructive/15">
 						Falhou
 					</Badge>
 				);
 			case 'retrying':
 				return (
-					<Badge
-						variant="secondary"
-						className="bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-100"
-					>
+					<Badge variant="secondary" className="bg-primary/15 text-primary hover:bg-primary/15">
 						Reenviando
 					</Badge>
 				);
@@ -149,9 +188,129 @@ export default function EmailsPage() {
 		}
 	};
 
+	const getLatencyMs = (e: EmailRecord) => {
+		if (!e.sent_at) return null;
+		const created = new Date(e.created_at || e.createdAt || '').getTime();
+		const sent = new Date(e.sent_at).getTime();
+		if (isNaN(created) || isNaN(sent)) return null;
+		return sent - created;
+	};
+
 	const openEmailModal = (email: EmailRecord) => {
 		setSelectedEmail(email);
 		setDialogOpen(true);
+	};
+
+	// --- Ações individuais ---
+	const handleRetry = async (email: EmailRecord) => {
+		try {
+			const res = await apiFetch(`/api/services/${email.service_id}/emails/${email.id}/retry`, {
+				method: 'POST',
+			});
+			const data = await res.json();
+			if (!res.ok) throw new Error(data.message || 'Falha ao reenviar e-mail.');
+			toast({ title: 'E-mail reenfileirado', description: data.message });
+			fetchEmails();
+		} catch (err: any) {
+			toast({ variant: 'destructive', title: 'Erro ao reenviar', description: err.message });
+		}
+	};
+
+	const handleConfirmCancel = async () => {
+		if (!emailToCancel) return;
+		try {
+			const res = await apiFetch(`/api/services/${emailToCancel.service_id}/emails/${emailToCancel.id}`, {
+				method: 'DELETE',
+			});
+			const data = await res.json();
+			if (!res.ok) throw new Error(data.message || 'Falha ao cancelar e-mail.');
+			toast({ title: 'E-mail cancelado', description: data.message });
+			fetchEmails();
+		} catch (err: any) {
+			toast({ variant: 'destructive', title: 'Erro ao cancelar', description: err.message });
+			throw err;
+		}
+	};
+
+	// --- Seleção e ações em massa ---
+	const allSelectedOnPage = emails.length > 0 && emails.every((e) => selectedIds.has(e.id));
+	const toggleSelectAll = () => {
+		setSelectedIds(allSelectedOnPage ? new Set() : new Set(emails.map((e) => e.id)));
+	};
+	const toggleSelect = (id: string) => {
+		setSelectedIds((prev) => {
+			const next = new Set(prev);
+			if (next.has(id)) next.delete(id);
+			else next.add(id);
+			return next;
+		});
+	};
+
+	const selectedFailed = emails.filter((e) => selectedIds.has(e.id) && e.status === 'failed');
+	const selectedPending = emails.filter((e) => selectedIds.has(e.id) && e.status === 'pending');
+
+	const handleBulkRetry = async () => {
+		setBulkLoading(true);
+		try {
+			const results = await Promise.allSettled(
+				selectedFailed.map((e) =>
+					apiFetch(`/api/services/${e.service_id}/emails/${e.id}/retry`, { method: 'POST' }),
+				),
+			);
+			const failCount = results.filter((r) => r.status === 'rejected' || !r.value.ok).length;
+			toast({
+				variant: failCount > 0 ? 'destructive' : undefined,
+				title: failCount > 0 ? 'Concluído com falhas' : 'Reenviados',
+				description: `${selectedFailed.length - failCount} de ${selectedFailed.length} e-mail(s) reenfileirado(s).`,
+			});
+			fetchEmails();
+		} finally {
+			setBulkLoading(false);
+		}
+	};
+
+	const handleBulkCancel = async () => {
+		setBulkLoading(true);
+		try {
+			const results = await Promise.allSettled(
+				selectedPending.map((e) =>
+					apiFetch(`/api/services/${e.service_id}/emails/${e.id}`, { method: 'DELETE' }),
+				),
+			);
+			const failCount = results.filter((r) => r.status === 'rejected' || !r.value.ok).length;
+			toast({
+				variant: failCount > 0 ? 'destructive' : undefined,
+				title: failCount > 0 ? 'Concluído com falhas' : 'Cancelados',
+				description: `${selectedPending.length - failCount} de ${selectedPending.length} e-mail(s) cancelado(s).`,
+			});
+			fetchEmails();
+		} finally {
+			setBulkLoading(false);
+			setShowBulkCancelModal(false);
+		}
+	};
+
+	// --- Exportar CSV ---
+	const handleExport = async () => {
+		setExporting(true);
+		try {
+			const params = buildFilterParams();
+			const res = await apiFetch(`/api/emails/export?${params.toString()}`);
+			if (!res.ok) throw new Error('Falha ao exportar.');
+			const blob = await res.blob();
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `emails-${Date.now()}.csv`;
+			document.body.appendChild(a);
+			a.click();
+			a.remove();
+			URL.revokeObjectURL(url);
+		} catch (err: any) {
+			toast({ variant: 'destructive', title: 'Erro ao exportar', description: err.message });
+		} finally {
+			setExporting(false);
+		}
 	};
 
 	const { startTour } = useTour([
@@ -159,7 +318,7 @@ export default function EmailsPage() {
 			element: '#tour-emails-filters',
 			popover: {
 				title: 'Filtros',
-				description: 'Filtre o histórico por serviço, status de entrega ou uma data específica.',
+				description: 'Filtre o histórico por texto (destinatário/assunto), serviço, status ou um intervalo de datas — tudo aplicado direto no servidor, sem limite de 100 registros.',
 				side: 'bottom',
 			},
 		},
@@ -167,7 +326,7 @@ export default function EmailsPage() {
 			element: '#tour-emails-table',
 			popover: {
 				title: 'Histórico de Envios',
-				description: 'Todos os e-mails processados aparecem aqui. Clique no ícone de olho em qualquer linha para ver o payload completo, variáveis e corpo da mensagem.',
+				description: 'Selecione várias linhas pra reenviar ou cancelar em massa, ou use os ícones de cada linha pra agir individualmente. Clique no olho pra ver o payload completo.',
 				side: 'top',
 			},
 		},
@@ -182,18 +341,44 @@ export default function EmailsPage() {
 						Acompanhe o histórico de envios e o status de entrega de todos os serviços.
 					</p>
 				</div>
-				<Button
-					onClick={startTour}
-					variant="outline"
-					className="cursor-pointer border-primary text-primary hover:bg-primary/10 w-fit"
-				>
-					Tour Guiado
-				</Button>
+				<div className="flex items-center gap-2">
+					<Button
+						variant="outline"
+						onClick={handleExport}
+						disabled={exporting}
+						className="cursor-pointer w-fit"
+					>
+						{exporting ? (
+							<Loader2 className="h-4 w-4 mr-2 animate-spin" />
+						) : (
+							<Download className="h-4 w-4 mr-2" />
+						)}
+						Exportar CSV
+					</Button>
+					<Button
+						onClick={startTour}
+						variant="outline"
+						className="cursor-pointer border-primary text-primary hover:bg-primary/10 w-fit"
+					>
+						Tour Guiado
+					</Button>
+				</div>
 			</div>
 
 			{/* Filters */}
-			<div id="tour-emails-filters" className="flex flex-col sm:flex-row items-end sm:items-center gap-4 bg-card p-4 rounded-xl border shadow-sm">
-				<div className="space-y-1 w-full sm:w-auto flex-1">
+			<div id="tour-emails-filters" className="flex flex-col lg:flex-row items-end lg:items-center gap-4 bg-card p-4 rounded-xl border shadow-sm flex-wrap">
+				<div className="space-y-1 w-full lg:w-auto flex-1 min-w-[160px]">
+					<label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+						Buscar
+					</label>
+					<Input
+						value={search}
+						onChange={(e) => setSearch(e.target.value)}
+						placeholder="Destinatário ou assunto..."
+						className="h-10"
+					/>
+				</div>
+				<div className="space-y-1 w-full lg:w-auto flex-1 min-w-[160px]">
 					<label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
 						Serviço
 					</label>
@@ -211,7 +396,7 @@ export default function EmailsPage() {
 						</SelectContent>
 					</Select>
 				</div>
-				<div className="space-y-1 w-full sm:w-auto flex-1">
+				<div className="space-y-1 w-full lg:w-auto flex-1 min-w-[140px]">
 					<label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
 						Status
 					</label>
@@ -228,26 +413,39 @@ export default function EmailsPage() {
 						</SelectContent>
 					</Select>
 				</div>
-				<div className="space-y-1 w-full sm:w-auto flex-1">
+				<div className="space-y-1 w-full lg:w-auto">
 					<label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-						Data
+						De
 					</label>
 					<Input
 						type="date"
-						value={filterDate}
-						onChange={(e) => setFilterDate(e.target.value)}
+						value={filterStartDate}
+						onChange={(e) => setFilterStartDate(e.target.value)}
 						className="cursor-pointer h-10"
 					/>
 				</div>
-				<div className="w-full sm:w-auto">
+				<div className="space-y-1 w-full lg:w-auto">
+					<label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+						Até
+					</label>
+					<Input
+						type="date"
+						value={filterEndDate}
+						onChange={(e) => setFilterEndDate(e.target.value)}
+						className="cursor-pointer h-10"
+					/>
+				</div>
+				<div className="w-full lg:w-auto">
 					<Button
 						variant="outline"
 						onClick={() => {
+							setSearch('');
 							setFilterService('all');
 							setFilterStatus('all');
-							setFilterDate('');
+							setFilterStartDate('');
+							setFilterEndDate('');
 						}}
-						className="w-full sm:w-auto h-10"
+						className="w-full lg:w-auto h-10"
 					>
 						<FilterX className="h-4 w-4 mr-2" />
 						Limpar
@@ -255,61 +453,170 @@ export default function EmailsPage() {
 				</div>
 			</div>
 
+			{/* Barra de ações em massa */}
+			{selectedIds.size > 0 && (
+				<div className="flex items-center gap-3 bg-primary/5 border border-primary/20 p-3 rounded-xl flex-wrap">
+					<span className="text-sm font-medium text-foreground">
+						{selectedIds.size} selecionado(s)
+					</span>
+					<Button
+						size="sm"
+						variant="outline"
+						disabled={selectedFailed.length === 0 || bulkLoading}
+						onClick={handleBulkRetry}
+						className="cursor-pointer gap-1.5"
+					>
+						{bulkLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+						Reenviar selecionados ({selectedFailed.length})
+					</Button>
+					<Button
+						size="sm"
+						variant="outline"
+						disabled={selectedPending.length === 0 || bulkLoading}
+						onClick={() => setShowBulkCancelModal(true)}
+						className="cursor-pointer gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
+					>
+						<Ban className="h-3.5 w-3.5" />
+						Cancelar selecionados ({selectedPending.length})
+					</Button>
+				</div>
+			)}
+
 			{/* Table */}
 			<div id="tour-emails-table" className="rounded-xl border bg-card shadow-sm overflow-x-auto">
 				<Table>
 					<TableHeader>
 						<TableRow>
+							<TableHead className="w-10">
+								<Checkbox checked={allSelectedOnPage} onCheckedChange={toggleSelectAll} />
+							</TableHead>
 							<TableHead>Status</TableHead>
 							<TableHead>Serviço</TableHead>
 							<TableHead>Destinatário</TableHead>
 							<TableHead>Assunto</TableHead>
 							<TableHead>Credencial</TableHead>
+							<TableHead>Tentativas</TableHead>
+							<TableHead>Latência</TableHead>
 							<TableHead>Data de Envio</TableHead>
-							<TableHead className="text-right">Ação</TableHead>
+							<TableHead className="text-right">Ações</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
 						{loading ? (
 							<TableRow>
-								<TableCell colSpan={7} className="h-24 text-center">
+								<TableCell colSpan={10} className="h-24 text-center">
 									<Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
 								</TableCell>
 							</TableRow>
-						) : filteredEmails.length === 0 ? (
+						) : emails.length === 0 ? (
 							<TableRow>
-								<TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+								<TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
 									Nenhum e-mail encontrado para os filtros selecionados.
 								</TableCell>
 							</TableRow>
 						) : (
-							filteredEmails.map((email) => (
-								<TableRow key={email.id} className="hover:bg-muted/50 transition-colors">
-									<TableCell>{getStatusBadge(email.status)}</TableCell>
-									<TableCell className="font-medium text-xs">{email.serviceName}</TableCell>
-									<TableCell className="text-sm">{email.recipient_to}</TableCell>
-									<TableCell className="text-sm max-w-[200px] truncate">{email.subject}</TableCell>
-									<TableCell className="text-xs font-mono text-muted-foreground truncate max-w-[120px]">
-										{email.credentialName || email.credential_id || 'N/A'}
-									</TableCell>
-									<TableCell className="text-sm">
-										{new Date(email.created_at || email.createdAt || '').toLocaleString()}
-									</TableCell>
-									<TableCell className="text-right">
-										<Button
-											variant="ghost"
-											size="icon"
-											onClick={() => openEmailModal(email)}
-											title="Ver detalhes"
-										>
-											<Eye className="h-4 w-4" />
-										</Button>
-									</TableCell>
-								</TableRow>
-							))
+							emails.map((email) => {
+								const latency = getLatencyMs(email);
+								return (
+									<TableRow key={email.id} className="hover:bg-muted/50 transition-colors">
+										<TableCell>
+											<Checkbox
+												checked={selectedIds.has(email.id)}
+												onCheckedChange={() => toggleSelect(email.id)}
+											/>
+										</TableCell>
+										<TableCell>{getStatusBadge(email.status)}</TableCell>
+										<TableCell className="font-medium text-xs">{email.serviceName}</TableCell>
+										<TableCell className="text-sm">{email.recipient_to}</TableCell>
+										<TableCell className="text-sm max-w-[200px] truncate">{email.subject}</TableCell>
+										<TableCell className="text-xs font-mono text-muted-foreground truncate max-w-[120px]">
+											{email.credentialName || email.credential_id || 'N/A'}
+										</TableCell>
+										<TableCell>
+											<div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+												<RefreshCw className="h-3 w-3" />
+												{email.retry_count ?? 0}x
+											</div>
+										</TableCell>
+										<TableCell className="text-xs text-muted-foreground font-mono">
+											{latency !== null ? `${latency} ms` : '-'}
+										</TableCell>
+										<TableCell className="text-sm">
+											{new Date(email.created_at || email.createdAt || '').toLocaleString()}
+										</TableCell>
+										<TableCell className="text-right">
+											<div className="flex items-center justify-end gap-1">
+												{email.status === 'failed' && (
+													<Button
+														variant="ghost"
+														size="icon"
+														onClick={() => handleRetry(email)}
+														title="Reenviar"
+														className="cursor-pointer text-primary hover:text-primary"
+													>
+														<RefreshCw className="h-4 w-4" />
+													</Button>
+												)}
+												{email.status === 'pending' && (
+													<Button
+														variant="ghost"
+														size="icon"
+														onClick={() => setEmailToCancel(email)}
+														title="Cancelar"
+														className="cursor-pointer text-destructive hover:text-destructive"
+													>
+														<Ban className="h-4 w-4" />
+													</Button>
+												)}
+												<Button
+													variant="ghost"
+													size="icon"
+													onClick={() => openEmailModal(email)}
+													title="Ver detalhes"
+													className="cursor-pointer"
+												>
+													<Eye className="h-4 w-4" />
+												</Button>
+											</div>
+										</TableCell>
+									</TableRow>
+								);
+							})
 						)}
 					</TableBody>
 				</Table>
+			</div>
+
+			{/* Paginação */}
+			<div className="flex items-center justify-between gap-4 flex-wrap">
+				<p className="text-xs text-muted-foreground">
+					{total > 0
+						? `Mostrando ${(page - 1) * LIMIT + 1}–${(page - 1) * LIMIT + emails.length} de ${total}`
+						: 'Nenhum resultado'}
+				</p>
+				<div className="flex items-center gap-2">
+					<Button
+						variant="outline"
+						size="sm"
+						disabled={page <= 1 || loading}
+						onClick={() => setPage((p) => Math.max(1, p - 1))}
+						className="cursor-pointer gap-1"
+					>
+						<ChevronLeft className="h-4 w-4" /> Anterior
+					</Button>
+					<span className="text-xs text-muted-foreground px-2">
+						Página {page} de {totalPages}
+					</span>
+					<Button
+						variant="outline"
+						size="sm"
+						disabled={page >= totalPages || loading}
+						onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+						className="cursor-pointer gap-1"
+					>
+						Próxima <ChevronRight className="h-4 w-4" />
+					</Button>
+				</div>
 			</div>
 
 			<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -348,6 +655,22 @@ export default function EmailsPage() {
 									</p>
 									<p className="text-sm font-mono break-all">
 										{selectedEmail.credentialName || selectedEmail.credential_id || 'N/A'}
+									</p>
+								</div>
+								<div className="space-y-1 min-w-0">
+									<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+										Tentativas
+									</p>
+									<p className="text-sm font-mono">{selectedEmail.retry_count ?? 0}x</p>
+								</div>
+								<div className="space-y-1 min-w-0">
+									<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+										Latência
+									</p>
+									<p className="text-sm font-mono">
+										{getLatencyMs(selectedEmail) !== null
+											? `${getLatencyMs(selectedEmail)} ms`
+											: 'Processando...'}
 									</p>
 								</div>
 							</div>
@@ -406,10 +729,41 @@ export default function EmailsPage() {
 									</div>
 								</div>
 							)}
+
+							{selectedEmail.error_log && (
+								<div className="space-y-2 min-w-0 w-full overflow-hidden">
+									<p className="text-xs font-bold text-destructive uppercase tracking-wider flex items-center gap-1">
+										<AlertCircle className="h-3 w-3 shrink-0" /> Log de Erro / Exception
+									</p>
+									<pre className="text-xs p-3 bg-destructive/10 text-destructive border border-destructive/20 rounded-md whitespace-pre-wrap break-all max-h-[150px] overflow-y-auto w-full overflow-x-hidden">
+										{selectedEmail.error_log}
+									</pre>
+								</div>
+							)}
 						</div>
 					)}
 				</DialogContent>
 			</Dialog>
+
+			<ConfirmModal
+				isOpen={!!emailToCancel}
+				onClose={() => setEmailToCancel(null)}
+				onConfirm={handleConfirmCancel}
+				variant="danger"
+				title="Cancelar este e-mail?"
+				description={`O envio para "${emailToCancel?.recipient_to}" será cancelado e não sairá da fila.`}
+				confirmText="Sim, cancelar"
+			/>
+
+			<ConfirmModal
+				isOpen={showBulkCancelModal}
+				onClose={() => setShowBulkCancelModal(false)}
+				onConfirm={handleBulkCancel}
+				variant="danger"
+				title="Cancelar e-mails selecionados?"
+				description={`${selectedPending.length} e-mail(s) pendente(s) serão cancelados e não sairão da fila.`}
+				confirmText="Sim, cancelar todos"
+			/>
 		</div>
 	);
 }

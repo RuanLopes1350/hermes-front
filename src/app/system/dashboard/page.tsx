@@ -26,6 +26,7 @@ import {
 	Moon,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useTheme } from 'next-themes';
 import ReactECharts from 'echarts-for-react';
 import { z } from 'zod';
 
@@ -39,7 +40,6 @@ const sseQueueSchema = z.object({
 import {
 	DashboardData,
 	VolumeData,
-	StatusData,
 	ActivityLog,
 	RecentEmail,
 	TopService,
@@ -92,6 +92,7 @@ interface AppUser {
 
 export default function DashboardPage() {
 	const { data: session, isPending } = authClient.useSession();
+	const { resolvedTheme } = useTheme();
 	const { toast } = useToast();
 	const [loading, setLoading] = useState(true);
 	const [data, setData] = useState<DashboardData | null>(null);
@@ -128,8 +129,8 @@ export default function DashboardPage() {
 			element: '#tour-status-chart',
 			popover: {
 				title: 'Distribuição por Status',
-				description: 'Proporção de e-mails em cada status (enviado, pendente, falha, retentando) na janela atual.',
-				side: 'left',
+				description: 'Contagem exata de e-mails em cada status (enviado, pendente, retentando, falha) na janela atual.',
+				side: 'top',
 			},
 		},
 		{
@@ -308,15 +309,68 @@ export default function DashboardPage() {
 	};
 	const greeting = getGreeting();
 
-	// Helper para Action Icon (Timeline)
+	// Helper para Action Icon (Timeline) — mesmos tokens semânticos usados nos badges de status
 	const getActionIcon = (action: string) => {
 		if (action.includes('CREATED') || action.includes('ADDED'))
-			return <PlusCircle className="h-4 w-4 text-emerald-500" />;
+			return <PlusCircle className="h-4 w-4 text-success" />;
 		if (action.includes('DELETED') || action.includes('REMOVED'))
-			return <MinusCircle className="h-4 w-4 text-red-500" />;
+			return <MinusCircle className="h-4 w-4 text-destructive" />;
 		if (action.includes('UPDATED') || action.includes('TRANSFERRED'))
-			return <RefreshCw className="h-4 w-4 text-blue-500" />;
-		return <MessageSquare className="h-4 w-4 text-amber-500" />;
+			return <RefreshCw className="h-4 w-4 text-primary" />;
+		return <MessageSquare className="h-4 w-4 text-warning" />;
+	};
+
+	// Badge de status de e-mail — mesmo mapeamento de STATUS_COLORS, mas como tokens Tailwind
+	const getStatusBadge = (status: string, extraClassName = '') => {
+		if (status === 'sent') {
+			return (
+				<Badge className={`bg-success/15 text-success hover:bg-success/15 border-none font-bold ${extraClassName}`}>
+					Entregue
+				</Badge>
+			);
+		}
+		if (status === 'failed') {
+			return (
+				<Badge className={`bg-destructive/15 text-destructive hover:bg-destructive/15 border-none font-bold ${extraClassName}`}>
+					Falha
+				</Badge>
+			);
+		}
+		return (
+			<Badge className={`bg-warning/15 text-warning hover:bg-warning/15 border-none font-bold ${extraClassName}`}>
+				{status === 'pending' ? 'Pendente' : status === 'retrying' ? 'Retentando' : status}
+			</Badge>
+		);
+	};
+
+	// ==========================================
+	// PALETA DE STATUS E TEMA DOS GRÁFICOS
+	// ==========================================
+	// Cores de marca (barras/linhas) ficam fixas nos dois temas — precisam de
+	// contraste/identidade constante contra o fundo do card, diferente dos tokens
+	// semânticos --success/--warning/--destructive (esses são pensados pra fundo
+	// de badge/chip, não pra marca de gráfico — no dark mode eles ficam bem mais
+	// escuros de propósito). O valor aqui é o mesmo hex do token semântico no tema claro.
+	const STATUS_COLORS = {
+		sent: '#10b981', // --success
+		failed: '#ef4444', // --destructive
+		pending: '#f59e0b', // --warning
+		retrying: '#3b82f6', // --primary (mesma lógica do "Ativo" na Saúde da Fila)
+	};
+
+	const isDarkChart = resolvedTheme === 'dark';
+	const CHART_COLORS = isDarkChart
+		? { axisLabel: '#94a3b8', splitLine: '#334155', axisLine: '#475569', legendText: '#cbd5e1' }
+		: { axisLabel: '#64748b', splitLine: '#f1f5f9', axisLine: '#cbd5e1', legendText: '#334155' };
+
+	// Contagens por status pro resumo inline (substitui o gráfico de rosca)
+	const findStatusTotal = (status: string) =>
+		Number((data.statusDistribution || []).find((d) => d.status === status)?.total || 0);
+	const statusCounts = {
+		sent: findStatusTotal('sent'),
+		pending: findStatusTotal('pending'),
+		retrying: findStatusTotal('retrying'),
+		failed: findStatusTotal('failed'),
 	};
 
 	// Calculations
@@ -339,7 +393,7 @@ export default function DashboardPage() {
 
 	const deltaIcon =
 		deltaToday >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />;
-	const deltaColor = deltaToday >= 0 ? 'text-emerald-600' : 'text-red-500';
+	const deltaColor = deltaToday >= 0 ? 'text-success' : 'text-destructive';
 
 	// ==========================================
 	// CONFIGURAÇÕES DE GRÁFICOS ECHARTS
@@ -359,18 +413,20 @@ export default function DashboardPage() {
 				trigger: 'axis',
 				axisPointer: { type: 'shadow' },
 			},
-			legend: { data: ['Enviados', 'Falhas'], bottom: 0 },
+			legend: { data: ['Enviados', 'Falhas'], bottom: 0, textStyle: { color: CHART_COLORS.legendText } },
 			grid: { top: 20, left: 10, right: 10, bottom: 30, containLabel: true },
 			xAxis: {
 				type: 'category',
 				data: dates,
-				axisLine: { lineStyle: { color: '#cbd5e1' } },
-				axisLabel: { color: '#64748b' },
+				axisLine: { lineStyle: { color: CHART_COLORS.axisLine } },
+				axisLabel: { color: CHART_COLORS.axisLabel },
 			},
 			yAxis: {
 				type: 'value',
-				splitLine: { lineStyle: { color: '#f1f5f9', type: 'dashed' } },
-				axisLabel: { color: '#64748b' },
+				min: 0,
+				minInterval: 1,
+				splitLine: { lineStyle: { color: CHART_COLORS.splitLine, type: 'dashed' } },
+				axisLabel: { color: CHART_COLORS.axisLabel },
 			},
 			series: [
 				{
@@ -378,14 +434,14 @@ export default function DashboardPage() {
 					type: 'bar',
 					stack: 'total',
 					data: sentValues,
-					itemStyle: { color: '#10b981' },
+					itemStyle: { color: STATUS_COLORS.sent },
 				},
 				{
 					name: 'Falhas',
 					type: 'bar',
 					stack: 'total',
 					data: failedValues,
-					itemStyle: { color: '#ef4444' },
+					itemStyle: { color: STATUS_COLORS.failed },
 				},
 			],
 		};
@@ -421,7 +477,7 @@ export default function DashboardPage() {
 		return {
 			backgroundColor: 'transparent',
 			tooltip: { trigger: 'axis' },
-			legend: { data: services, bottom: 0, type: 'scroll' },
+			legend: { data: services, bottom: 0, type: 'scroll', textStyle: { color: CHART_COLORS.legendText } },
 			grid: { top: 20, left: 10, right: 10, bottom: 30, containLabel: true },
 			xAxis: {
 				type: 'category',
@@ -429,51 +485,15 @@ export default function DashboardPage() {
 				data: dates.map((d) =>
 					new Date(d).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }),
 				),
-				axisLine: { lineStyle: { color: '#cbd5e1' } },
+				axisLine: { lineStyle: { color: CHART_COLORS.axisLine } },
+				axisLabel: { color: CHART_COLORS.axisLabel },
 			},
-			yAxis: { type: 'value', splitLine: { lineStyle: { color: '#f1f5f9', type: 'dashed' } } },
+			yAxis: {
+				type: 'value',
+				splitLine: { lineStyle: { color: CHART_COLORS.splitLine, type: 'dashed' } },
+				axisLabel: { color: CHART_COLORS.axisLabel },
+			},
 			series,
-		};
-	};
-
-	// 2. Gráfico de Distribuição de Status (Donut)
-	const getStatusDistributionOption = (statusData: StatusData[]) => {
-		const colorMap: Record<string, string> = {
-			sent: '#10b981', // Emerald
-			pending: '#f59e0b', // Amber
-			failed: '#ef4444', // Red
-			retrying: '#3b82f6', // Blue
-		};
-
-		const formattedData = (statusData || []).map((d: StatusData) => ({
-			value: Number(d.total),
-			name: d.status.charAt(0).toUpperCase() + d.status.slice(1),
-			itemStyle: { color: colorMap[d.status] || '#94a3b8' },
-		}));
-
-		return {
-			backgroundColor: 'transparent',
-			tooltip: { trigger: 'item' },
-			legend: { top: 'bottom' },
-			series: [
-				{
-					name: 'Status',
-					type: 'pie',
-					radius: ['45%', '70%'],
-					avoidLabelOverlap: false,
-					itemStyle: {
-						borderRadius: 5,
-						borderColor: '#fff',
-						borderWidth: 2,
-					},
-					label: { show: false, position: 'center', formatter: '{b}\n{d}%' },
-					emphasis: {
-						label: { show: true, fontSize: 16, fontWeight: 'bold' },
-					},
-					labelLine: { show: false },
-					data: formattedData,
-				},
-			],
 		};
 	};
 
@@ -490,7 +510,7 @@ export default function DashboardPage() {
 				type: 'category',
 				inverse: true,
 				data: names,
-				axisLabel: { color: '#64748b', fontSize: 11, width: 120, overflow: 'truncate' },
+				axisLabel: { color: CHART_COLORS.axisLabel, fontSize: 11, width: 120, overflow: 'truncate' },
 			},
 			series: [
 				{
@@ -529,7 +549,7 @@ export default function DashboardPage() {
 				type: 'category',
 				inverse: true,
 				data: names,
-				axisLabel: { color: '#64748b', fontSize: 11, width: 120, overflow: 'truncate' },
+				axisLabel: { color: CHART_COLORS.axisLabel, fontSize: 11, width: 120, overflow: 'truncate' },
 			},
 			series: [
 				{
@@ -538,7 +558,7 @@ export default function DashboardPage() {
 					data: rates,
 					barMaxWidth: 20,
 					itemStyle: {
-						color: '#ef4444',
+						color: STATUS_COLORS.failed,
 						borderRadius: [0, 4, 4, 0],
 					},
 				},
@@ -556,14 +576,14 @@ export default function DashboardPage() {
 			grid: { top: 10, left: 10, right: 10, bottom: 10, containLabel: true },
 			xAxis: {
 				type: 'value',
-				axisLabel: { color: '#64748b' },
-				splitLine: { lineStyle: { type: 'dashed', color: '#f1f5f9' } },
+				axisLabel: { color: CHART_COLORS.axisLabel },
+				splitLine: { lineStyle: { type: 'dashed', color: CHART_COLORS.splitLine } },
 			},
 			yAxis: {
 				type: 'category',
 				inverse: true,
 				data: names,
-				axisLabel: { color: '#64748b', fontSize: 11, width: 120, overflow: 'truncate' },
+				axisLabel: { color: CHART_COLORS.axisLabel, fontSize: 11, width: 120, overflow: 'truncate' },
 			},
 			series: [
 				{
@@ -599,8 +619,8 @@ export default function DashboardPage() {
 				label: 'E-mails Hoje',
 				value: todayCount.toLocaleString('pt-BR'),
 				icon: Zap,
-				color: 'text-blue-600',
-				bg: 'bg-blue-100',
+				color: 'text-primary',
+				bg: 'bg-primary/10',
 				desc: (
 					<span className={`flex items-center gap-1 ${deltaColor}`}>
 						{deltaIcon} {Math.abs(deltaToday).toFixed(1)}% vs Ontem
@@ -611,24 +631,24 @@ export default function DashboardPage() {
 				label: 'Taxa de Entrega Global',
 				value: `${successRate}%`,
 				icon: CheckCircle2,
-				color: 'text-emerald-600',
-				bg: 'bg-emerald-100',
+				color: 'text-success',
+				bg: 'bg-success/10',
 				desc: 'Taxa histórica',
 			},
 			{
 				label: 'Sessões Ativas',
 				value: data.summary.activeSessions || 0,
 				icon: Users,
-				color: 'text-slate-600',
-				bg: 'bg-slate-200',
+				color: 'text-primary',
+				bg: 'bg-primary/10',
 				desc: 'Usuários online (tokens válidos)',
 			},
 			{
 				label: 'Serviços Registrados',
 				value: data.summary.totalServices || 0,
 				icon: Server,
-				color: 'text-indigo-600',
-				bg: 'bg-indigo-100',
+				color: 'text-primary',
+				bg: 'bg-primary/10',
 				desc: 'Projetos ativos na plataforma',
 			},
 		]
@@ -637,8 +657,8 @@ export default function DashboardPage() {
 				label: 'E-mails Hoje',
 				value: todayCount.toLocaleString('pt-BR'),
 				icon: Mail,
-				color: 'text-blue-600',
-				bg: 'bg-blue-100',
+				color: 'text-primary',
+				bg: 'bg-primary/10',
 				desc: (
 					<span className={`flex items-center gap-1 ${deltaColor}`}>
 						{deltaIcon} {Math.abs(deltaToday).toFixed(1)}% vs Ontem
@@ -649,8 +669,8 @@ export default function DashboardPage() {
 				label: 'Status Pendentes / Falhas',
 				value: `${data.summary.failed || 0} / ${data.summary.retrying || 0}`,
 				icon: AlertCircle,
-				color: 'text-red-600',
-				bg: 'bg-red-100',
+				color: 'text-destructive',
+				bg: 'bg-destructive/10',
 				desc: 'Falhas permanentes / Em retentativa',
 			},
 			{
@@ -662,8 +682,8 @@ export default function DashboardPage() {
 					})
 					: 'Nenhum',
 				icon: CalendarClock,
-				color: 'text-purple-600',
-				bg: 'bg-purple-100',
+				color: 'text-primary',
+				bg: 'bg-primary/10',
 				desc: data.nextScheduled
 					? new Date(data.nextScheduled).toLocaleDateString('pt-BR')
 					: 'Sem fila agendada',
@@ -672,8 +692,8 @@ export default function DashboardPage() {
 				label: 'Templates Ativos',
 				value: data.summary.templates || 0,
 				icon: FileText,
-				color: 'text-indigo-600',
-				bg: 'bg-indigo-100',
+				color: 'text-primary',
+				bg: 'bg-primary/10',
 				desc: 'Prontos para uso',
 			},
 		];
@@ -761,50 +781,73 @@ export default function DashboardPage() {
 				))}
 			</div>
 
-			{/* Gráficos e Timeline */}
-			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-				{/* Gráfico 1: Volume de Envios */}
-				<Card id="tour-volume-chart" className="col-span-1 lg:col-span-2 flex flex-col shadow-sm">
-					<CardHeader>
-						<CardTitle>Volume de Envios ({days} dias)</CardTitle>
-						<CardDescription>Quantidade de e-mails enviados e falhas acumuladas</CardDescription>
-					</CardHeader>
-					<CardContent className="flex-1 min-h-[280px]">
-						{!data.volumeByDay || data.volumeByDay.length === 0 ? (
-							<div className="h-full flex items-center justify-center text-muted-foreground text-sm border border-dashed rounded-xl py-10">
-								Aguardando tráfego para gerar gráficos.
-							</div>
-						) : (
-							<ReactECharts
-								option={getVolumeByDayOption(data.volumeByDay)}
-								style={{ height: '100%', width: '100%' }}
-								opts={{ renderer: 'svg' }}
-							/>
-						)}
-					</CardContent>
-				</Card>
+			{/* Gráfico de Volume */}
+			<Card id="tour-volume-chart" className="flex flex-col shadow-sm">
+				<CardHeader>
+					<CardTitle>Volume de Envios ({days} dias)</CardTitle>
+					<CardDescription>Quantidade de e-mails enviados e falhas acumuladas</CardDescription>
+				</CardHeader>
+				<CardContent className="h-[320px]">
+					{!data.volumeByDay || data.volumeByDay.length === 0 ? (
+						<div className="h-full flex items-center justify-center text-muted-foreground text-sm border border-dashed rounded-xl py-10">
+							Aguardando tráfego para gerar gráficos.
+						</div>
+					) : (
+						<ReactECharts
+							option={getVolumeByDayOption(data.volumeByDay)}
+							style={{ height: 320, width: '100%' }}
+							opts={{ renderer: 'svg' }}
+						/>
+					)}
+				</CardContent>
+			</Card>
 
-				{/* Gráfico 2: Distribuição de Status */}
-				<Card id="tour-status-chart" className="flex flex-col shadow-sm">
-					<CardHeader>
-						<CardTitle>Distribuição por Status</CardTitle>
-						<CardDescription>Visualização do estado atual de envios</CardDescription>
-					</CardHeader>
-					<CardContent className="flex-1 min-h-[280px]">
-						{!data.statusDistribution || data.statusDistribution.length === 0 ? (
-							<div className="h-full flex items-center justify-center text-muted-foreground text-sm border border-dashed rounded-xl py-10">
-								Sem dados disponíveis
+			{/* Resumo de Status — tiles com número exato em vez de rosca (ângulo/área
+			    comparam pior que texto quando os valores estão próximos) */}
+			<Card id="tour-status-chart" className="shadow-sm">
+				<CardHeader>
+					<CardTitle>Distribuição por Status</CardTitle>
+					<CardDescription>Estado atual dos envios no período selecionado</CardDescription>
+				</CardHeader>
+				<CardContent>
+					{!data.statusDistribution || data.statusDistribution.length === 0 ? (
+						<div className="h-24 flex items-center justify-center text-muted-foreground text-sm border border-dashed rounded-xl">
+							Sem dados disponíveis
+						</div>
+					) : (
+						<div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+							<div className="p-4 rounded-xl bg-success/10 border border-success/20 flex flex-col items-center justify-center text-center gap-0.5">
+								<CheckCircle2 className="h-4 w-4 text-success mb-1" />
+								<span className="text-2xl font-bold tracking-tight text-success">
+									{statusCounts.sent}
+								</span>
+								<span className="text-xs font-medium text-success">Enviado</span>
 							</div>
-						) : (
-							<ReactECharts
-								option={getStatusDistributionOption(data.statusDistribution)}
-								style={{ height: '100%', width: '100%' }}
-								opts={{ renderer: 'svg' }}
-							/>
-						)}
-					</CardContent>
-				</Card>
-			</div>
+							<div className="p-4 rounded-xl bg-warning/10 border border-warning/20 flex flex-col items-center justify-center text-center gap-0.5">
+								<Clock className="h-4 w-4 text-warning mb-1" />
+								<span className="text-2xl font-bold tracking-tight text-warning">
+									{statusCounts.pending}
+								</span>
+								<span className="text-xs font-medium text-warning">Pendente</span>
+							</div>
+							<div className="p-4 rounded-xl bg-primary/10 border border-primary/20 flex flex-col items-center justify-center text-center gap-0.5">
+								<RefreshCw className="h-4 w-4 text-primary mb-1" />
+								<span className="text-2xl font-bold tracking-tight text-primary">
+									{statusCounts.retrying}
+								</span>
+								<span className="text-xs font-medium text-primary">Retentando</span>
+							</div>
+							<div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 flex flex-col items-center justify-center text-center gap-0.5">
+								<AlertCircle className="h-4 w-4 text-destructive mb-1" />
+								<span className="text-2xl font-bold tracking-tight text-destructive">
+									{statusCounts.failed}
+								</span>
+								<span className="text-xs font-medium text-destructive">Falha</span>
+							</div>
+						</div>
+					)}
+				</CardContent>
+			</Card>
 
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 				{/* Timeline de Atividades */}
@@ -891,24 +934,7 @@ export default function DashboardPage() {
 														</span>
 													</div>
 												</TableCell>
-												<TableCell>
-													{mail.status === 'sent' ? (
-														<Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-none font-bold">
-															Entregue
-														</Badge>
-													) : mail.status === 'failed' ? (
-														<Badge className="bg-red-100 text-red-800 hover:bg-red-200 border-none font-bold">
-															Falha
-														</Badge>
-													) : (
-														<Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200 border-none font-bold">
-															{mail.status === 'pending'
-																? 'Pendente'
-																: mail.status === 'retrying'
-																	? 'Retentando'
-																	: mail.status}
-														</Badge>
-													)}
+												<TableCell>{getStatusBadge(mail.status)}
 												</TableCell>
 												<TableCell>
 													<div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -951,7 +977,7 @@ export default function DashboardPage() {
 				<div className="space-y-6 pt-6 border-t mt-8">
 					<div>
 						<h3 className="text-lg font-bold flex items-center gap-2">
-							<Server className="h-5 w-5 text-indigo-500" />
+							<Server className="h-5 w-5 text-primary" />
 							Painel de Infraestrutura Global
 						</h3>
 						<p className="text-sm text-muted-foreground">
@@ -972,7 +998,7 @@ export default function DashboardPage() {
 										size="sm"
 										variant="outline"
 										onClick={() => window.location.reload()}
-										className="gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+										className="gap-2 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
 									>
 										<RefreshCw className="h-4 w-4" />
 										Reconectar Live
@@ -981,7 +1007,7 @@ export default function DashboardPage() {
 								{sseStatus === 'connected' && (
 									<Badge
 										variant="outline"
-										className="bg-emerald-50 text-emerald-600 border-emerald-200 shadow-none"
+										className="bg-success/10 text-success border-success/20 shadow-none"
 									>
 										<div className="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse" />
 										Live
@@ -990,7 +1016,7 @@ export default function DashboardPage() {
 								{sseStatus === 'connecting' && (
 									<Badge
 										variant="outline"
-										className="bg-amber-50 text-amber-600 border-amber-200 shadow-none hover:bg-amber-50"
+										className="bg-warning/10 text-warning border-warning/20 shadow-none hover:bg-warning/10"
 									>
 										<Loader2 className="h-3 w-3 mr-1 animate-spin" />
 										Conectando
@@ -1000,46 +1026,46 @@ export default function DashboardPage() {
 						</CardHeader>
 						<CardContent>
 							<div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-								<div className="p-4 rounded-xl bg-amber-50 border border-amber-100 flex flex-col items-center justify-center text-center gap-0.5">
-									<Clock className="h-4 w-4 text-amber-500 mb-1" />
-									<span className="text-2xl font-bold tracking-tight text-amber-700">
+								<div className="p-4 rounded-xl bg-warning/10 border border-warning/20 flex flex-col items-center justify-center text-center gap-0.5">
+									<Clock className="h-4 w-4 text-warning mb-1" />
+									<span className="text-2xl font-bold tracking-tight text-warning">
 										{data.queue?.waiting || 0}
 									</span>
-									<span className="text-xs font-medium text-amber-600">
+									<span className="text-xs font-medium text-warning">
 										Espera
 									</span>
 								</div>
-								<div className="p-4 rounded-xl bg-blue-50 border border-blue-100 flex flex-col items-center justify-center text-center gap-0.5">
-									<Activity className="h-4 w-4 text-blue-500 mb-1" />
-									<span className="text-2xl font-bold tracking-tight text-blue-700">
+								<div className="p-4 rounded-xl bg-primary/10 border border-primary/20 flex flex-col items-center justify-center text-center gap-0.5">
+									<Activity className="h-4 w-4 text-primary mb-1" />
+									<span className="text-2xl font-bold tracking-tight text-primary">
 										{data.queue?.active || 0}
 									</span>
-									<span className="text-xs font-medium text-blue-600">
+									<span className="text-xs font-medium text-primary">
 										Ativo
 									</span>
 								</div>
-								<div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100 flex flex-col items-center justify-center text-center gap-0.5">
-									<CheckCircle2 className="h-4 w-4 text-emerald-500 mb-1" />
-									<span className="text-2xl font-bold tracking-tight text-emerald-700">
+								<div className="p-4 rounded-xl bg-success/10 border border-success/20 flex flex-col items-center justify-center text-center gap-0.5">
+									<CheckCircle2 className="h-4 w-4 text-success mb-1" />
+									<span className="text-2xl font-bold tracking-tight text-success">
 										{data.queue?.completed || 0}
 									</span>
-									<span className="text-xs font-medium text-emerald-600">
+									<span className="text-xs font-medium text-success">
 										Concluído
 									</span>
 								</div>
-								<div className="p-4 rounded-xl bg-red-50 border border-red-100 flex flex-col items-center justify-center text-center gap-0.5">
-									<AlertCircle className="h-4 w-4 text-red-500 mb-1" />
-									<span className="text-2xl font-bold tracking-tight text-red-700">{data.queue?.failed || 0}</span>
-									<span className="text-xs font-medium text-red-600">
+								<div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 flex flex-col items-center justify-center text-center gap-0.5">
+									<AlertCircle className="h-4 w-4 text-destructive mb-1" />
+									<span className="text-2xl font-bold tracking-tight text-destructive">{data.queue?.failed || 0}</span>
+									<span className="text-xs font-medium text-destructive">
 										Falha
 									</span>
 								</div>
-								<div className="p-4 rounded-xl bg-purple-50 border border-purple-100 flex flex-col items-center justify-center text-center gap-0.5">
-									<CalendarClock className="h-4 w-4 text-purple-500 mb-1" />
-									<span className="text-2xl font-bold tracking-tight text-purple-700">
+								<div className="p-4 rounded-xl bg-muted/50 border border-border flex flex-col items-center justify-center text-center gap-0.5">
+									<CalendarClock className="h-4 w-4 text-muted-foreground mb-1" />
+									<span className="text-2xl font-bold tracking-tight text-foreground">
 										{data.queue?.delayed || 0}
 									</span>
-									<span className="text-xs font-medium text-purple-600">
+									<span className="text-xs font-medium text-muted-foreground">
 										Agendado
 									</span>
 								</div>
@@ -1165,21 +1191,7 @@ export default function DashboardPage() {
 									<label className="text-[10px] uppercase font-bold text-muted-foreground truncate block">
 										Status Atual
 									</label>
-									<div>
-										{selectedEmail.status === 'sent' ? (
-											<Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-none font-bold">
-												Entregue
-											</Badge>
-										) : selectedEmail.status === 'failed' ? (
-											<Badge className="bg-red-100 text-red-800 hover:bg-red-200 border-none font-bold">
-												Falhou
-											</Badge>
-										) : (
-											<Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200 border-none font-bold truncate max-w-full block">
-												{selectedEmail.status}
-											</Badge>
-										)}
-									</div>
+									<div>{getStatusBadge(selectedEmail.status, 'truncate max-w-full block')}</div>
 								</div>
 								<div className="space-y-1 min-w-0">
 									<label className="text-[10px] uppercase font-bold text-muted-foreground truncate block">
@@ -1252,7 +1264,7 @@ export default function DashboardPage() {
 							{selectedEmail.errorLog && (
 								<div className="border-t pt-4 w-full">
 									<div className="flex items-center justify-between mb-2">
-										<label className="text-[10px] uppercase font-bold text-red-600 flex items-center gap-1">
+										<label className="text-[10px] uppercase font-bold text-destructive flex items-center gap-1">
 											<AlertCircle className="h-3 w-3 shrink-0" /> Log de Erro / Exception
 										</label>
 										{selectedEmail.status === 'failed' && (
@@ -1261,7 +1273,7 @@ export default function DashboardPage() {
 											</Button>
 										)}
 									</div>
-									<pre className="text-[10px] p-3 bg-red-50 text-red-900 border border-red-200 rounded-md whitespace-pre-wrap break-all max-h-[150px] overflow-y-auto w-full overflow-x-hidden">
+									<pre className="text-[10px] p-3 bg-destructive/10 text-destructive border border-destructive/20 rounded-md whitespace-pre-wrap break-all max-h-[150px] overflow-y-auto w-full overflow-x-hidden">
 										{selectedEmail.errorLog}
 									</pre>
 								</div>
