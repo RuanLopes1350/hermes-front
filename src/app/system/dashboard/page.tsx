@@ -81,6 +81,7 @@ import { authClient } from '@/src/lib/auth-client';
 import { apiFetch } from '@/src/lib/api';
 import { useToast } from '@/src/hooks/use-toast';
 import { useTour } from '@/src/hooks/use-tour';
+import { useSSE } from '@/src/hooks/use-sse';
 import { Button } from '@/src/components/ui/button';
 
 interface AppUser {
@@ -104,9 +105,15 @@ export default function DashboardPage() {
 	const user = session?.user as AppUser | undefined;
 	const isAdmin = (user?.role === 'super_admin' || user?.role === 'admin');
 
-	const [sseStatus, setSseStatus] = useState<'connecting' | 'connected' | 'disconnected'>(
-		'connecting',
-	);
+	const sseStatus = useSSE('/api/dashboard/stream', sseQueueSchema, {
+		enabled: !!session,
+		onMessage: (queueData) => {
+			setData((prev: DashboardData | null) => {
+				if (!prev) return prev;
+				return { ...prev, queue: queueData };
+			});
+		},
+	});
 
 	const { startTour } = useTour([
 		{
@@ -205,63 +212,10 @@ export default function DashboardPage() {
 	};
 
 	useEffect(() => {
-		let currentEventSource: EventSource | undefined;
-		let reconnectTimeout: NodeJS.Timeout;
-		let retryDelay = 1000;
-
-		const initSSE = () => {
-			if (!session) return;
-			setSseStatus('connecting');
-
-			const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1350';
-			currentEventSource = new EventSource(`${API_URL}/api/dashboard/stream`, {
-				withCredentials: true,
-			});
-
-			currentEventSource.onopen = () => {
-				setSseStatus('connected');
-				retryDelay = 1000; // Reseta o delay ao conectar com sucesso
-			};
-
-			currentEventSource.onmessage = (event) => {
-				try {
-					const rawData = JSON.parse(event.data);
-					const queueData = sseQueueSchema.parse(rawData);
-					setData((prev: DashboardData | null) => {
-						if (!prev) return prev;
-						return { ...prev, queue: queueData };
-					});
-				} catch (e) {
-					console.warn('[SSE] Evento malformado recebido, ignorando...', e);
-				}
-			};
-
-			currentEventSource.onerror = () => {
-				if (currentEventSource) {
-					currentEventSource.close();
-				}
-				setSseStatus('disconnected');
-				
-				// Reconexão com backoff exponencial (máx 30s)
-				clearTimeout(reconnectTimeout);
-				reconnectTimeout = setTimeout(() => {
-					retryDelay = Math.min(retryDelay * 2, 30000);
-					initSSE();
-				}, retryDelay);
-			};
-		};
-
 		if (session) {
 			fetchDashboardData();
-			initSSE();
 		}
-
-		return () => {
-			if (currentEventSource) {
-				currentEventSource.close();
-			}
-			clearTimeout(reconnectTimeout);
-		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [session, days]);
 
 	const fetchDashboardData = async () => {

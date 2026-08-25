@@ -45,6 +45,8 @@ import {
 } from '@/src/components/ui/dropdown-menu';
 import { ConfirmModal } from '@/src/components/ui/confirm-modal';
 import { useTour } from '@/src/hooks/use-tour';
+import { Circle } from 'lucide-react';
+import { useOnlineUsers } from '@/src/hooks/use-online-users';
 
 interface User {
 	id: string;
@@ -71,8 +73,17 @@ export default function UsersPage() {
 	const { toast } = useToast();
 	const currentUser = session?.user as AppUser | undefined;
 
+	const onlineUsers = useOnlineUsers(
+		currentUser?.role === 'super_admin' || currentUser?.role === 'admin',
+	);
+	const onlineIds = useMemo(() => new Set(onlineUsers.map((u) => u.id)), [onlineUsers]);
+
 	useEffect(() => {
-		if (!isPending && currentUser && !(currentUser.role === 'super_admin' || currentUser.role === 'admin')) {
+		if (
+			!isPending &&
+			currentUser &&
+			!(currentUser.role === 'super_admin' || currentUser.role === 'admin')
+		) {
 			notFound();
 		}
 	}, [currentUser, isPending]);
@@ -188,7 +199,8 @@ export default function UsersPage() {
 			element: '#tour-users-table',
 			popover: {
 				title: 'Base de Usuários',
-				description: 'Cada linha traz status, nível de acesso e data de entrada. Clique nos "⋮" ao lado de um usuário para promover a Admin, suspender ou excluir a conta.',
+				description:
+					'Cada linha traz status, nível de acesso e data de entrada. Clique nos "⋮" ao lado de um usuário para promover a Admin, suspender ou excluir a conta.',
 				side: 'top',
 			},
 		},
@@ -268,6 +280,7 @@ export default function UsersPage() {
 										<TableHead>Status</TableHead>
 										<TableHead>Acesso</TableHead>
 										<TableHead>Data de Entrada</TableHead>
+										<TableHead>Último Acesso</TableHead>
 										<TableHead className="text-right">Ações</TableHead>
 									</TableRow>
 								</TableHeader>
@@ -289,6 +302,9 @@ export default function UsersPage() {
 											<TableRow key={user.id}>
 												<TableCell>
 													<div className="font-medium flex items-center gap-2">
+														{onlineIds.has(user.id) && (
+															<Circle className="h-2 w-2 fill-emerald-500 text-emerald-500 shrink-0" />
+														)}
 														{user.name}
 														{user.id === currentUser?.id && (
 															<Badge
@@ -303,22 +319,34 @@ export default function UsersPage() {
 												</TableCell>
 												<TableCell>
 													{user.isActive !== false ? (
-														<Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 cursor-default hover:bg-emerald-500/10">
+														<Badge
+															variant="outline"
+															className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 cursor-default hover:bg-emerald-500/10"
+														>
 															Ativa
 														</Badge>
 													) : (
-														<Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20 cursor-default hover:bg-destructive/10">
+														<Badge
+															variant="outline"
+															className="bg-destructive/10 text-destructive border-destructive/20 cursor-default hover:bg-destructive/10"
+														>
 															Suspensa
 														</Badge>
 													)}
 												</TableCell>
 												<TableCell>
-													{(user.role === 'super_admin' || user.role === 'admin') ? (
-														<Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 flex w-fit items-center gap-1 cursor-default hover:bg-primary/10">
+													{user.role === 'super_admin' || user.role === 'admin' ? (
+														<Badge
+															variant="outline"
+															className="bg-primary/10 text-primary border-primary/20 flex w-fit items-center gap-1 cursor-default hover:bg-primary/10"
+														>
 															<Shield className="h-3 w-3" /> Admin
 														</Badge>
 													) : (
-														<Badge variant="secondary" className="cursor-default hover:bg-secondary">
+														<Badge
+															variant="secondary"
+															className="cursor-default hover:bg-secondary"
+														>
 															Membro
 														</Badge>
 													)}
@@ -326,6 +354,7 @@ export default function UsersPage() {
 												<TableCell className="text-sm text-muted-foreground">
 													{new Date(user.createdAt).toLocaleDateString('pt-BR')}
 												</TableCell>
+												<TableCell>{/* Todo: adicionar data de ultimo login */}</TableCell>
 												<TableCell className="text-right">
 													{user.id !== currentUser?.id && (
 														<DropdownMenu>
@@ -341,11 +370,18 @@ export default function UsersPage() {
 																<DropdownMenuItem
 																	className="cursor-pointer"
 																	onClick={() =>
-																		handleUpdateUser(user.id, user.name, { role: (user.role === 'super_admin' || user.role === 'admin') ? 'user' : 'admin' })
+																		handleUpdateUser(user.id, user.name, {
+																			role:
+																				user.role === 'super_admin' || user.role === 'admin'
+																					? 'user'
+																					: 'admin',
+																		})
 																	}
 																>
 																	<UserCog className="mr-2 h-4 w-4" />
-																	{(user.role === 'super_admin' || user.role === 'admin') ? 'Remover privilégios Admin' : 'Promover a Admin'}
+																	{user.role === 'super_admin' || user.role === 'admin'
+																		? 'Remover privilégios Admin'
+																		: 'Promover a Admin'}
 																</DropdownMenuItem>
 
 																<DropdownMenuItem

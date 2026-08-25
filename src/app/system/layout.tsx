@@ -7,7 +7,6 @@ import { Loader2, LogOut, Settings, User as UserIcon, Menu, X, AlertCircle } fro
 import Link from 'next/link';
 import LogoPrimarioClaro from '@/public/hermes-primario.svg';
 import LogoPrimarioEscuro from '@/public/hermes-escuro.svg';
-
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -20,6 +19,8 @@ import { Button } from '@/src/components/ui/button';
 import { ThemeToggle } from '@/src/components/theme-toggle';
 import { NotificationBell } from '@/src/components/notification-bell';
 import { useTour } from '@/src/hooks/use-tour';
+import { useSessionWatcher } from '@/src/hooks/use-session-watcher';
+import { PresencePanel } from '@/src/components/presence-panel';
 
 const WELCOME_TOUR_STORAGE_KEY = 'hermes_welcome_tour_seen';
 
@@ -45,18 +46,25 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 		{ name: 'Sandbox', path: '/system/sandbox' },
 	];
 
+	// Fallback: cobre o caso de a sessão já estar inativa no carregamento da página
+	// (antes de qualquer push chegar via SSE).
 	useEffect(() => {
 		if (user && user.isActive === false) {
 			authClient.signOut({ fetchOptions: { onSuccess: () => router.push('/auth/sign-in') } });
 		}
 	}, [user, router]);
 
+	// Push em tempo real: força o logout imediatamente quando um admin desativa
+	// a conta enquanto o usuário já está com uma aba aberta e ociosa.
+	useSessionWatcher(!!user);
+
 	const { startTour: startWelcomeTour } = useTour([
 		{
 			element: '#tour-welcome-logo',
 			popover: {
 				title: 'Bem-vindo ao Hermes! 🕊️',
-				description: 'Este é o painel administrativo do seu gateway de e-mails transacionais. Vamos fazer um tour rápido pela barra superior.',
+				description:
+					'Este é o painel administrativo do seu gateway de e-mails transacionais. Vamos fazer um tour rápido pela barra superior.',
 				side: 'bottom',
 			},
 		},
@@ -64,7 +72,8 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 			element: '#tour-welcome-nav',
 			popover: {
 				title: 'Navegação Principal',
-				description: 'Dashboard (métricas), Serviços (seus namespaces de API Keys), E-mails (histórico), Templates (editor MJML) e Sandbox (teste de envios).',
+				description:
+					'Dashboard (métricas), Serviços (seus namespaces de API Keys), E-mails (histórico), Templates (editor MJML) e Sandbox (teste de envios).',
 				side: 'bottom',
 			},
 		},
@@ -72,7 +81,8 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 			element: '#tour-welcome-bell',
 			popover: {
 				title: 'Notificações',
-				description: 'Avisos sobre rotação de chaves, falhas de webhook e outros eventos importantes aparecem aqui.',
+				description:
+					'Avisos sobre rotação de chaves, falhas de webhook e outros eventos importantes aparecem aqui.',
 				side: 'bottom',
 			},
 		},
@@ -88,7 +98,8 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 			element: '#tour-welcome-account',
 			popover: {
 				title: 'Sua Conta',
-				description: 'Acesse seu perfil, gerencie usuários (se você for administrador) e saia da plataforma por aqui. Você pode refazer os tours guiados de cada tela a qualquer momento clicando em "Tour Guiado".',
+				description:
+					'Acesse seu perfil, gerencie usuários (se você for administrador) e saia da plataforma por aqui. Você pode refazer os tours guiados de cada tela a qualquer momento clicando em "Tour Guiado".',
 				side: 'bottom',
 				align: 'end',
 			},
@@ -126,11 +137,11 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 					{/* Left: Brand & Links */}
 					<div className="flex items-center gap-10">
 						<div id="tour-welcome-logo" className="flex items-center">
-							<Link href='/system/dashboard'>
+							<Link href="/system/dashboard">
 								{/* Logo renderizado no tema claro */}
-								<LogoPrimarioClaro className='block dark:hidden w-40 h-20' />
+								<LogoPrimarioClaro className="block dark:hidden w-40 h-20" />
 								{/* Logo renderizado no tema escuro */}
-								<LogoPrimarioEscuro className='hidden dark:block w-40 h-20' />
+								<LogoPrimarioEscuro className="hidden dark:block w-40 h-20" />
 							</Link>
 						</div>
 
@@ -141,10 +152,11 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 									<Link
 										key={item.path}
 										href={item.path}
-										className={`px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${isActive
-											? 'bg-secondary text-secondary-foreground'
-											: 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
-											}`}
+										className={`px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
+											isActive
+												? 'bg-secondary text-secondary-foreground'
+												: 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
+										}`}
 									>
 										{item.name}
 									</Link>
@@ -155,6 +167,7 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 
 					{/* Right: Actions & Profile */}
 					<div className="flex items-center gap-4">
+						<PresencePanel isAdmin={user?.role === 'super_admin' || user?.role === 'admin'} />
 						<div id="tour-welcome-bell" className="flex">
 							<NotificationBell />
 						</div>
@@ -183,7 +196,9 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 									<div className="flex flex-col space-y-1">
 										<p className="text-sm font-medium leading-none">{user?.name}</p>
 										<p className="text-xs leading-none text-muted-foreground">
-											{(user?.role === 'super_admin' || user?.role === 'admin') ? 'Administrador' : 'Usuário Padrão'}
+											{user?.role === 'super_admin' || user?.role === 'admin'
+												? 'Administrador'
+												: 'Usuário Padrão'}
 										</p>
 									</div>
 								</DropdownMenuLabel>
@@ -247,10 +262,11 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 									key={item.path}
 									href={item.path}
 									onClick={() => setIsMobileMenuOpen(false)}
-									className={`block px-4 py-2 rounded-md text-sm font-medium transition-colors ${isActive
-										? 'bg-secondary text-secondary-foreground'
-										: 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
-										}`}
+									className={`block px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+										isActive
+											? 'bg-secondary text-secondary-foreground'
+											: 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
+									}`}
 								>
 									{item.name}
 								</Link>
