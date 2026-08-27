@@ -1,7 +1,6 @@
 'use client';
 
 import {
-	Activity,
 	AlertCircle,
 	Clock,
 	Loader2,
@@ -83,6 +82,7 @@ import { useToast } from '@/src/hooks/use-toast';
 import { useTour } from '@/src/hooks/use-tour';
 import { useSSE } from '@/src/hooks/use-sse';
 import { Button } from '@/src/components/ui/button';
+import { DispatchPipeline } from '@/src/components/dispatch-pipeline';
 
 interface AppUser {
 	id: string;
@@ -274,25 +274,34 @@ export default function DashboardPage() {
 		return <MessageSquare className="h-4 w-4 text-warning" />;
 	};
 
-	// Badge de status de e-mail — mesmo mapeamento de STATUS_COLORS, mas como tokens Tailwind
+	// Badge de status de e-mail — mesmo mapeamento de STATUS_COLORS, mas como tokens Tailwind.
+	// pending e retrying agora têm cores distintas (antes as duas caíam no mesmo
+	// "warning", só o texto diferia — indistinguíveis num relance).
 	const getStatusBadge = (status: string, extraClassName = '') => {
 		if (status === 'sent') {
 			return (
-				<Badge className={`bg-success/15 text-success hover:bg-success/15 border-none font-bold ${extraClassName}`}>
+				<Badge className={`bg-status-good/15 text-status-good hover:bg-status-good/15 border-none font-bold ${extraClassName}`}>
 					Entregue
 				</Badge>
 			);
 		}
 		if (status === 'failed') {
 			return (
-				<Badge className={`bg-destructive/15 text-destructive hover:bg-destructive/15 border-none font-bold ${extraClassName}`}>
+				<Badge className={`bg-status-critical/15 text-status-critical hover:bg-status-critical/15 border-none font-bold ${extraClassName}`}>
 					Falha
 				</Badge>
 			);
 		}
+		if (status === 'retrying') {
+			return (
+				<Badge className={`bg-status-serious/15 text-status-serious hover:bg-status-serious/15 border-none font-bold ${extraClassName}`}>
+					Retentando
+				</Badge>
+			);
+		}
 		return (
-			<Badge className={`bg-warning/15 text-warning hover:bg-warning/15 border-none font-bold ${extraClassName}`}>
-				{status === 'pending' ? 'Pendente' : status === 'retrying' ? 'Retentando' : status}
+			<Badge className={`bg-status-warning/15 text-status-warning hover:bg-status-warning/15 border-none font-bold ${extraClassName}`}>
+				{status === 'pending' ? 'Pendente' : status}
 			</Badge>
 		);
 	};
@@ -300,22 +309,32 @@ export default function DashboardPage() {
 	// ==========================================
 	// PALETA DE STATUS E TEMA DOS GRÁFICOS
 	// ==========================================
-	// Cores de marca (barras/linhas) ficam fixas nos dois temas — precisam de
-	// contraste/identidade constante contra o fundo do card, diferente dos tokens
-	// semânticos --success/--warning/--destructive (esses são pensados pra fundo
-	// de badge/chip, não pra marca de gráfico — no dark mode eles ficam bem mais
-	// escuros de propósito). O valor aqui é o mesmo hex do token semântico no tema claro.
+	// Paleta validada via skill dataviz (CVD + contraste) contra as superfícies
+	// claro/escuro do app — mesmo hex nos dois temas, isolada dos tokens globais
+	// --success/--warning/--destructive (usados no resto do app fora do dashboard).
+	// "retrying" deixou de usar a cor de "Ativo" (não significava nada) e passou
+	// pra "serious": é um envio que já falhou uma vez e está sendo remediado,
+	// semanticamente mais grave que "pending" (ainda nem tentado).
 	const STATUS_COLORS = {
-		sent: '#10b981', // --success
-		failed: '#ef4444', // --destructive
-		pending: '#f59e0b', // --warning
-		retrying: '#3b82f6', // --primary (mesma lógica do "Ativo" na Saúde da Fila)
+		sent: '#0ca30c', // --status-good
+		pending: '#fab219', // --status-warning
+		retrying: '#ec835a', // --status-serious
+		failed: '#d03b3b', // --status-critical
 	};
+
+	// Paleta categórica (8 slots, ordem fixa — nunca ciclar) para os gráficos
+	// multi-tenant, onde cada serviço precisa de uma cor própria e distinguível.
+	const CATEGORICAL_COLORS = resolvedTheme === 'dark'
+		? ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#008300', '#9085e9', '#e66767']
+		: ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948'];
 
 	const isDarkChart = resolvedTheme === 'dark';
 	const CHART_COLORS = isDarkChart
 		? { axisLabel: '#94a3b8', splitLine: '#334155', axisLine: '#475569', legendText: '#cbd5e1' }
 		: { axisLabel: '#64748b', splitLine: '#f1f5f9', axisLine: '#cbd5e1', legendText: '#334155' };
+	// Superfície do card por trás dos gráficos — usada como cor do "gap" entre
+	// segmentos empilhados (spec dataviz: 2px de superfície, nunca um stroke).
+	const CHART_SURFACE = isDarkChart ? '#0f172a' : '#ffffff';
 
 	// Contagens por status pro resumo inline (substitui o gráfico de rosca)
 	const findStatusTotal = (status: string) =>
@@ -379,7 +398,7 @@ export default function DashboardPage() {
 				type: 'value',
 				min: 0,
 				minInterval: 1,
-				splitLine: { lineStyle: { color: CHART_COLORS.splitLine, type: 'dashed' } },
+				splitLine: { lineStyle: { color: CHART_COLORS.splitLine } },
 				axisLabel: { color: CHART_COLORS.axisLabel },
 			},
 			series: [
@@ -388,14 +407,28 @@ export default function DashboardPage() {
 					type: 'bar',
 					stack: 'total',
 					data: sentValues,
-					itemStyle: { color: STATUS_COLORS.sent },
+					// Percentual da banda da categoria, não px fixo: com poucos dias
+					// com dado (banda larga) a barra cresce até o teto de 48px; com
+					// muitos dias (banda estreita) ela encolhe sozinha pra não colidir.
+					barWidth: '45%',
+					barMaxWidth: 48,
+					itemStyle: { color: STATUS_COLORS.sent, borderColor: CHART_SURFACE, borderWidth: 2 },
 				},
 				{
 					name: 'Falhas',
 					type: 'bar',
 					stack: 'total',
 					data: failedValues,
-					itemStyle: { color: STATUS_COLORS.failed },
+					barWidth: '45%',
+					barMaxWidth: 48,
+					// Único segmento que toca o topo visível da pilha — só ele leva
+					// a ponta arredondada (spec: arredondado na ponta, reto na base).
+					itemStyle: {
+						color: STATUS_COLORS.failed,
+						borderColor: CHART_SURFACE,
+						borderWidth: 2,
+						borderRadius: [4, 4, 0, 0],
+					},
 				},
 			],
 		};
@@ -430,6 +463,10 @@ export default function DashboardPage() {
 
 		return {
 			backgroundColor: 'transparent',
+			// Ordem fixa de 8 cores validada (dataviz) — nunca deixar o ECharts
+			// escolher sozinho, senão a mesma cor pode acabar representando
+			// serviços diferentes conforme o filtro muda a lista.
+			color: CATEGORICAL_COLORS,
 			tooltip: { trigger: 'axis' },
 			legend: { data: services, bottom: 0, type: 'scroll', textStyle: { color: CHART_COLORS.legendText } },
 			grid: { top: 20, left: 10, right: 10, bottom: 30, containLabel: true },
@@ -444,7 +481,7 @@ export default function DashboardPage() {
 			},
 			yAxis: {
 				type: 'value',
-				splitLine: { lineStyle: { color: CHART_COLORS.splitLine, type: 'dashed' } },
+				splitLine: { lineStyle: { color: CHART_COLORS.splitLine } },
 				axisLabel: { color: CHART_COLORS.axisLabel },
 			},
 			series,
@@ -472,20 +509,9 @@ export default function DashboardPage() {
 					type: 'bar',
 					data: counts,
 					barMaxWidth: 20,
-					itemStyle: {
-						color: {
-							type: 'linear',
-							x: 0,
-							y: 0,
-							x2: 1,
-							y2: 0,
-							colorStops: [
-								{ offset: 0, color: '#6366f1' },
-								{ offset: 1, color: '#0ea5e9' },
-							],
-						},
-						borderRadius: [0, 4, 4, 0],
-					},
+					// Ranking por magnitude = uma cor só (regra dataviz), não gradiente
+					// de dois tons — a marca (indigo) carrega o "quanto", sem ambiguidade.
+					itemStyle: { color: isDarkChart ? '#818cf8' : '#4f46e5', borderRadius: [0, 4, 4, 0] },
 				},
 			],
 		};
@@ -545,20 +571,7 @@ export default function DashboardPage() {
 					type: 'bar',
 					data: counts,
 					barMaxWidth: 20,
-					itemStyle: {
-						color: {
-							type: 'linear',
-							x: 0,
-							y: 0,
-							x2: 1,
-							y2: 0,
-							colorStops: [
-								{ offset: 0, color: '#10b981' },
-								{ offset: 1, color: '#0ea5e9' },
-							],
-						},
-						borderRadius: [0, 4, 4, 0],
-					},
+					itemStyle: { color: isDarkChart ? '#818cf8' : '#4f46e5', borderRadius: [0, 4, 4, 0] },
 				},
 			],
 		};
@@ -720,16 +733,16 @@ export default function DashboardPage() {
 			{/* KPI Cards */}
 			<div id="tour-kpi-cards" className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
 				{kpiCards.map((stat, i) => (
-					<Card key={i} className="shadow-sm">
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium text-muted-foreground">{stat.label}</CardTitle>
-							<div className={`p-2 rounded-xl ${stat.bg} ${stat.color}`}>
-								<stat.icon className="h-4 w-4" />
+					<Card key={i} className={`shadow-sm border-t-2 ${stat.color.replace('text-', 'border-t-')}`}>
+						<CardContent className="pt-5">
+							<div className="flex items-start justify-between gap-2">
+								<span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+									{stat.label}
+								</span>
+								<stat.icon className={`h-4 w-4 shrink-0 ${stat.color}`} />
 							</div>
-						</CardHeader>
-						<CardContent>
-							<div className="text-2xl font-bold tracking-tight">{stat.value}</div>
-							<div className="text-xs text-muted-foreground mt-1">{stat.desc}</div>
+							<div className="mt-2 text-3xl font-semibold tracking-tight">{stat.value}</div>
+							<div className="text-xs text-muted-foreground mt-1.5">{stat.desc}</div>
 						</CardContent>
 					</Card>
 				))}
@@ -741,7 +754,7 @@ export default function DashboardPage() {
 					<CardTitle>Volume de Envios ({days} dias)</CardTitle>
 					<CardDescription>Quantidade de e-mails enviados e falhas acumuladas</CardDescription>
 				</CardHeader>
-				<CardContent className="h-[320px]">
+				<CardContent className="h-[240px]">
 					{!data.volumeByDay || data.volumeByDay.length === 0 ? (
 						<div className="h-full flex items-center justify-center text-muted-foreground text-sm border border-dashed rounded-xl py-10">
 							Aguardando tráfego para gerar gráficos.
@@ -749,7 +762,7 @@ export default function DashboardPage() {
 					) : (
 						<ReactECharts
 							option={getVolumeByDayOption(data.volumeByDay)}
-							style={{ height: 320, width: '100%' }}
+							style={{ height: 240, width: '100%' }}
 							opts={{ renderer: 'svg' }}
 						/>
 					)}
@@ -770,33 +783,33 @@ export default function DashboardPage() {
 						</div>
 					) : (
 						<div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-							<div className="p-4 rounded-xl bg-success/10 border border-success/20 flex flex-col items-center justify-center text-center gap-0.5">
-								<CheckCircle2 className="h-4 w-4 text-success mb-1" />
-								<span className="text-2xl font-bold tracking-tight text-success">
+							<div className="p-4 rounded-xl bg-status-good/10 border border-status-good/20 flex flex-col items-center justify-center text-center gap-0.5">
+								<CheckCircle2 className="h-4 w-4 text-status-good mb-1" />
+								<span className="text-2xl font-semibold tracking-tight text-status-good">
 									{statusCounts.sent}
 								</span>
-								<span className="text-xs font-medium text-success">Enviado</span>
+								<span className="text-xs font-medium text-status-good">Enviado</span>
 							</div>
-							<div className="p-4 rounded-xl bg-warning/10 border border-warning/20 flex flex-col items-center justify-center text-center gap-0.5">
-								<Clock className="h-4 w-4 text-warning mb-1" />
-								<span className="text-2xl font-bold tracking-tight text-warning">
+							<div className="p-4 rounded-xl bg-status-warning/10 border border-status-warning/20 flex flex-col items-center justify-center text-center gap-0.5">
+								<Clock className="h-4 w-4 text-status-warning mb-1" />
+								<span className="text-2xl font-semibold tracking-tight text-status-warning">
 									{statusCounts.pending}
 								</span>
-								<span className="text-xs font-medium text-warning">Pendente</span>
+								<span className="text-xs font-medium text-status-warning">Pendente</span>
 							</div>
-							<div className="p-4 rounded-xl bg-primary/10 border border-primary/20 flex flex-col items-center justify-center text-center gap-0.5">
-								<RefreshCw className="h-4 w-4 text-primary mb-1" />
-								<span className="text-2xl font-bold tracking-tight text-primary">
+							<div className="p-4 rounded-xl bg-status-serious/10 border border-status-serious/20 flex flex-col items-center justify-center text-center gap-0.5">
+								<RefreshCw className="h-4 w-4 text-status-serious mb-1" />
+								<span className="text-2xl font-semibold tracking-tight text-status-serious">
 									{statusCounts.retrying}
 								</span>
-								<span className="text-xs font-medium text-primary">Retentando</span>
+								<span className="text-xs font-medium text-status-serious">Retentando</span>
 							</div>
-							<div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 flex flex-col items-center justify-center text-center gap-0.5">
-								<AlertCircle className="h-4 w-4 text-destructive mb-1" />
-								<span className="text-2xl font-bold tracking-tight text-destructive">
+							<div className="p-4 rounded-xl bg-status-critical/10 border border-status-critical/20 flex flex-col items-center justify-center text-center gap-0.5">
+								<AlertCircle className="h-4 w-4 text-status-critical mb-1" />
+								<span className="text-2xl font-semibold tracking-tight text-status-critical">
 									{statusCounts.failed}
 								</span>
-								<span className="text-xs font-medium text-destructive">Falha</span>
+								<span className="text-xs font-medium text-status-critical">Falha</span>
 							</div>
 						</div>
 					)}
@@ -979,51 +992,15 @@ export default function DashboardPage() {
 							</div>
 						</CardHeader>
 						<CardContent>
-							<div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-								<div className="p-4 rounded-xl bg-warning/10 border border-warning/20 flex flex-col items-center justify-center text-center gap-0.5">
-									<Clock className="h-4 w-4 text-warning mb-1" />
-									<span className="text-2xl font-bold tracking-tight text-warning">
-										{data.queue?.waiting || 0}
-									</span>
-									<span className="text-xs font-medium text-warning">
-										Espera
-									</span>
-								</div>
-								<div className="p-4 rounded-xl bg-primary/10 border border-primary/20 flex flex-col items-center justify-center text-center gap-0.5">
-									<Activity className="h-4 w-4 text-primary mb-1" />
-									<span className="text-2xl font-bold tracking-tight text-primary">
-										{data.queue?.active || 0}
-									</span>
-									<span className="text-xs font-medium text-primary">
-										Ativo
-									</span>
-								</div>
-								<div className="p-4 rounded-xl bg-success/10 border border-success/20 flex flex-col items-center justify-center text-center gap-0.5">
-									<CheckCircle2 className="h-4 w-4 text-success mb-1" />
-									<span className="text-2xl font-bold tracking-tight text-success">
-										{data.queue?.completed || 0}
-									</span>
-									<span className="text-xs font-medium text-success">
-										Concluído
-									</span>
-								</div>
-								<div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 flex flex-col items-center justify-center text-center gap-0.5">
-									<AlertCircle className="h-4 w-4 text-destructive mb-1" />
-									<span className="text-2xl font-bold tracking-tight text-destructive">{data.queue?.failed || 0}</span>
-									<span className="text-xs font-medium text-destructive">
-										Falha
-									</span>
-								</div>
-								<div className="p-4 rounded-xl bg-muted/50 border border-border flex flex-col items-center justify-center text-center gap-0.5">
-									<CalendarClock className="h-4 w-4 text-muted-foreground mb-1" />
-									<span className="text-2xl font-bold tracking-tight text-foreground">
-										{data.queue?.delayed || 0}
-									</span>
-									<span className="text-xs font-medium text-muted-foreground">
-										Agendado
-									</span>
-								</div>
-							</div>
+							<DispatchPipeline
+								queue={{
+									waiting: data.queue?.waiting || 0,
+									active: data.queue?.active || 0,
+									completed: data.queue?.completed || 0,
+									failed: data.queue?.failed || 0,
+									delayed: data.queue?.delayed || 0,
+								}}
+							/>
 						</CardContent>
 					</Card>
 

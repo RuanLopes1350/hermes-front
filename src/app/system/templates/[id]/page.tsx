@@ -86,7 +86,25 @@ export default function TemplateDetailsPage() {
 	const { id } = useParams();
 	const router = useRouter();
 	const editorRef = useRef<any>(null);
+	const previewFrameRef = useRef<HTMLIFrameElement>(null);
 	const { toast } = useToast();
+
+	// O preview é só uma visualização: nenhum clique em botão/link do MJML pode
+	// navegar para fora dele (nem dentro do próprio iframe, nem no app).
+	const handlePreviewFrameLoad = useCallback(() => {
+		const doc = previewFrameRef.current?.contentDocument;
+		if (!doc) return;
+		doc.addEventListener(
+			'click',
+			(e) => {
+				if ((e.target as HTMLElement)?.closest('a')) {
+					e.preventDefault();
+					e.stopPropagation();
+				}
+			},
+			true,
+		);
+	}, []);
 
 	// UI States
 	const [loading, setLoading] = useState(true);
@@ -675,9 +693,12 @@ export default function TemplateDetailsPage() {
 						<div className="flex-1 bg-white relative">
 							{htmlPreview ? (
 								<iframe
+									ref={previewFrameRef}
 									srcDoc={htmlPreview}
 									className="w-full h-full border-none"
 									title="Preview"
+									sandbox="allow-same-origin"
+									onLoad={handlePreviewFrameLoad}
 								/>
 							) : (
 								<div className="h-full flex flex-col items-center justify-center text-slate-300 gap-2 italic text-xs px-12 text-center leading-relaxed">

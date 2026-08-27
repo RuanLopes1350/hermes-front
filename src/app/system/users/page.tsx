@@ -55,6 +55,12 @@ interface User {
 	role: 'super_admin' | 'admin' | 'user';
 	isActive: boolean | null;
 	createdAt: string;
+	// Derivados do presenceService (em memória, no backend) — não vêm do
+	// session.updatedAt do Better Auth. `lastSeenAt` é a última transição de
+	// presença conhecida (conectou ou desconectou), `null` se o usuário nunca
+	// abriu uma conexão SSE desde que a API subiu.
+	online: boolean;
+	lastSeenAt: string | null;
 }
 
 interface AppUser {

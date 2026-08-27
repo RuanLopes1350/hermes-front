@@ -5,6 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
+	--font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+	--font-mono: var(--font-plex-mono), ui-monospace, 'SFMono-Regular', monospace;
+
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 
@@ -54,6 +57,29 @@
 	--color-chart-4: var(--chart-4);
 	--color-chart-5: var(--chart-5);
 
+	/* Paleta de status do dashboard de despacho — validada via skill dataviz
+	   (CVD + contraste) contra as superfícies claro/escuro do app. Escopo
+	   isolado das cores --success/--warning/--destructive globais (essas são
+	   usadas em todo o resto do app; não mexemos nelas aqui). Invariante entre
+	   temas — o próprio conjunto validado já cobre os dois. */
+	--color-status-good: var(--status-good);
+	--color-status-warning: var(--status-warning);
+	--color-status-serious: var(--status-serious);
+	--color-status-critical: var(--status-critical);
+
+	/* Paleta categórica do dashboard (gráficos multi-tenant) — 8 slots, ordem
+	   fixa validada (nunca ciclar). Usada só via JS (opções do ECharts), mas
+	   exposta aqui também como utilities (bg-cat-1..8) para eventuais legendas
+	   em HTML. */
+	--color-cat-1: var(--cat-1);
+	--color-cat-2: var(--cat-2);
+	--color-cat-3: var(--cat-3);
+	--color-cat-4: var(--cat-4);
+	--color-cat-5: var(--cat-5);
+	--color-cat-6: var(--cat-6);
+	--color-cat-7: var(--cat-7);
+	--color-cat-8: var(--cat-8);
+
 	--radius-3xl: calc(var(--radius) * 2.2);
 	--radius-2xl: calc(var(--radius) * 1.8);
 	--radius-xl: calc(var(--radius) * 1.4);
@@ -101,6 +127,22 @@
 		--chart-3: #16a34a;
 		--chart-4: #d97706;
 		--chart-5: #9333ea;
+
+		/* Status (dashboard) — mesmo hex nos dois temas (validado como invariante) */
+		--status-good: #0ca30c;
+		--status-warning: #fab219;
+		--status-serious: #ec835a;
+		--status-critical: #d03b3b;
+
+		/* Categórico (dashboard) — passo claro */
+		--cat-1: #2a78d6;
+		--cat-2: #eb6834;
+		--cat-3: #1baf7a;
+		--cat-4: #eda100;
+		--cat-5: #e87ba4;
+		--cat-6: #008300;
+		--cat-7: #4a3aa7;
+		--cat-8: #e34948;
 
 		--radius: 0.75rem;
 
@@ -152,6 +194,22 @@
 		--chart-3: #059669;
 		--chart-4: #d97706;
 		--chart-5: #7c3aed;
+
+		/* Status (dashboard) — mesmo valor do :root, invariante entre temas */
+		--status-good: #0ca30c;
+		--status-warning: #fab219;
+		--status-serious: #ec835a;
+		--status-critical: #d03b3b;
+
+		/* Categórico (dashboard) — passo escuro */
+		--cat-1: #3987e5;
+		--cat-2: #d95926;
+		--cat-3: #199e70;
+		--cat-4: #c98500;
+		--cat-5: #d55181;
+		--cat-6: #008300;
+		--cat-7: #9085e9;
+		--cat-8: #e66767;
 
 		--sidebar: #020617;
 		--sidebar-foreground: #f8fafc;

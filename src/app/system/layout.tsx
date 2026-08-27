@@ -133,7 +133,7 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 		<div className="min-h-screen bg-background flex flex-col">
 			{/* Top Navigation Bar */}
 			<header className="sticky top-0 z-50 w-full border-b bg-card">
-				<div className="container mx-auto max-w-7xl flex h-16 items-center justify-between px-4 sm:px-6">
+				<div className="container mx-auto max-w-[1600px] flex h-16 items-center justify-between px-4 sm:px-6">
 					{/* Left: Brand & Links */}
 					<div className="flex items-center gap-10">
 						<div id="tour-welcome-logo" className="flex items-center">
@@ -278,7 +278,7 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 
 			{/* Main Content Viewport */}
 			<main className="flex-1 overflow-y-auto">
-				<div className="container mx-auto max-w-7xl px-4 sm:px-6 py-8">{children}</div>
+				<div className="container mx-auto max-w-[1600px] px-4 sm:px-6 py-8">{children}</div>
 			</main>
 		</div>
 	);
