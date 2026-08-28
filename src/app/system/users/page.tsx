@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { notFound } from 'next/navigation';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { Badge } from '@/src/components/ui/badge';
@@ -293,13 +295,13 @@ export default function UsersPage() {
 								<TableBody>
 									{loading && users.length === 0 ? (
 										<TableRow>
-											<TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+											<TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
 												Carregando usuários...
 											</TableCell>
 										</TableRow>
 									) : filteredUsers.length === 0 ? (
 										<TableRow>
-											<TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+											<TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
 												Nenhum usuário encontrado.
 											</TableCell>
 										</TableRow>
@@ -360,7 +362,17 @@ export default function UsersPage() {
 												<TableCell className="text-sm text-muted-foreground">
 													{new Date(user.createdAt).toLocaleDateString('pt-BR')}
 												</TableCell>
-												<TableCell>{/* Todo: adicionar data de ultimo login */}</TableCell>
+												<TableCell className="text-sm text-muted-foreground">
+													{onlineIds.has(user.id) ? (
+														<span className="text-emerald-600 font-medium">Online agora</span>
+													) : user.lastSeenAt ? (
+														format(new Date(user.lastSeenAt), "dd/MM/yy 'às' HH:mm", {
+															locale: ptBR,
+														})
+													) : (
+														'Nunca acessou'
+													)}
+												</TableCell>
 												<TableCell className="text-right">
 													{user.id !== currentUser?.id && (
 														<DropdownMenu>
