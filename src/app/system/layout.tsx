@@ -166,7 +166,7 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 					</div>
 
 					{/* Right: Actions & Profile */}
-					<div className="flex items-center gap-4">
+					<div className="flex items-center gap-2 sm:gap-4 shrink-0">
 						<PresencePanel isAdmin={user?.role === 'super_admin' || user?.role === 'admin'} />
 						<div id="tour-welcome-bell" className="flex">
 							<NotificationBell />
@@ -179,13 +179,13 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 								<Button
 									id="tour-welcome-account"
 									variant="ghost"
-									className="relative h-9 rounded-full pl-2 pr-4 border border-border/50 hover:bg-secondary/50 cursor-pointer"
+									className="relative h-9 rounded-full px-2 sm:pl-2 sm:pr-4 border border-border/50 hover:bg-secondary/50 cursor-pointer"
 								>
 									<div className="flex items-center gap-2">
-										<div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10">
+										<div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 shrink-0">
 											<UserIcon className="h-3 w-3 text-primary" />
 										</div>
-										<span className="text-sm font-medium">
+										<span className="text-sm font-medium hidden sm:inline-block">
 											{user?.name?.split(' ')[0] || 'Conta'}
 										</span>
 									</div>

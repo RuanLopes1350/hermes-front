@@ -17,10 +17,12 @@ export function PresencePanel({ isAdmin }: { isAdmin: boolean }) {
 			<PopoverTrigger asChild>
 				<button
 					type="button"
-					className="flex items-center gap-1.5 rounded-full border border-border/50 px-3 py-1.5 text-sm hover:bg-secondary/50 cursor-pointer"
+					className="flex items-center gap-1.5 rounded-full border border-border/50 px-2 sm:px-3 py-1.5 text-sm hover:bg-secondary/50 cursor-pointer"
 				>
-					<Circle className="h-2 w-2 fill-emerald-500 text-emerald-500" />
-					<span>{onlineUsers.length} online</span>
+					<Circle className="h-2 w-2 fill-emerald-500 text-emerald-500 shrink-0" />
+					<span className="font-medium sm:font-normal">
+						{onlineUsers.length} <span className="hidden sm:inline">online</span>
+					</span>
 				</button>
 			</PopoverTrigger>
 			<PopoverContent align="end" className="w-64">

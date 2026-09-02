@@ -10,7 +10,7 @@ interface UseSSEOptions<T> {
 	onMessage: (data: T) => void;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1350';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.hermes.qa.fslab.dev';
 
 // Hook genérico de consumo de SSE (EventSource) com reconexão via backoff exponencial
 // (máx. 30s) e validação de payload via Zod. `path` é relativo à API (ex.: '/api/dashboard/stream').

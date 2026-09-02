@@ -12,6 +12,8 @@ import {
 	CheckCircle2,
 	UserCog,
 } from 'lucide-react';
+import { MoreHorizontal, Plus, ShieldAlert, ShieldCheck, Mail, KeyRound, Monitor } from 'lucide-react';
+import { ManageSessionsModal } from '@/src/components/manage-sessions-modal';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { notFound } from 'next/navigation';
 import { format } from 'date-fns';
@@ -76,6 +78,7 @@ export default function UsersPage() {
 	const [isActionInProgress, setIsActionInProgress] = useState(false);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+	const [sessionTarget, setSessionTarget] = useState<{ id: string; name: string } | null>(null);
 
 	const { data: session, isPending } = authClient.useSession();
 	const { toast } = useToast();
@@ -224,6 +227,13 @@ export default function UsersPage() {
 
 	return (
 		<>
+			<ManageSessionsModal
+				isOpen={!!sessionTarget}
+				onClose={() => setSessionTarget(null)}
+				userId={sessionTarget?.id || null}
+				userName={sessionTarget?.name}
+			/>
+
 			<ConfirmModal
 				isOpen={!!deleteTarget}
 				onClose={() => setDeleteTarget(null)}
@@ -424,6 +434,14 @@ export default function UsersPage() {
 																</DropdownMenuItem>
 
 																<DropdownMenuSeparator />
+																<DropdownMenuItem
+																	className="cursor-pointer"
+																	onClick={() => setSessionTarget({ id: user.id, name: user.name })}
+																>
+																	<Monitor className="mr-2 h-4 w-4" />
+																	Gerenciar Sessões
+																</DropdownMenuItem>
+
 																<DropdownMenuItem
 																	className="text-destructive focus:text-destructive cursor-pointer"
 																	onClick={() => handleDeleteUser(user.id, user.name)}

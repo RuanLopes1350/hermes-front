@@ -1,6 +1,6 @@
 import { authClient } from './auth-client';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1350';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.hermes.qa.fslab.dev';
 
 // Utilitário de fetch customizado para a Hermes API.
 // Resolve automaticamente a URL base e anexa os headers de autenticação/cookies.

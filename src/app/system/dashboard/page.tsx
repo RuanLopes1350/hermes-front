@@ -603,12 +603,12 @@ export default function DashboardPage() {
 				desc: 'Taxa histórica',
 			},
 			{
-				label: 'Sessões Ativas',
-				value: data.summary.activeSessions || 0,
-				icon: Users,
-				color: 'text-primary',
-				bg: 'bg-primary/10',
-				desc: 'Usuários online (tokens válidos)',
+				label: 'Fila de Processamento',
+				value: (data.queue.waiting + data.queue.active).toLocaleString('pt-BR'),
+				icon: Server,
+				color: 'text-warning',
+				bg: 'bg-warning/10',
+				desc: 'E-mails aguardando envio',
 			},
 			{
 				label: 'Serviços Registrados',
