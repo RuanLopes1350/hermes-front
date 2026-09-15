@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { authClient } from '@/src/lib/auth-client';
-import { Loader2, LogOut, Settings, User as UserIcon, Menu, X, AlertCircle } from 'lucide-react';
+import { Loader2, LogOut, Settings, User as UserIcon, Menu, X, AlertCircle, Users2 } from 'lucide-react';
 import Link from 'next/link';
 import LogoPrimarioClaro from '@/public/hermes-primario.svg';
 import LogoPrimarioEscuro from '@/public/hermes-escuro.svg';
@@ -214,7 +214,7 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 									<>
 										<DropdownMenuItem asChild>
 											<Link href="/system/users" className="cursor-pointer flex w-full">
-												<Settings className="mr-2 h-4 w-4" />
+												<Users2 className="mr-2 h-4 w-4" />
 												<span>Gerenciar Usuários</span>
 											</Link>
 										</DropdownMenuItem>
@@ -224,6 +224,17 @@ export default function SystemLayout({ children }: { children: React.ReactNode }
 												<span>Alertas Globais</span>
 											</Link>
 										</DropdownMenuItem>
+										{user?.role === 'super_admin' && (
+											<DropdownMenuItem asChild>
+												<Link
+													href="/system/settings"
+													className="cursor-pointer flex w-full text-primary font-medium"
+												>
+													<Settings className="mr-2 h-4 w-4" />
+													<span>Configurações do Sistema</span>
+												</Link>
+											</DropdownMenuItem>
+										)}
 									</>
 								)}
 
