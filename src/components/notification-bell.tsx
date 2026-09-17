@@ -1,41 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Bell, Check, Trash2 } from 'lucide-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { Bell, Check } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 import { Popover, PopoverContent, PopoverTrigger } from '@/src/components/ui/popover';
 import { Button } from '@/src/components/ui/button';
-import { ScrollArea } from '@/src/components/ui/scroll-area';
 import { apiFetch } from '@/src/lib/api';
-
-interface Notification {
-	id: string;
-	type: 'error' | 'warning' | 'info' | 'success';
-	title: string;
-	message: string;
-	is_read: boolean;
-	createdAt: string;
-}
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { useNotifications } from '@/src/hooks/use-notifications';
 
 export function NotificationBell() {
 	const queryClient = useQueryClient();
 	const [isOpen, setIsOpen] = useState(false);
 
-	const { data: notifications = [] } = useQuery<Notification[]>({
-		queryKey: ['notifications'],
-		queryFn: async () => {
-			const res = await apiFetch('/api/notifications/my-alerts');
-			if (!res.ok) throw new Error('Falha ao buscar notificações');
-			return res.json();
-		},
-		refetchInterval: 60000, // Poll a cada 1 minuto
-	});
-
+	const notifications = useNotifications(true);
 	const unreadCount = notifications.length;
 
 	const markAsRead = useMutation({

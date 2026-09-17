@@ -1,9 +1,20 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { Loader2, AlertCircle, CheckCircle2, Info, AlertTriangle } from 'lucide-react';
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+	Loader2,
+	AlertCircle,
+	CheckCircle2,
+	Info,
+	AlertTriangle,
+	Send,
+	User,
+	Radio,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { z } from 'zod';
 
 import {
 	Table,
@@ -14,6 +25,7 @@ import {
 	TableRow,
 } from '@/src/components/ui/table';
 import { Badge } from '@/src/components/ui/badge';
+import { Button } from '@/src/components/ui/button';
 import {
 	Card,
 	CardContent,
@@ -22,10 +34,23 @@ import {
 	CardTitle,
 } from '@/src/components/ui/card';
 import { apiFetch } from '@/src/lib/api';
+import { useSSE } from '@/src/hooks/use-sse';
+import { SendNotificationModal } from '@/src/components/send-notification-modal';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const notificationEventSchema = z.object({
+	type: z.literal('new_notification'),
+	notification: z.object({
+		id: z.string(),
+		type: z.enum(['error', 'warning', 'info', 'success']),
+		title: z.string(),
+		message: z.string(),
+	}),
+});
 
 export default function AdminAlertsPage() {
+	const queryClient = useQueryClient();
+	const [isSendModalOpen, setIsSendModalOpen] = useState(false);
+
 	const {
 		data: alerts = [],
 		isLoading,
@@ -36,6 +61,14 @@ export default function AdminAlertsPage() {
 			const res = await apiFetch('/api/notifications/admin?limit=100');
 			if (!res.ok) throw new Error('Falha ao buscar alertas globais');
 			return res.json();
+		},
+	});
+
+	// SSE: atualiza a lista de alertas em tempo real quando uma nova notificação é criada
+	useSSE('/api/notifications/stream', notificationEventSchema, {
+		enabled: true,
+		onMessage: () => {
+			queryClient.invalidateQueries({ queryKey: ['admin-alerts'] });
 		},
 	});
 
@@ -64,21 +97,24 @@ export default function AdminAlertsPage() {
 			case 'error':
 				return {
 					variant: 'outline' as const,
-					className: 'bg-destructive/10 text-destructive border-destructive/20 cursor-default hover:bg-destructive/10',
+					className:
+						'bg-destructive/10 text-destructive border-destructive/20 cursor-default hover:bg-destructive/10',
 					icon: AlertCircle,
 					label: 'Erro Crítico',
 				};
 			case 'warning':
 				return {
 					variant: 'outline' as const,
-					className: 'bg-amber-500/10 text-amber-600 border-amber-500/20 cursor-default hover:bg-amber-500/10',
+					className:
+						'bg-amber-500/10 text-amber-600 border-amber-500/20 cursor-default hover:bg-amber-500/10',
 					icon: AlertTriangle,
 					label: 'Aviso',
 				};
 			case 'success':
 				return {
 					variant: 'outline' as const,
-					className: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 cursor-default hover:bg-emerald-500/10',
+					className:
+						'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 cursor-default hover:bg-emerald-500/10',
 					icon: CheckCircle2,
 					label: 'Sucesso',
 				};
@@ -93,71 +129,113 @@ export default function AdminAlertsPage() {
 	};
 
 	return (
-		<div className="space-y-6 animate-in fade-in duration-300 ease-out">
-			<div>
-				<h1 className="text-3xl font-bold tracking-tight">Alertas Globais</h1>
-				<p className="text-muted-foreground">
-					Monitoramento de eventos em todo o ecossistema Hermes.
-				</p>
-			</div>
+		<>
+			<SendNotificationModal
+				isOpen={isSendModalOpen}
+				onClose={() => setIsSendModalOpen(false)}
+				onSuccess={() => queryClient.invalidateQueries({ queryKey: ['admin-alerts'] })}
+			/>
 
-			<Card className="shadow-sm">
-				<CardHeader>
-					<CardTitle>Histórico de Eventos</CardTitle>
-					<CardDescription>
-						Visão geral de todos os erros de webhook, rotações automatizadas e avisos do sistema.
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<div className="rounded-md border">
-						<Table>
-							<TableHeader>
-								<TableRow>
-									<TableHead>Status</TableHead>
-									<TableHead>Título</TableHead>
-									<TableHead className="hidden md:table-cell">Mensagem</TableHead>
-									<TableHead className="text-right">Data</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{alerts.length === 0 ? (
-									<TableRow>
-										<TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
-											Nenhum alerta registrado no sistema.
-										</TableCell>
-									</TableRow>
-								) : (
-									alerts.map((alert: any) => {
-										const { variant, className, icon: Icon, label } = getBadgeProps(alert.type);
-										return (
-											<TableRow key={alert.id}>
-												<TableCell>
-													<Badge variant={variant} className={className}>
-														<Icon className="mr-1 h-3 w-3" />
-														{label}
-													</Badge>
-												</TableCell>
-												<TableCell className="font-medium">{alert.title}</TableCell>
-												<TableCell
-													className="hidden md:table-cell max-w-[400px] truncate text-muted-foreground"
-													title={alert.message}
-												>
-													{alert.message}
-												</TableCell>
-												<TableCell className="text-right text-sm text-muted-foreground">
-													{format(new Date(alert.createdAt), "dd/MM/yy 'às' HH:mm", {
-														locale: ptBR,
-													})}
-												</TableCell>
-											</TableRow>
-										);
-									})
-								)}
-							</TableBody>
-						</Table>
+			<div className="space-y-6 animate-in fade-in duration-300 ease-out">
+				{/* Cabeçalho com o botão de Ação */}
+				<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+					<div>
+						<h1 className="text-3xl font-bold tracking-tight">Alertas Globais</h1>
+						<p className="text-muted-foreground">
+							Monitoramento de eventos e envio de comunicados em todo o ecossistema Hermes.
+						</p>
 					</div>
-				</CardContent>
-			</Card>
-		</div>
+					<Button
+						onClick={() => setIsSendModalOpen(true)}
+						className="cursor-pointer gap-2 shrink-0 self-start sm:self-auto"
+					>
+						<Send className="h-4 w-4" />
+						Enviar Notificação
+					</Button>
+				</div>
+
+				<Card className="shadow-sm">
+					<CardHeader>
+						<CardTitle>Histórico de Eventos</CardTitle>
+						<CardDescription>
+							Visão geral de todos os erros de webhook, rotações automatizadas e avisos
+							administrativos.
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<div className="rounded-md border">
+							<Table>
+								<TableHeader>
+									<TableRow>
+										<TableHead>Status</TableHead>
+										<TableHead>Destinatário</TableHead>
+										<TableHead>Título</TableHead>
+										<TableHead className="hidden md:table-cell">Mensagem</TableHead>
+										<TableHead className="text-right">Data</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									{alerts.length === 0 ? (
+										<TableRow>
+											<TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+												Nenhum alerta registrado no sistema.
+											</TableCell>
+										</TableRow>
+									) : (
+										alerts.map((alert: any) => {
+											const { variant, className, icon: Icon, label } = getBadgeProps(alert.type);
+											return (
+												<TableRow key={alert.id}>
+													<TableCell>
+														<Badge variant={variant} className={className}>
+															<Icon className="mr-1 h-3 w-3" />
+															{label}
+														</Badge>
+													</TableCell>
+													<TableCell>
+														{alert.user_id ? (
+															<Badge
+																variant="outline"
+																className="flex items-center gap-1.5 w-fit font-normal text-xs bg-muted/40"
+															>
+																<User className="h-3 w-3 text-muted-foreground" />
+																<span className="font-medium text-foreground">
+																	{alert.targetUserName || 'Usuário'}
+																</span>
+															</Badge>
+														) : (
+															<Badge
+																variant="secondary"
+																className="flex items-center gap-1.5 w-fit font-medium text-xs bg-primary/10 text-primary border border-primary/20"
+															>
+																<Radio className="h-3 w-3 text-primary animate-pulse" />
+																Todos (Broadcast)
+															</Badge>
+														)}
+													</TableCell>
+
+													<TableCell className="font-medium">{alert.title}</TableCell>
+													<TableCell
+														className="hidden md:table-cell max-w-[400px] truncate text-muted-foreground"
+														title={alert.message}
+													>
+														{alert.message}
+													</TableCell>
+													<TableCell className="text-right text-sm text-muted-foreground">
+														{format(new Date(alert.createdAt), "dd/MM/yy 'às' HH:mm", {
+															locale: ptBR,
+														})}
+													</TableCell>
+												</TableRow>
+											);
+										})
+									)}
+								</TableBody>
+							</Table>
+						</div>
+					</CardContent>
+				</Card>
+			</div>
+		</>
 	);
 }
