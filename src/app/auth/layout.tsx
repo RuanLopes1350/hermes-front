@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { Documentacao, Tutorial, Privacidade, Version } from '@/src/constants/links';
 import { ThemeToggle } from '@/src/components/theme-toggle';
 import Link from 'next/link';
-import LogoEmpilhadoClaro from '@/public/hermes-primario-empilhado.svg'
-import LogoEmpilhadoEscuro from '@/public/hermes-escuro-empilhado.svg'
+import LogoEmpilhadoClaro from '@/public/hermes-primario-empilhado.svg';
+import LogoEmpilhadoEscuro from '@/public/hermes-escuro-empilhado.svg';
 
 export const metadata: Metadata = {
 	title: 'Hermes | Autenticação',
@@ -38,7 +38,9 @@ export default function AuthLayout({
 						Documentação API
 					</a>
 				</div>
-				<p>Hermes v{Version} · © {new Date().getFullYear()} Hermes. Todos os direitos reservados.</p>
+				<p>
+					Hermes v{Version} · © {new Date().getFullYear()} Hermes. Todos os direitos reservados.
+				</p>
 			</div>
 		</main>
 	);

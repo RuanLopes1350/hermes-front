@@ -34,7 +34,8 @@ export default function ProfilePage() {
 			element: '#tour-profile-personal',
 			popover: {
 				title: 'Dados Pessoais',
-				description: 'Atualize seu nome de exibição aqui. O e-mail é imutável por ser sua identidade de login.',
+				description:
+					'Atualize seu nome de exibição aqui. O e-mail é imutável por ser sua identidade de login.',
 				side: 'bottom',
 			},
 		},
@@ -42,7 +43,8 @@ export default function ProfilePage() {
 			element: '#tour-profile-security',
 			popover: {
 				title: 'Segurança',
-				description: 'Troque sua senha por aqui. Ao salvar, todas as outras sessões ativas são revogadas automaticamente.',
+				description:
+					'Troque sua senha por aqui. Ao salvar, todas as outras sessões ativas são revogadas automaticamente.',
 				side: 'top',
 			},
 		},
@@ -159,7 +161,11 @@ export default function ProfilePage() {
 								</div>
 							</div>
 							<div className="flex justify-end pt-2">
-								<Button onClick={handleSaveProfile} disabled={isSavingProfile || !name.trim()} className="cursor-pointer">
+								<Button
+									onClick={handleSaveProfile}
+									disabled={isSavingProfile || !name.trim()}
+									className="cursor-pointer"
+								>
 									{isSavingProfile && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Salvar
 									Alterações
 								</Button>

@@ -12,7 +12,15 @@ import {
 	CheckCircle2,
 	UserCog,
 } from 'lucide-react';
-import { MoreHorizontal, Plus, ShieldAlert, ShieldCheck, Mail, KeyRound, Monitor } from 'lucide-react';
+import {
+	MoreHorizontal,
+	Plus,
+	ShieldAlert,
+	ShieldCheck,
+	Mail,
+	KeyRound,
+	Monitor,
+} from 'lucide-react';
 import { ManageSessionsModal } from '@/src/components/manage-sessions-modal';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { notFound } from 'next/navigation';

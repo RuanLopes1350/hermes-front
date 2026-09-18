@@ -18,7 +18,14 @@ import {
 	ExternalLink,
 	RefreshCw,
 } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/src/components/ui/card';
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+	CardFooter,
+} from '@/src/components/ui/card';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { Badge } from '@/src/components/ui/badge';
@@ -174,7 +181,11 @@ export default function SettingsPage() {
 	// Envia E-mail de Teste
 	const handleSendTestEmail = async () => {
 		if (!testEmailAddress) {
-			toast({ variant: 'destructive', title: 'Erro', description: 'Informe um e-mail para o teste.' });
+			toast({
+				variant: 'destructive',
+				title: 'Erro',
+				description: 'Informe um e-mail para o teste.',
+			});
 			return;
 		}
 		setTestingMail(true);
@@ -189,7 +200,11 @@ export default function SettingsPage() {
 			toast({ title: 'Sucesso!', description: json.message });
 			await loadSettings();
 		} catch (error: any) {
-			toast({ variant: 'destructive', title: 'Falha no Envio de Teste', description: error.message });
+			toast({
+				variant: 'destructive',
+				title: 'Falha no Envio de Teste',
+				description: error.message,
+			});
 		} finally {
 			setTestingMail(false);
 		}
@@ -234,7 +249,10 @@ export default function SettingsPage() {
 						Gerencie o provedor de e-mail institucional e as regras de segurança da plataforma.
 					</p>
 				</div>
-				<Badge variant="outline" className="w-fit px-3 py-1 bg-primary/5 text-primary border-primary/20">
+				<Badge
+					variant="outline"
+					className="w-fit px-3 py-1 bg-primary/5 text-primary border-primary/20"
+				>
 					Exclusivo Super Admin
 				</Badge>
 			</div>
@@ -273,7 +291,8 @@ export default function SettingsPage() {
 										Provedor de E-mails do Sistema
 									</CardTitle>
 									<CardDescription>
-										Esta credencial é usada exclusivamente pelo Hermes para enviar links de reset de senha e alertas internos.
+										Esta credencial é usada exclusivamente pelo Hermes para enviar links de reset de
+										senha e alertas internos.
 									</CardDescription>
 								</div>
 								{mailConfig.isConfigured ? (
@@ -351,7 +370,9 @@ export default function SettingsPage() {
 												<label className="text-sm font-medium">Host SMTP</label>
 												<Input
 													value={mailConfig.smtpHost}
-													onChange={(e) => setMailConfig({ ...mailConfig, smtpHost: e.target.value })}
+													onChange={(e) =>
+														setMailConfig({ ...mailConfig, smtpHost: e.target.value })
+													}
 													placeholder="smtp.empresa.com"
 													required
 												/>
@@ -361,7 +382,9 @@ export default function SettingsPage() {
 												<Input
 													type="number"
 													value={mailConfig.smtpPort}
-													onChange={(e) => setMailConfig({ ...mailConfig, smtpPort: Number(e.target.value) })}
+													onChange={(e) =>
+														setMailConfig({ ...mailConfig, smtpPort: Number(e.target.value) })
+													}
 													placeholder="587"
 													required
 												/>
@@ -380,13 +403,22 @@ export default function SettingsPage() {
 											</div>
 											<div className="space-y-1.5">
 												<label className="text-sm font-medium">
-													Senha SMTP {mailConfig.hasPasskey && <span className="text-xs text-muted-foreground font-normal">(deixe em branco para manter a atual)</span>}
+													Senha SMTP{' '}
+													{mailConfig.hasPasskey && (
+														<span className="text-xs text-muted-foreground font-normal">
+															(deixe em branco para manter a atual)
+														</span>
+													)}
 												</label>
 												<Input
 													type="password"
 													value={mailConfig.passkey}
-													onChange={(e) => setMailConfig({ ...mailConfig, passkey: e.target.value })}
-													placeholder={mailConfig.hasPasskey ? '•••••••• (salva)' : 'Digite a senha SMTP'}
+													onChange={(e) =>
+														setMailConfig({ ...mailConfig, passkey: e.target.value })
+													}
+													placeholder={
+														mailConfig.hasPasskey ? '•••••••• (salva)' : 'Digite a senha SMTP'
+													}
 													required={!mailConfig.hasPasskey}
 												/>
 											</div>
@@ -396,10 +428,16 @@ export default function SettingsPage() {
 											<Checkbox
 												id="smtpSecure"
 												checked={mailConfig.smtpSecure}
-												onCheckedChange={(checked) => setMailConfig({ ...mailConfig, smtpSecure: !!checked })}
+												onCheckedChange={(checked) =>
+													setMailConfig({ ...mailConfig, smtpSecure: !!checked })
+												}
 											/>
-											<label htmlFor="smtpSecure" className="text-sm text-muted-foreground cursor-pointer">
-												Usar Conexão Segura SSL/TLS (marque para portas 465, desmarque para STARTTLS 587)
+											<label
+												htmlFor="smtpSecure"
+												className="text-sm text-muted-foreground cursor-pointer"
+											>
+												Usar Conexão Segura SSL/TLS (marque para portas 465, desmarque para STARTTLS
+												587)
 											</label>
 										</div>
 									</div>
@@ -409,10 +447,13 @@ export default function SettingsPage() {
 								{mailConfig.provider === 'google_oauth2' && (
 									<div className="space-y-4 border-t pt-4">
 										<h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
-											<Lock className="h-4 w-4 text-muted-foreground" /> Credenciais Google Cloud Console
+											<Lock className="h-4 w-4 text-muted-foreground" /> Credenciais Google Cloud
+											Console
 										</h4>
 										<p className="text-xs text-muted-foreground">
-											Se os campos abaixo forem deixados em branco, o sistema usará as variáveis de ambiente globais (<code className="bg-muted px-1 py-0.5 rounded">GOOGLE_CLIENT_ID</code>).
+											Se os campos abaixo forem deixados em branco, o sistema usará as variáveis de
+											ambiente globais (
+											<code className="bg-muted px-1 py-0.5 rounded">GOOGLE_CLIENT_ID</code>).
 										</p>
 
 										<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -420,19 +461,32 @@ export default function SettingsPage() {
 												<label className="text-sm font-medium">Client ID</label>
 												<Input
 													value={mailConfig.clientId}
-													onChange={(e) => setMailConfig({ ...mailConfig, clientId: e.target.value })}
+													onChange={(e) =>
+														setMailConfig({ ...mailConfig, clientId: e.target.value })
+													}
 													placeholder="exemplo.apps.googleusercontent.com"
 												/>
 											</div>
 											<div className="space-y-1.5">
 												<label className="text-sm font-medium">
-													Client Secret {mailConfig.hasClientSecret && <span className="text-xs text-muted-foreground font-normal">(salvo)</span>}
+													Client Secret{' '}
+													{mailConfig.hasClientSecret && (
+														<span className="text-xs text-muted-foreground font-normal">
+															(salvo)
+														</span>
+													)}
 												</label>
 												<Input
 													type="password"
 													value={mailConfig.clientSecret}
-													onChange={(e) => setMailConfig({ ...mailConfig, clientSecret: e.target.value })}
-													placeholder={mailConfig.hasClientSecret ? '•••••••• (salvo)' : 'Client Secret do Google'}
+													onChange={(e) =>
+														setMailConfig({ ...mailConfig, clientSecret: e.target.value })
+													}
+													placeholder={
+														mailConfig.hasClientSecret
+															? '•••••••• (salvo)'
+															: 'Client Secret do Google'
+													}
 												/>
 											</div>
 										</div>
@@ -454,15 +508,25 @@ export default function SettingsPage() {
 													className="gap-2 cursor-pointer shrink-0"
 												>
 													<ExternalLink className="h-4 w-4" />
-													{mailConfig.hasRefreshToken ? 'Reconectar Google' : 'Conectar Conta Google'}
+													{mailConfig.hasRefreshToken
+														? 'Reconectar Google'
+														: 'Conectar Conta Google'}
 												</Button>
 											</div>
 										</div>
 									</div>
 								)}
 
-								<Button type="submit" disabled={savingMail} className="w-full sm:w-auto cursor-pointer gap-2">
-									{savingMail ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+								<Button
+									type="submit"
+									disabled={savingMail}
+									className="w-full sm:w-auto cursor-pointer gap-2"
+								>
+									{savingMail ? (
+										<Loader2 className="h-4 w-4 animate-spin" />
+									) : (
+										<Save className="h-4 w-4" />
+									)}
 									Salvar Configurações de E-mail
 								</Button>
 							</form>
@@ -476,10 +540,12 @@ export default function SettingsPage() {
 								<Send className="h-4 w-4 text-primary" /> Testar Envio em Tempo Real
 							</CardTitle>
 							<CardDescription>
-								Dispare um e-mail de teste para garantir que o remetente está autenticado e as portas liberadas.
+								Dispare um e-mail de teste para garantir que o remetente está autenticado e as
+								portas liberadas.
 								{mailConfig.lastTestedAt && (
 									<span className="block mt-1 text-xs text-success font-medium">
-										Último teste bem-sucedido: {new Date(mailConfig.lastTestedAt).toLocaleString('pt-BR')}
+										Último teste bem-sucedido:{' '}
+										{new Date(mailConfig.lastTestedAt).toLocaleString('pt-BR')}
 									</span>
 								)}
 							</CardDescription>
@@ -535,7 +601,9 @@ export default function SettingsPage() {
 					<CardContent>
 						<form onSubmit={handleSaveSecurity} className="space-y-6">
 							<div className="space-y-1.5 max-w-md">
-								<label className="text-sm font-medium">Validade do Link de Reset de Senha (minutos)</label>
+								<label className="text-sm font-medium">
+									Validade do Link de Reset de Senha (minutos)
+								</label>
 								<Input
 									type="number"
 									min={5}
@@ -550,7 +618,8 @@ export default function SettingsPage() {
 									required
 								/>
 								<p className="text-xs text-muted-foreground">
-									Tempo limite em minutos para o usuário utilizar o link recebido no e-mail (Padrão: 60 minutos).
+									Tempo limite em minutos para o usuário utilizar o link recebido no e-mail (Padrão:
+									60 minutos).
 								</p>
 							</div>
 
@@ -569,14 +638,19 @@ export default function SettingsPage() {
 											Permitir Cadastro Público de Usuários
 										</label>
 										<p className="text-xs text-muted-foreground">
-											Se desativado, o formulário de cadastro na tela de login será bloqueado, permitindo que apenas administradores criem novas contas.
+											Se desativado, o formulário de cadastro na tela de login será bloqueado,
+											permitindo que apenas administradores criem novas contas.
 										</p>
 									</div>
 								</div>
 							</div>
 
 							<Button type="submit" disabled={savingSecurity} className="cursor-pointer gap-2">
-								{savingSecurity ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+								{savingSecurity ? (
+									<Loader2 className="h-4 w-4 animate-spin" />
+								) : (
+									<Save className="h-4 w-4" />
+								)}
 								Salvar Configurações de Segurança
 							</Button>
 						</form>

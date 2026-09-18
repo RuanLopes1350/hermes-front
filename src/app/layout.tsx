@@ -51,7 +51,8 @@ export const metadata: Metadata = {
 	twitter: {
 		card: 'summary_large_image',
 		title: 'Hermes | Transactional Email Gateway',
-		description: 'O Gateway open-source definitivo para gerenciar seus e-mails transacionais com SMTP e OAuth2.',
+		description:
+			'O Gateway open-source definitivo para gerenciar seus e-mails transacionais com SMTP e OAuth2.',
 		creator: '@ruanlopes1350',
 	},
 	icons: {

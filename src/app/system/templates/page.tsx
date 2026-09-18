@@ -147,7 +147,8 @@ export default function TemplatesPage() {
 			element: '#tour-templates-new',
 			popover: {
 				title: 'Novo Template',
-				description: 'Vamos criar um template de exemplo. Clique em Próximo para abrir o formulário.',
+				description:
+					'Vamos criar um template de exemplo. Clique em Próximo para abrir o formulário.',
 				side: 'bottom',
 				onNextClick: () => {
 					setShowCreateModal(true);
@@ -161,7 +162,8 @@ export default function TemplatesPage() {
 			waitForElement: 1000,
 			popover: {
 				title: 'Nome e Escopo',
-				description: 'Dê um nome ao template e escolha se ele é "Global" (disponível para todos os serviços) ou exclusivo de um serviço específico.',
+				description:
+					'Dê um nome ao template e escolha se ele é "Global" (disponível para todos os serviços) ou exclusivo de um serviço específico.',
 				side: 'top',
 				onNextClick: () => {
 					setShowCreateModal(false);
@@ -181,7 +183,8 @@ export default function TemplatesPage() {
 			element: '#tour-templates-grid',
 			popover: {
 				title: 'Seus Templates',
-				description: 'Templates já criados aparecem aqui. Clique em "Editar" para abrir o editor MJML com preview ao vivo.',
+				description:
+					'Templates já criados aparecem aqui. Clique em "Editar" para abrir o editor MJML com preview ao vivo.',
 				side: 'top',
 			},
 		},
@@ -215,7 +218,10 @@ export default function TemplatesPage() {
 					<Loader2 className="h-8 w-8 animate-spin text-primary" />
 				</div>
 			) : templates.length === 0 ? (
-				<div id="tour-templates-grid" className="flex flex-col items-center justify-center h-64 border border-dashed rounded-xl bg-card text-center p-6">
+				<div
+					id="tour-templates-grid"
+					className="flex flex-col items-center justify-center h-64 border border-dashed rounded-xl bg-card text-center p-6"
+				>
 					<Layout className="h-10 w-10 text-muted-foreground mb-4" />
 					<h3 className="text-lg font-semibold">Nenhum Template</h3>
 					<p className="text-sm text-muted-foreground mt-2 max-w-sm">
@@ -226,9 +232,15 @@ export default function TemplatesPage() {
 					</Button>
 				</div>
 			) : (
-				<div id="tour-templates-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+				<div
+					id="tour-templates-grid"
+					className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+				>
 					{templates.map((tmpl) => (
-						<Card key={tmpl.id} className="flex flex-col shadow-sm hover:shadow-md transition-shadow">
+						<Card
+							key={tmpl.id}
+							className="flex flex-col shadow-sm hover:shadow-md transition-shadow"
+						>
 							<CardHeader className="pb-4">
 								<div className="flex justify-between items-start mb-2">
 									<div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center text-primary">
@@ -239,7 +251,10 @@ export default function TemplatesPage() {
 											<Globe className="h-3 w-3" /> Global
 										</Badge>
 									) : (
-										<Badge variant="secondary" className="hover:bg-secondary flex items-center gap-1 cursor-default">
+										<Badge
+											variant="secondary"
+											className="hover:bg-secondary flex items-center gap-1 cursor-default"
+										>
 											<Server className="h-3 w-3" />{' '}
 											{services.find((s) => s.id === tmpl.service_id)?.name || 'Específico'}
 										</Badge>

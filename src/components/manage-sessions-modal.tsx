@@ -19,7 +19,12 @@ interface ManageSessionsModalProps {
 	userName?: string;
 }
 
-export function ManageSessionsModal({ isOpen, onClose, userId, userName }: ManageSessionsModalProps) {
+export function ManageSessionsModal({
+	isOpen,
+	onClose,
+	userId,
+	userName,
+}: ManageSessionsModalProps) {
 	const [sessions, setSessions] = useState<any[]>([]);
 	const [loading, setLoading] = useState(false);
 	const { toast } = useToast();
@@ -42,7 +47,11 @@ export function ManageSessionsModal({ isOpen, onClose, userId, userName }: Manag
 			}
 		} catch (error) {
 			console.error(error);
-			toast({ variant: 'destructive', title: 'Erro', description: 'Erro ao buscar sessões do usuário.' });
+			toast({
+				variant: 'destructive',
+				title: 'Erro',
+				description: 'Erro ao buscar sessões do usuário.',
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -68,7 +77,8 @@ export function ManageSessionsModal({ isOpen, onClose, userId, userName }: Manag
 				<DialogHeader>
 					<DialogTitle>Sessões Ativas</DialogTitle>
 					<DialogDescription>
-						Gerenciando acessos de <strong className="text-foreground">{userName || 'Usuário'}</strong>
+						Gerenciando acessos de{' '}
+						<strong className="text-foreground">{userName || 'Usuário'}</strong>
 					</DialogDescription>
 				</DialogHeader>
 
@@ -87,14 +97,24 @@ export function ManageSessionsModal({ isOpen, onClose, userId, userName }: Manag
 								const isMobile = sess.userAgent?.toLowerCase().includes('mobile');
 
 								return (
-									<div key={sess.token} className="flex items-center justify-between p-3 bg-muted/30 border rounded-lg">
+									<div
+										key={sess.token}
+										className="flex items-center justify-between p-3 bg-muted/30 border rounded-lg"
+									>
 										<div className="flex items-center gap-3">
-											{isMobile ? <Smartphone className="h-5 w-5 text-muted-foreground" /> : <Monitor className="h-5 w-5 text-muted-foreground" />}
+											{isMobile ? (
+												<Smartphone className="h-5 w-5 text-muted-foreground" />
+											) : (
+												<Monitor className="h-5 w-5 text-muted-foreground" />
+											)}
 											<div>
 												<p className="text-sm font-medium flex items-center gap-2">
 													{sess.ipAddress}
 												</p>
-												<p className="text-xs text-muted-foreground mt-0.5 line-clamp-1" title={sess.userAgent}>
+												<p
+													className="text-xs text-muted-foreground mt-0.5 line-clamp-1"
+													title={sess.userAgent}
+												>
 													{sess.userAgent}
 												</p>
 												<p className="text-xs text-muted-foreground mt-1">
@@ -102,8 +122,14 @@ export function ManageSessionsModal({ isOpen, onClose, userId, userName }: Manag
 												</p>
 											</div>
 										</div>
-										
-										<Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleRevoke(sess.token)} title="Revogar acesso">
+
+										<Button
+											variant="ghost"
+											size="icon"
+											className="text-destructive hover:text-destructive hover:bg-destructive/10"
+											onClick={() => handleRevoke(sess.token)}
+											title="Revogar acesso"
+										>
 											<Trash2 className="h-4 w-4" />
 										</Button>
 									</div>

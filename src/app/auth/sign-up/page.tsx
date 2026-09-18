@@ -85,7 +85,9 @@ export default function SignUpPage() {
 			<Card className="shadow-md ring-1 ring-border/60">
 				<CardHeader className="space-y-1 text-center pb-2">
 					<CardTitle className="text-2xl font-semibold tracking-tight">Criar Conta</CardTitle>
-					<CardDescription>Junte-se ao Hermes e gerencie seus e-mails transacionais.</CardDescription>
+					<CardDescription>
+						Junte-se ao Hermes e gerencie seus e-mails transacionais.
+					</CardDescription>
 				</CardHeader>
 
 				<CardContent className="pt-4">
@@ -210,11 +212,23 @@ export default function SignUpPage() {
 					</div>
 
 					<div className="grid grid-cols-2 gap-3">
-						<Button variant="outline" type="button" onClick={handleGitHubSignUp} disabled={loading} className="h-10">
+						<Button
+							variant="outline"
+							type="button"
+							onClick={handleGitHubSignUp}
+							disabled={loading}
+							className="h-10"
+						>
 							<FaGithub className="mr-2 h-4 w-4" />
 							GitHub
 						</Button>
-						<Button variant="outline" type="button" onClick={handleGoogleSignUp} disabled={loading} className="h-10">
+						<Button
+							variant="outline"
+							type="button"
+							onClick={handleGoogleSignUp}
+							disabled={loading}
+							className="h-10"
+						>
 							<FaGoogle className="mr-2 h-4 w-4" />
 							Google
 						</Button>

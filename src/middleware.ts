@@ -22,8 +22,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-	matcher: [
-		'/system/:path*',
-		'/auth/:path*',
-	],
+	matcher: ['/system/:path*', '/auth/:path*'],
 };

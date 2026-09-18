@@ -64,7 +64,12 @@ export default function LandingPage() {
 					</div>
 					<div className="flex items-center gap-2">
 						<Button variant="ghost" size="icon" asChild>
-							<a href={GITHUB_ORG_URL} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+							<a
+								href={GITHUB_ORG_URL}
+								target="_blank"
+								rel="noopener noreferrer"
+								aria-label="GitHub"
+							>
 								<FaGithub className="h-4 w-4" />
 							</a>
 						</Button>
@@ -86,8 +91,8 @@ export default function LandingPage() {
 						Gateway de e-mails transacionais, sem dor de cabeça.
 					</h1>
 					<p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10 text-balance">
-						Gerencie credenciais SMTP e OAuth2, templates em MJML e audite cada envio em tempo real —
-						tudo em um painel multitenant com rotação automática de chaves.
+						Gerencie credenciais SMTP e OAuth2, templates em MJML e audite cada envio em tempo real
+						— tudo em um painel multitenant com rotação automática de chaves.
 					</p>
 					<div className="flex items-center justify-center gap-3 flex-wrap">
 						<Button size="lg" asChild>
@@ -112,7 +117,9 @@ export default function LandingPage() {
 							<Card key={feature.title} className="p-6">
 								<feature.icon className="h-6 w-6 text-primary mb-4" />
 								<h3 className="font-semibold text-foreground mb-2">{feature.title}</h3>
-								<p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
+								<p className="text-sm text-muted-foreground leading-relaxed">
+									{feature.description}
+								</p>
 							</Card>
 						))}
 					</div>
@@ -145,8 +152,8 @@ export default function LandingPage() {
 						<div>
 							<h3 className="font-semibold text-foreground mb-3">3. Envie um e-mail</h3>
 							<p className="text-sm text-muted-foreground mb-3">
-								A interface encadeada (Builder Pattern) cobre templates MJML com variáveis dinâmicas,
-								envio agendado e bulk.
+								A interface encadeada (Builder Pattern) cobre templates MJML com variáveis
+								dinâmicas, envio agendado e bulk.
 							</p>
 							<CodeBlock code={quickstartSend} lang="typescript" />
 						</div>
@@ -167,13 +174,28 @@ export default function LandingPage() {
 				<div className="container mx-auto max-w-6xl px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
 					<span>Hermes — Gateway de e-mails transacionais open-source.</span>
 					<div className="flex items-center gap-4">
-						<a href={`${GITHUB_ORG_URL}/hermes-api`} target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+						<a
+							href={`${GITHUB_ORG_URL}/hermes-api`}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="hover:text-foreground"
+						>
 							hermes-api
 						</a>
-						<a href={`${GITHUB_ORG_URL}/hermes-front`} target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+						<a
+							href={`${GITHUB_ORG_URL}/hermes-front`}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="hover:text-foreground"
+						>
 							hermes-front
 						</a>
-						<a href={`${GITHUB_ORG_URL}/hermes-client`} target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+						<a
+							href={`${GITHUB_ORG_URL}/hermes-client`}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="hover:text-foreground"
+						>
 							hermes-client
 						</a>
 					</div>

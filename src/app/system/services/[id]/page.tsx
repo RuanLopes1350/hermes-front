@@ -469,7 +469,8 @@ export default function ServiceDetailsPage() {
 			element: '#tour-settings',
 			popover: {
 				title: 'Configurações do Projeto',
-				description: 'Edite o nome, adicione BCC de auditoria e configure a rotação automática das suas chaves de API.',
+				description:
+					'Edite o nome, adicione BCC de auditoria e configure a rotação automática das suas chaves de API.',
 				side: 'bottom',
 			},
 		},
@@ -477,7 +478,8 @@ export default function ServiceDetailsPage() {
 			element: '#tour-credentials',
 			popover: {
 				title: 'Credenciais e Conexões',
-				description: 'Crie ou edite credenciais SMTP (plain) e OAuth2. Aqui você também pode ativar/desativar as API Keys de envio.',
+				description:
+					'Crie ou edite credenciais SMTP (plain) e OAuth2. Aqui você também pode ativar/desativar as API Keys de envio.',
 				side: 'left',
 			},
 		},
@@ -501,7 +503,8 @@ export default function ServiceDetailsPage() {
 			waitForElement: 1000,
 			popover: {
 				title: 'Tipos de Conexão',
-				description: 'Você pode escolher conectar via SMTP tradicional ou usando a autorização segura do Google OAuth2. Clique em próximo para fechar.',
+				description:
+					'Você pode escolher conectar via SMTP tradicional ou usando a autorização segura do Google OAuth2. Clique em próximo para fechar.',
 				side: 'top',
 				onNextClick: () => {
 					closeModal();
@@ -545,7 +548,9 @@ export default function ServiceDetailsPage() {
 					</div>
 				</div>
 				{/* TODO: Add a proper type definition for session user when better-auth client is fully typed. */}
-				{(isOwner || ((session?.user as any)?.role === 'super_admin' || (session?.user as any)?.role === 'admin')) && (
+				{(isOwner ||
+					(session?.user as any)?.role === 'super_admin' ||
+					(session?.user as any)?.role === 'admin') && (
 					<div className="flex items-center gap-2">
 						<Button
 							variant="outline"
@@ -751,7 +756,11 @@ export default function ServiceDetailsPage() {
 									Conexões e chaves de API vinculadas a este projeto.
 								</CardDescription>
 							</div>
-							<Button id="tour-new-connection-btn" onClick={() => setShowConnModal(true)} className="cursor-pointer">
+							<Button
+								id="tour-new-connection-btn"
+								onClick={() => setShowConnModal(true)}
+								className="cursor-pointer"
+							>
 								<Plus className="mr-2 h-4 w-4" /> Nova Conexão
 							</Button>
 						</CardHeader>
@@ -786,10 +795,7 @@ export default function ServiceDetailsPage() {
 															<AlertCircle className="mr-1 h-3 w-3" /> Requer Autorização
 														</Badge>
 													) : (
-														<Badge
-															variant="secondary"
-															className="bg-emerald-100 text-emerald-800"
-														>
+														<Badge variant="secondary" className="bg-emerald-100 text-emerald-800">
 															<Check className="mr-1 h-3 w-3" /> Pronto
 														</Badge>
 													)}
@@ -1145,7 +1151,9 @@ export default function ServiceDetailsPage() {
 									<p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-widest">
 										Token de Acesso (API Key)
 									</p>
-									<code className="text-sm break-all text-foreground font-mono">{generatedKey}</code>
+									<code className="text-sm break-all text-foreground font-mono">
+										{generatedKey}
+									</code>
 								</div>
 								<div className="flex justify-end mt-3">
 									<Button

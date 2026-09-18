@@ -3,7 +3,16 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { authClient } from '@/src/lib/auth-client';
-import { Loader2, LogOut, Settings, User as UserIcon, Menu, X, AlertCircle, Users2 } from 'lucide-react';
+import {
+	Loader2,
+	LogOut,
+	Settings,
+	User as UserIcon,
+	Menu,
+	X,
+	AlertCircle,
+	Users2,
+} from 'lucide-react';
 import Link from 'next/link';
 import LogoPrimarioClaro from '@/public/hermes-primario.svg';
 import LogoPrimarioEscuro from '@/public/hermes-escuro.svg';

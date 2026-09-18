@@ -7,7 +7,11 @@ export function useServices() {
 	const queryClient = useQueryClient();
 	const { toast } = useToast();
 
-	const { data: services = [], isLoading: loading, refetch: fetchServices } = useQuery({
+	const {
+		data: services = [],
+		isLoading: loading,
+		refetch: fetchServices,
+	} = useQuery({
 		queryKey: ['services'],
 		queryFn: async () => {
 			const response = await apiFetch('/api/services');
@@ -42,11 +46,18 @@ export function useServices() {
 			return result;
 		},
 		onSuccess: (data, variables) => {
-			toast({ title: variables.editingId ? 'Atualizado' : 'Criado', description: `Serviço salvo.` });
+			toast({
+				title: variables.editingId ? 'Atualizado' : 'Criado',
+				description: `Serviço salvo.`,
+			});
 			queryClient.invalidateQueries({ queryKey: ['services'] });
 		},
 		onError: (error) => {
-			toast({ variant: 'destructive', title: 'Erro', description: error.message || 'Erro de rede.' });
+			toast({
+				variant: 'destructive',
+				title: 'Erro',
+				description: error.message || 'Erro de rede.',
+			});
 		},
 	});
 
@@ -64,7 +75,11 @@ export function useServices() {
 			queryClient.invalidateQueries({ queryKey: ['services'] });
 		},
 		onError: (error) => {
-			toast({ variant: 'destructive', title: 'Erro', description: error.message || 'Erro de rede.' });
+			toast({
+				variant: 'destructive',
+				title: 'Erro',
+				description: error.message || 'Erro de rede.',
+			});
 		},
 	});
 

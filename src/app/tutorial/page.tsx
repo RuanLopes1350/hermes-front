@@ -192,10 +192,9 @@ export default function TutorialPage() {
 									<Link href="/auth/sign-up" className="text-primary hover:underline">
 										/auth/sign-up
 									</Link>{' '}
-									e crie sua conta com e-mail e senha, ou entre direto com{' '}
-									<strong>Google</strong> ou <strong>GitHub</strong>. Essa conta é para você (ou seu
-									time) acessar o painel do Hermes — não tem relação com os usuários da sua
-									aplicação.
+									e crie sua conta com e-mail e senha, ou entre direto com <strong>Google</strong>{' '}
+									ou <strong>GitHub</strong>. Essa conta é para você (ou seu time) acessar o painel
+									do Hermes — não tem relação com os usuários da sua aplicação.
 								</p>
 							</Step>
 
@@ -203,8 +202,8 @@ export default function TutorialPage() {
 								<p>
 									Um <strong>serviço</strong> é um namespace isolado: cada aplicação/produto seu
 									deve ter o seu próprio, com credenciais, templates e configurações separadas. Em{' '}
-									<strong>Serviços → Novo Serviço</strong>, dê um nome (ex: &quot;App Principal&quot;,
-									&quot;Landing de Marketing&quot;) e confirme.
+									<strong>Serviços → Novo Serviço</strong>, dê um nome (ex: &quot;App
+									Principal&quot;, &quot;Landing de Marketing&quot;) e confirme.
 								</p>
 							</Step>
 
@@ -219,21 +218,22 @@ export default function TutorialPage() {
 										(Gmail, SES, SendGrid, seu próprio servidor de e-mail, etc).
 									</li>
 									<li>
-										<strong>Google OAuth2</strong> — autorização segura via conta Google, sem
-										expor senha/app password.
+										<strong>Google OAuth2</strong> — autorização segura via conta Google, sem expor
+										senha/app password.
 									</li>
 								</ul>
 								<p>
-									Ao salvar, a <strong>API Key</strong> (formato <code className="rounded bg-muted px-1.5 py-0.5 text-xs">hm_...</code>)
-									aparece <strong>uma única vez</strong>. Copie e guarde agora — o Hermes armazena só
-									o hash dela e não consegue mostrá-la de novo (só rotacionar e gerar uma nova).
+									Ao salvar, a <strong>API Key</strong> (formato{' '}
+									<code className="rounded bg-muted px-1.5 py-0.5 text-xs">hm_...</code>) aparece{' '}
+									<strong>uma única vez</strong>. Copie e guarde agora — o Hermes armazena só o hash
+									dela e não consegue mostrá-la de novo (só rotacionar e gerar uma nova).
 								</p>
 							</Step>
 
 							<Step number={4} id="sdk" title="Instale o SDK (opcional, mas recomendado)">
 								<p>
-									O SDK cuida de retry, streaming de status e rotação automática de chave pra
-									você. Se preferir não adicionar a dependência, dá pra chamar a API REST direto.
+									O SDK cuida de retry, streaming de status e rotação automática de chave pra você.
+									Se preferir não adicionar a dependência, dá pra chamar a API REST direto.
 								</p>
 								<CodeBlock code="npm install @ruanlopes1350/hermes-client" lang="bash" />
 								<p className="text-sm">Sem o SDK, o mesmo envio fica assim:</p>
@@ -250,31 +250,40 @@ export default function TutorialPage() {
 
 							<Step number={6} id="cliente" title="Crie o client na sua aplicação">
 								<p>
-									Instancie o <code className="rounded bg-muted px-1.5 py-0.5 text-xs">HermesClient</code>{' '}
-									uma única vez e reexporte. Em produção (VPS/servidor com processo persistente),
-									use o <strong>EnvAdapter</strong>: se a chave rotacionar via webhook (passo 8), ele
-									atualiza o <code className="rounded bg-muted px-1.5 py-0.5 text-xs">.env</code> sozinho.
+									Instancie o{' '}
+									<code className="rounded bg-muted px-1.5 py-0.5 text-xs">HermesClient</code> uma
+									única vez e reexporte. Em produção (VPS/servidor com processo persistente), use o{' '}
+									<strong>EnvAdapter</strong>: se a chave rotacionar via webhook (passo 8), ele
+									atualiza o <code className="rounded bg-muted px-1.5 py-0.5 text-xs">.env</code>{' '}
+									sozinho.
 								</p>
 								<CodeBlock code={clientEnvAdapter} lang="typescript" filename="lib/hermes.ts" />
 							</Step>
 
 							<Step number={7} id="gatilhos" title="Decida onde disparar os e-mails">
 								<p>
-									Chame <code className="rounded bg-muted px-1.5 py-0.5 text-xs">hermes.email()</code>{' '}
-									nos pontos de negócio da sua aplicação onde um e-mail deve sair — cadastro de
-									usuário, recuperação de senha, confirmação de pedido, alertas, etc:
+									Chame{' '}
+									<code className="rounded bg-muted px-1.5 py-0.5 text-xs">hermes.email()</code> nos
+									pontos de negócio da sua aplicação onde um e-mail deve sair — cadastro de usuário,
+									recuperação de senha, confirmação de pedido, alertas, etc:
 								</p>
 								<CodeBlock code={triggerSignup} lang="typescript" filename="signup.ts" />
-								<CodeBlock code={triggerPasswordReset} lang="typescript" filename="forgot-password.ts" />
+								<CodeBlock
+									code={triggerPasswordReset}
+									lang="typescript"
+									filename="forgot-password.ts"
+								/>
 							</Step>
 
 							<Step number={8} id="webhook" title="(Opcional) Ative a rotação automática de chaves">
 								<p>
 									Se você configurou <strong>Intervalo de Validade da Chave</strong>, a API Key
-									expira e precisa ser trocada periodicamente. Pra sua aplicação não quebrar
-									quando isso acontecer, receba o aviso via webhook:
+									expira e precisa ser trocada periodicamente. Pra sua aplicação não quebrar quando
+									isso acontecer, receba o aviso via webhook:
 								</p>
-								<p className="text-sm font-medium text-foreground">a) Crie a rota que recebe o aviso</p>
+								<p className="text-sm font-medium text-foreground">
+									a) Crie a rota que recebe o aviso
+								</p>
 								<CodeBlock code={webhookRoute} lang="typescript" />
 								<p className="text-sm font-medium text-foreground">
 									b) Cadastre o endpoint no Hermes
@@ -289,16 +298,21 @@ export default function TutorialPage() {
 									</li>
 									<li>
 										<strong>Segredo do Webhook</strong> — usado pra assinar o header{' '}
-										<code className="rounded bg-muted px-1.5 py-0.5 text-xs">X-Hermes-Signature</code>{' '}
-										(mesmo valor de <code className="rounded bg-muted px-1.5 py-0.5 text-xs">HERMES_WEBHOOK_SECRET</code>{' '}
+										<code className="rounded bg-muted px-1.5 py-0.5 text-xs">
+											X-Hermes-Signature
+										</code>{' '}
+										(mesmo valor de{' '}
+										<code className="rounded bg-muted px-1.5 py-0.5 text-xs">
+											HERMES_WEBHOOK_SECRET
+										</code>{' '}
 										acima).
 									</li>
 									<li>
 										<strong>Ativar Rotação Automática de API Keys</strong> — liga o processo.
 									</li>
 									<li>
-										<strong>Dias de antecedência para rotacionar (Threshold)</strong> — quantos
-										dias antes do vencimento a nova chave é gerada e o webhook disparado.
+										<strong>Dias de antecedência para rotacionar (Threshold)</strong> — quantos dias
+										antes do vencimento a nova chave é gerada e o webhook disparado.
 									</li>
 								</ul>
 							</Step>
@@ -311,8 +325,8 @@ export default function TutorialPage() {
 									MJML — toda variável no formato{' '}
 									<code className="rounded bg-muted px-1.5 py-0.5 text-xs">{'{{assim}}'}</code> é
 									detectada automaticamente e listada em <strong>Variáveis Detectadas</strong>, sem
-									precisar declarar nada à parte. O preview ao vivo mostra o resultado enquanto
-									você edita.
+									precisar declarar nada à parte. O preview ao vivo mostra o resultado enquanto você
+									edita.
 								</p>
 							</Step>
 
@@ -355,13 +369,13 @@ export default function TutorialPage() {
 											</li>
 											<li>
 												Para volumes maiores ou transacionais críticos, prefira um provedor SMTP
-												dedicado (Amazon SES, SendGrid, Mailgun, Postmark, etc.) em vez de uma
-												conta Gmail pessoal como conexão.
+												dedicado (Amazon SES, SendGrid, Mailgun, Postmark, etc.) em vez de uma conta
+												Gmail pessoal como conexão.
 											</li>
 										</ul>
 										<p className="text-xs text-muted-foreground">
-											Esses números são os publicados pelo Google e podem mudar — confirme sempre
-											na documentação oficial do provedor escolhido antes de dimensionar volume.
+											Esses números são os publicados pelo Google e podem mudar — confirme sempre na
+											documentação oficial do provedor escolhido antes de dimensionar volume.
 										</p>
 									</div>
 								</div>

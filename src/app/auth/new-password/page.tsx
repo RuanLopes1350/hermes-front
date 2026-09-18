@@ -51,7 +51,9 @@ function NewPasswordForm() {
 			});
 
 			if (authError) {
-				setError(authError.message || 'Não foi possível redefinir a senha. O link pode ter expirado.');
+				setError(
+					authError.message || 'Não foi possível redefinir a senha. O link pode ter expirado.',
+				);
 			} else {
 				setSuccess(true);
 				setTimeout(() => router.push('/auth/sign-in'), 3000);
@@ -94,9 +96,7 @@ function NewPasswordForm() {
 			<Card className="shadow-md ring-1 ring-border/60">
 				<CardHeader className="space-y-1 text-center pb-2">
 					<CardTitle className="text-2xl font-semibold tracking-tight">Redefinir Senha</CardTitle>
-					<CardDescription>
-						Crie uma nova senha segura para sua conta Hermes.
-					</CardDescription>
+					<CardDescription>Crie uma nova senha segura para sua conta Hermes.</CardDescription>
 				</CardHeader>
 
 				<CardContent className="pt-4">
@@ -199,9 +199,15 @@ function NewPasswordForm() {
 }
 
 export default function NewPasswordPage() {
-    return (
-        <Suspense fallback={<div className="w-full flex justify-center py-10"><div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" /></div>}>
-            <NewPasswordForm />
-        </Suspense>
-    );
+	return (
+		<Suspense
+			fallback={
+				<div className="w-full flex justify-center py-10">
+					<div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
+				</div>
+			}
+		>
+			<NewPasswordForm />
+		</Suspense>
+	);
 }

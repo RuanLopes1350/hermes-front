@@ -1,6 +1,14 @@
 'use client';
 
-import { CalendarClock, ChevronDown, ChevronRight, Inbox, Send, CheckCircle2, AlertCircle } from 'lucide-react';
+import {
+	CalendarClock,
+	ChevronDown,
+	ChevronRight,
+	Inbox,
+	Send,
+	CheckCircle2,
+	AlertCircle,
+} from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
 interface QueueMetrics {
@@ -22,7 +30,11 @@ const TONE_CLASSES: Record<Stage['tone'], { bg: string; text: string; border: st
 	muted: { bg: 'bg-muted/60', text: 'text-muted-foreground', border: 'border-border' },
 	primary: { bg: 'bg-primary/10', text: 'text-primary', border: 'border-primary/25' },
 	good: { bg: 'bg-status-good/10', text: 'text-status-good', border: 'border-status-good/25' },
-	critical: { bg: 'bg-status-critical/10', text: 'text-status-critical', border: 'border-status-critical/25' },
+	critical: {
+		bg: 'bg-status-critical/10',
+		text: 'text-status-critical',
+		border: 'border-status-critical/25',
+	},
 };
 
 function StageNode({ stage, value }: { stage: Stage; value: number }) {
@@ -65,11 +77,26 @@ function Connector({ dashed = false }: { dashed?: boolean }) {
 // afluente (linha tracejada: ainda não está na fila de verdade), Em trânsito
 // bifurca em dois desfechos possíveis (Entregue / Falhou).
 export function DispatchPipeline({ queue }: { queue: QueueMetrics }) {
-	const delayedStage: Stage = { key: 'delayed', label: 'Agendado', icon: CalendarClock, tone: 'muted' };
+	const delayedStage: Stage = {
+		key: 'delayed',
+		label: 'Agendado',
+		icon: CalendarClock,
+		tone: 'muted',
+	};
 	const waitingStage: Stage = { key: 'waiting', label: 'Na fila', icon: Inbox, tone: 'muted' };
 	const activeStage: Stage = { key: 'active', label: 'Em trânsito', icon: Send, tone: 'primary' };
-	const completedStage: Stage = { key: 'completed', label: 'Entregue', icon: CheckCircle2, tone: 'good' };
-	const failedStage: Stage = { key: 'failed', label: 'Falhou', icon: AlertCircle, tone: 'critical' };
+	const completedStage: Stage = {
+		key: 'completed',
+		label: 'Entregue',
+		icon: CheckCircle2,
+		tone: 'good',
+	};
+	const failedStage: Stage = {
+		key: 'failed',
+		label: 'Falhou',
+		icon: AlertCircle,
+		tone: 'critical',
+	};
 
 	return (
 		<div className="flex flex-col items-stretch gap-3 lg:flex-row lg:items-center">

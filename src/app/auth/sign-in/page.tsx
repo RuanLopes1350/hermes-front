@@ -78,7 +78,9 @@ export default function SignInPage() {
 		<div className="w-full animate-in fade-in slide-in-from-bottom-2 duration-300 ease-out">
 			<Card className="shadow-md ring-1 ring-border/60">
 				<CardHeader className="space-y-1 text-center pb-2">
-					<CardTitle className="text-2xl font-semibold tracking-tight">Acesso à Plataforma</CardTitle>
+					<CardTitle className="text-2xl font-semibold tracking-tight">
+						Acesso à Plataforma
+					</CardTitle>
 					<CardDescription>Digite seu e-mail e senha para entrar no Hermes.</CardDescription>
 				</CardHeader>
 
@@ -136,11 +138,7 @@ export default function SignInPage() {
 									className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
 									aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
 								>
-									{showPassword ? (
-										<EyeOff className="h-4 w-4" />
-									) : (
-										<Eye className="h-4 w-4" />
-									)}
+									{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
 								</button>
 							</div>
 						</div>
@@ -167,11 +165,23 @@ export default function SignInPage() {
 					</div>
 
 					<div className="grid grid-cols-2 gap-3">
-						<Button variant="outline" type="button" onClick={handleGitHubSignIn} disabled={loading} className="h-10">
+						<Button
+							variant="outline"
+							type="button"
+							onClick={handleGitHubSignIn}
+							disabled={loading}
+							className="h-10"
+						>
 							<FaGithub className="mr-2 h-4 w-4" />
 							GitHub
 						</Button>
-						<Button variant="outline" type="button" onClick={handleGoogleSignIn} disabled={loading} className="h-10">
+						<Button
+							variant="outline"
+							type="button"
+							onClick={handleGoogleSignIn}
+							disabled={loading}
+							className="h-10"
+						>
 							<FaGoogle className="mr-2 h-4 w-4" />
 							Google
 						</Button>

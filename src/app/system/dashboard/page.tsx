@@ -103,7 +103,7 @@ export default function DashboardPage() {
 	const [isSheetOpen, setIsSheetOpen] = useState(false);
 
 	const user = session?.user as AppUser | undefined;
-	const isAdmin = (user?.role === 'super_admin' || user?.role === 'admin');
+	const isAdmin = user?.role === 'super_admin' || user?.role === 'admin';
 
 	const sseStatus = useSSE('/api/dashboard/stream', sseQueueSchema, {
 		enabled: !!session,
@@ -120,7 +120,8 @@ export default function DashboardPage() {
 			element: '#tour-kpi-cards',
 			popover: {
 				title: 'Indicadores Principais',
-				description: 'Visão rápida do volume de e-mails de hoje, taxa de entrega e os principais números da sua operação.',
+				description:
+					'Visão rápida do volume de e-mails de hoje, taxa de entrega e os principais números da sua operação.',
 				side: 'bottom',
 			},
 		},
@@ -128,7 +129,8 @@ export default function DashboardPage() {
 			element: '#tour-volume-chart',
 			popover: {
 				title: 'Volume de Envios',
-				description: 'Compara enviados x falhas ao longo do período selecionado. Use o seletor de período no topo para ajustar a janela de análise.',
+				description:
+					'Compara enviados x falhas ao longo do período selecionado. Use o seletor de período no topo para ajustar a janela de análise.',
 				side: 'top',
 			},
 		},
@@ -136,7 +138,8 @@ export default function DashboardPage() {
 			element: '#tour-status-chart',
 			popover: {
 				title: 'Distribuição por Status',
-				description: 'Contagem exata de e-mails em cada status (enviado, pendente, retentando, falha) na janela atual.',
+				description:
+					'Contagem exata de e-mails em cada status (enviado, pendente, retentando, falha) na janela atual.',
 				side: 'top',
 			},
 		},
@@ -144,7 +147,8 @@ export default function DashboardPage() {
 			element: '#tour-activity-timeline',
 			popover: {
 				title: 'Atividade Recente',
-				description: 'Linha do tempo de auditoria: criação de credenciais, templates, rotação de chaves e outras ações relevantes.',
+				description:
+					'Linha do tempo de auditoria: criação de credenciais, templates, rotação de chaves e outras ações relevantes.',
 				side: 'right',
 			},
 		},
@@ -152,7 +156,8 @@ export default function DashboardPage() {
 			element: '#tour-recent-emails',
 			popover: {
 				title: 'Últimos Envios',
-				description: 'Os disparos mais recentes com status e latência. Clique no ícone de olho para ver detalhes e reprocessar envios falhos.',
+				description:
+					'Os disparos mais recentes com status e latência. Clique no ícone de olho para ver detalhes e reprocessar envios falhos.',
 				side: 'top',
 			},
 		},
@@ -162,7 +167,8 @@ export default function DashboardPage() {
 						element: '#tour-queue-health',
 						popover: {
 							title: 'Saúde da Fila (Redis / BullMQ)',
-							description: 'Métricas em tempo real (via SSE) da fila de processamento: quantos jobs estão esperando, ativos, concluídos ou falhados agora.',
+							description:
+								'Métricas em tempo real (via SSE) da fila de processamento: quantos jobs estão esperando, ativos, concluídos ou falhados agora.',
 							side: 'bottom' as const,
 						},
 					},
@@ -170,7 +176,8 @@ export default function DashboardPage() {
 						element: '#tour-infra-charts',
 						popover: {
 							title: 'Infraestrutura Global',
-							description: 'Volume por serviço ao longo do tempo e ranking dos serviços com mais envios e mais falhas — útil para identificar tenants com problemas.',
+							description:
+								'Volume por serviço ao longo do tempo e ranking dos serviços com mais envios e mais falhas — útil para identificar tenants com problemas.',
 							side: 'top' as const,
 						},
 					},
@@ -180,7 +187,8 @@ export default function DashboardPage() {
 						element: '#tour-top-templates',
 						popover: {
 							title: 'Top Templates',
-							description: 'Os templates mais usados nos seus serviços, ordenados por quantidade de disparos.',
+							description:
+								'Os templates mais usados nos seus serviços, ordenados por quantidade de disparos.',
 							side: 'top' as const,
 						},
 					},
@@ -190,9 +198,12 @@ export default function DashboardPage() {
 	const handleRetryEmail = async () => {
 		if (!selectedEmail || !selectedEmail.serviceId) return;
 		try {
-			const res = await apiFetch(`/api/services/${selectedEmail.serviceId}/emails/${selectedEmail.id}/retry`, {
-				method: 'POST',
-			});
+			const res = await apiFetch(
+				`/api/services/${selectedEmail.serviceId}/emails/${selectedEmail.id}/retry`,
+				{
+					method: 'POST',
+				},
+			);
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.message || 'Erro ao reprocessar');
 
@@ -201,7 +212,7 @@ export default function DashboardPage() {
 				description: data.message || 'O e-mail retornou para a fila (DLQ).',
 			});
 
-			setSelectedEmail((prev) => prev ? { ...prev, status: 'pending' } : prev);
+			setSelectedEmail((prev) => (prev ? { ...prev, status: 'pending' } : prev));
 		} catch (error: any) {
 			toast({
 				title: 'Erro ao reprocessar',
@@ -280,27 +291,35 @@ export default function DashboardPage() {
 	const getStatusBadge = (status: string, extraClassName = '') => {
 		if (status === 'sent') {
 			return (
-				<Badge className={`bg-status-good/15 text-status-good hover:bg-status-good/15 border-none font-bold ${extraClassName}`}>
+				<Badge
+					className={`bg-status-good/15 text-status-good hover:bg-status-good/15 border-none font-bold ${extraClassName}`}
+				>
 					Entregue
 				</Badge>
 			);
 		}
 		if (status === 'failed') {
 			return (
-				<Badge className={`bg-status-critical/15 text-status-critical hover:bg-status-critical/15 border-none font-bold ${extraClassName}`}>
+				<Badge
+					className={`bg-status-critical/15 text-status-critical hover:bg-status-critical/15 border-none font-bold ${extraClassName}`}
+				>
 					Falha
 				</Badge>
 			);
 		}
 		if (status === 'retrying') {
 			return (
-				<Badge className={`bg-status-serious/15 text-status-serious hover:bg-status-serious/15 border-none font-bold ${extraClassName}`}>
+				<Badge
+					className={`bg-status-serious/15 text-status-serious hover:bg-status-serious/15 border-none font-bold ${extraClassName}`}
+				>
 					Retentando
 				</Badge>
 			);
 		}
 		return (
-			<Badge className={`bg-status-warning/15 text-status-warning hover:bg-status-warning/15 border-none font-bold ${extraClassName}`}>
+			<Badge
+				className={`bg-status-warning/15 text-status-warning hover:bg-status-warning/15 border-none font-bold ${extraClassName}`}
+			>
 				{status === 'pending' ? 'Pendente' : status}
 			</Badge>
 		);
@@ -324,9 +343,10 @@ export default function DashboardPage() {
 
 	// Paleta categórica (8 slots, ordem fixa — nunca ciclar) para os gráficos
 	// multi-tenant, onde cada serviço precisa de uma cor própria e distinguível.
-	const CATEGORICAL_COLORS = resolvedTheme === 'dark'
-		? ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#008300', '#9085e9', '#e66767']
-		: ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948'];
+	const CATEGORICAL_COLORS =
+		resolvedTheme === 'dark'
+			? ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#008300', '#9085e9', '#e66767']
+			: ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948'];
 
 	const isDarkChart = resolvedTheme === 'dark';
 	const CHART_COLORS = isDarkChart
@@ -386,7 +406,11 @@ export default function DashboardPage() {
 				trigger: 'axis',
 				axisPointer: { type: 'shadow' },
 			},
-			legend: { data: ['Enviados', 'Falhas'], bottom: 0, textStyle: { color: CHART_COLORS.legendText } },
+			legend: {
+				data: ['Enviados', 'Falhas'],
+				bottom: 0,
+				textStyle: { color: CHART_COLORS.legendText },
+			},
 			grid: { top: 20, left: 10, right: 10, bottom: 30, containLabel: true },
 			xAxis: {
 				type: 'category',
@@ -455,7 +479,9 @@ export default function DashboardPage() {
 				type: 'line',
 				smooth: true,
 				data: dates.map((date) => {
-					const entry = volumeData.find((d: VolumeData) => d.date === date && d.serviceName === service);
+					const entry = volumeData.find(
+						(d: VolumeData) => d.date === date && d.serviceName === service,
+					);
 					return entry ? entry.total : 0;
 				}),
 			};
@@ -468,7 +494,12 @@ export default function DashboardPage() {
 			// serviços diferentes conforme o filtro muda a lista.
 			color: CATEGORICAL_COLORS,
 			tooltip: { trigger: 'axis' },
-			legend: { data: services, bottom: 0, type: 'scroll', textStyle: { color: CHART_COLORS.legendText } },
+			legend: {
+				data: services,
+				bottom: 0,
+				type: 'scroll',
+				textStyle: { color: CHART_COLORS.legendText },
+			},
 			grid: { top: 20, left: 10, right: 10, bottom: 30, containLabel: true },
 			xAxis: {
 				type: 'category',
@@ -501,7 +532,12 @@ export default function DashboardPage() {
 				type: 'category',
 				inverse: true,
 				data: names,
-				axisLabel: { color: CHART_COLORS.axisLabel, fontSize: 11, width: 120, overflow: 'truncate' },
+				axisLabel: {
+					color: CHART_COLORS.axisLabel,
+					fontSize: 11,
+					width: 120,
+					overflow: 'truncate',
+				},
 			},
 			series: [
 				{
@@ -529,7 +565,12 @@ export default function DashboardPage() {
 				type: 'category',
 				inverse: true,
 				data: names,
-				axisLabel: { color: CHART_COLORS.axisLabel, fontSize: 11, width: 120, overflow: 'truncate' },
+				axisLabel: {
+					color: CHART_COLORS.axisLabel,
+					fontSize: 11,
+					width: 120,
+					overflow: 'truncate',
+				},
 			},
 			series: [
 				{
@@ -563,7 +604,12 @@ export default function DashboardPage() {
 				type: 'category',
 				inverse: true,
 				data: names,
-				axisLabel: { color: CHART_COLORS.axisLabel, fontSize: 11, width: 120, overflow: 'truncate' },
+				axisLabel: {
+					color: CHART_COLORS.axisLabel,
+					fontSize: 11,
+					width: 120,
+					overflow: 'truncate',
+				},
 			},
 			series: [
 				{
@@ -582,88 +628,88 @@ export default function DashboardPage() {
 	// ==========================================
 	const kpiCards = isAdmin
 		? [
-			{
-				label: 'E-mails Hoje',
-				value: todayCount.toLocaleString('pt-BR'),
-				icon: Zap,
-				color: 'text-primary',
-				bg: 'bg-primary/10',
-				desc: (
-					<span className={`flex items-center gap-1 ${deltaColor}`}>
-						{deltaIcon} {Math.abs(deltaToday).toFixed(1)}% vs Ontem
-					</span>
-				),
-			},
-			{
-				label: 'Taxa de Entrega Global',
-				value: `${successRate}%`,
-				icon: CheckCircle2,
-				color: 'text-success',
-				bg: 'bg-success/10',
-				desc: 'Taxa histórica',
-			},
-			{
-				label: 'Fila de Processamento',
-				value: (data.queue.waiting + data.queue.active).toLocaleString('pt-BR'),
-				icon: Server,
-				color: 'text-warning',
-				bg: 'bg-warning/10',
-				desc: 'E-mails aguardando envio',
-			},
-			{
-				label: 'Serviços Registrados',
-				value: data.summary.totalServices || 0,
-				icon: Server,
-				color: 'text-primary',
-				bg: 'bg-primary/10',
-				desc: 'Projetos ativos na plataforma',
-			},
-		]
+				{
+					label: 'E-mails Hoje',
+					value: todayCount.toLocaleString('pt-BR'),
+					icon: Zap,
+					color: 'text-primary',
+					bg: 'bg-primary/10',
+					desc: (
+						<span className={`flex items-center gap-1 ${deltaColor}`}>
+							{deltaIcon} {Math.abs(deltaToday).toFixed(1)}% vs Ontem
+						</span>
+					),
+				},
+				{
+					label: 'Taxa de Entrega Global',
+					value: `${successRate}%`,
+					icon: CheckCircle2,
+					color: 'text-success',
+					bg: 'bg-success/10',
+					desc: 'Taxa histórica',
+				},
+				{
+					label: 'Fila de Processamento',
+					value: (data.queue.waiting + data.queue.active).toLocaleString('pt-BR'),
+					icon: Server,
+					color: 'text-warning',
+					bg: 'bg-warning/10',
+					desc: 'E-mails aguardando envio',
+				},
+				{
+					label: 'Serviços Registrados',
+					value: data.summary.totalServices || 0,
+					icon: Server,
+					color: 'text-primary',
+					bg: 'bg-primary/10',
+					desc: 'Projetos ativos na plataforma',
+				},
+			]
 		: [
-			{
-				label: 'E-mails Hoje',
-				value: todayCount.toLocaleString('pt-BR'),
-				icon: Mail,
-				color: 'text-primary',
-				bg: 'bg-primary/10',
-				desc: (
-					<span className={`flex items-center gap-1 ${deltaColor}`}>
-						{deltaIcon} {Math.abs(deltaToday).toFixed(1)}% vs Ontem
-					</span>
-				),
-			},
-			{
-				label: 'Status Pendentes / Falhas',
-				value: `${data.summary.failed || 0} / ${data.summary.retrying || 0}`,
-				icon: AlertCircle,
-				color: 'text-destructive',
-				bg: 'bg-destructive/10',
-				desc: 'Falhas permanentes / Em retentativa',
-			},
-			{
-				label: 'Próximo Agendado',
-				value: data.nextScheduled
-					? new Date(data.nextScheduled).toLocaleTimeString('pt-BR', {
-						hour: '2-digit',
-						minute: '2-digit',
-					})
-					: 'Nenhum',
-				icon: CalendarClock,
-				color: 'text-primary',
-				bg: 'bg-primary/10',
-				desc: data.nextScheduled
-					? new Date(data.nextScheduled).toLocaleDateString('pt-BR')
-					: 'Sem fila agendada',
-			},
-			{
-				label: 'Templates Ativos',
-				value: data.summary.templates || 0,
-				icon: FileText,
-				color: 'text-primary',
-				bg: 'bg-primary/10',
-				desc: 'Prontos para uso',
-			},
-		];
+				{
+					label: 'E-mails Hoje',
+					value: todayCount.toLocaleString('pt-BR'),
+					icon: Mail,
+					color: 'text-primary',
+					bg: 'bg-primary/10',
+					desc: (
+						<span className={`flex items-center gap-1 ${deltaColor}`}>
+							{deltaIcon} {Math.abs(deltaToday).toFixed(1)}% vs Ontem
+						</span>
+					),
+				},
+				{
+					label: 'Status Pendentes / Falhas',
+					value: `${data.summary.failed || 0} / ${data.summary.retrying || 0}`,
+					icon: AlertCircle,
+					color: 'text-destructive',
+					bg: 'bg-destructive/10',
+					desc: 'Falhas permanentes / Em retentativa',
+				},
+				{
+					label: 'Próximo Agendado',
+					value: data.nextScheduled
+						? new Date(data.nextScheduled).toLocaleTimeString('pt-BR', {
+								hour: '2-digit',
+								minute: '2-digit',
+							})
+						: 'Nenhum',
+					icon: CalendarClock,
+					color: 'text-primary',
+					bg: 'bg-primary/10',
+					desc: data.nextScheduled
+						? new Date(data.nextScheduled).toLocaleDateString('pt-BR')
+						: 'Sem fila agendada',
+				},
+				{
+					label: 'Templates Ativos',
+					value: data.summary.templates || 0,
+					icon: FileText,
+					color: 'text-primary',
+					bg: 'bg-primary/10',
+					desc: 'Prontos para uso',
+				},
+			];
 
 	return (
 		<div className="space-y-6 animate-in fade-in duration-300 ease-out">
@@ -733,7 +779,10 @@ export default function DashboardPage() {
 			{/* KPI Cards */}
 			<div id="tour-kpi-cards" className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
 				{kpiCards.map((stat, i) => (
-					<Card key={i} className={`shadow-sm border-t-2 ${stat.color.replace('text-', 'border-t-')}`}>
+					<Card
+						key={i}
+						className={`shadow-sm border-t-2 ${stat.color.replace('text-', 'border-t-')}`}
+					>
 						<CardContent className="pt-5">
 							<div className="flex items-start justify-between gap-2">
 								<span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -818,7 +867,10 @@ export default function DashboardPage() {
 
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 				{/* Timeline de Atividades */}
-				<Card id="tour-activity-timeline" className="col-span-1 flex flex-col max-h-[500px] shadow-sm">
+				<Card
+					id="tour-activity-timeline"
+					className="col-span-1 flex flex-col max-h-[500px] shadow-sm"
+				>
 					<CardHeader>
 						<CardTitle>Atividade Recente</CardTitle>
 						<CardDescription>Últimas ações na plataforma</CardDescription>
@@ -856,7 +908,10 @@ export default function DashboardPage() {
 				</Card>
 
 				{/* Envios Recentes */}
-				<Card id="tour-recent-emails" className="col-span-1 lg:col-span-2 flex flex-col max-h-[500px] shadow-sm">
+				<Card
+					id="tour-recent-emails"
+					className="col-span-1 lg:col-span-2 flex flex-col max-h-[500px] shadow-sm"
+				>
 					<CardHeader>
 						<CardTitle>Últimos Envios e Disparos</CardTitle>
 						<CardDescription>
@@ -901,8 +956,7 @@ export default function DashboardPage() {
 														</span>
 													</div>
 												</TableCell>
-												<TableCell>{getStatusBadge(mail.status)}
-												</TableCell>
+												<TableCell>{getStatusBadge(mail.status)}</TableCell>
 												<TableCell>
 													<div className="flex items-center gap-1.5 text-xs text-muted-foreground">
 														<RefreshCw className="h-3 w-3" />
@@ -1199,7 +1253,12 @@ export default function DashboardPage() {
 											<AlertCircle className="h-3 w-3 shrink-0" /> Log de Erro / Exception
 										</label>
 										{selectedEmail.status === 'failed' && (
-											<Button size="sm" variant="outline" className="h-6 text-[10px] gap-1" onClick={handleRetryEmail}>
+											<Button
+												size="sm"
+												variant="outline"
+												className="h-6 text-[10px] gap-1"
+												onClick={handleRetryEmail}
+											>
 												<RefreshCw className="h-3 w-3" /> Reprocessar
 											</Button>
 										)}
@@ -1215,7 +1274,9 @@ export default function DashboardPage() {
 									<div className="min-w-0">
 										<span className="block text-[10px] uppercase mb-0.5 truncate">Criado em:</span>
 										<span className="font-mono truncate block">
-											{selectedEmail.createdAt ? new Date(selectedEmail.createdAt).toLocaleString('pt-BR') : '-'}
+											{selectedEmail.createdAt
+												? new Date(selectedEmail.createdAt).toLocaleString('pt-BR')
+												: '-'}
 										</span>
 									</div>
 									{selectedEmail.sentAt && (

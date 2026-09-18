@@ -131,7 +131,11 @@ export default function EmailsPage() {
 			}
 		} catch (err) {
 			console.error('Erro ao buscar e-mails', err);
-			toast({ variant: 'destructive', title: 'Erro', description: 'Falha de conexão ao carregar e-mails.' });
+			toast({
+				variant: 'destructive',
+				title: 'Erro',
+				description: 'Falha de conexão ao carregar e-mails.',
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -173,7 +177,10 @@ export default function EmailsPage() {
 				);
 			case 'failed':
 				return (
-					<Badge variant="secondary" className="bg-destructive/15 text-destructive hover:bg-destructive/15">
+					<Badge
+						variant="secondary"
+						className="bg-destructive/15 text-destructive hover:bg-destructive/15"
+					>
 						Falhou
 					</Badge>
 				);
@@ -219,9 +226,12 @@ export default function EmailsPage() {
 	const handleConfirmCancel = async () => {
 		if (!emailToCancel) return;
 		try {
-			const res = await apiFetch(`/api/services/${emailToCancel.service_id}/emails/${emailToCancel.id}`, {
-				method: 'DELETE',
-			});
+			const res = await apiFetch(
+				`/api/services/${emailToCancel.service_id}/emails/${emailToCancel.id}`,
+				{
+					method: 'DELETE',
+				},
+			);
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.message || 'Falha ao cancelar e-mail.');
 			toast({ title: 'E-mail cancelado', description: data.message });
@@ -318,7 +328,8 @@ export default function EmailsPage() {
 			element: '#tour-emails-filters',
 			popover: {
 				title: 'Filtros',
-				description: 'Filtre o histórico por texto (destinatário/assunto), serviço, status ou um intervalo de datas — tudo aplicado direto no servidor, sem limite de 100 registros.',
+				description:
+					'Filtre o histórico por texto (destinatário/assunto), serviço, status ou um intervalo de datas — tudo aplicado direto no servidor, sem limite de 100 registros.',
 				side: 'bottom',
 			},
 		},
@@ -326,7 +337,8 @@ export default function EmailsPage() {
 			element: '#tour-emails-table',
 			popover: {
 				title: 'Histórico de Envios',
-				description: 'Selecione várias linhas pra reenviar ou cancelar em massa, ou use os ícones de cada linha pra agir individualmente. Clique no olho pra ver o payload completo.',
+				description:
+					'Selecione várias linhas pra reenviar ou cancelar em massa, ou use os ícones de cada linha pra agir individualmente. Clique no olho pra ver o payload completo.',
 				side: 'top',
 			},
 		},
@@ -366,7 +378,10 @@ export default function EmailsPage() {
 			</div>
 
 			{/* Filters */}
-			<div id="tour-emails-filters" className="flex flex-col lg:flex-row items-end lg:items-center gap-4 bg-card p-4 rounded-xl border shadow-sm flex-wrap">
+			<div
+				id="tour-emails-filters"
+				className="flex flex-col lg:flex-row items-end lg:items-center gap-4 bg-card p-4 rounded-xl border shadow-sm flex-wrap"
+			>
 				<div className="space-y-1 w-full lg:w-auto flex-1 min-w-[160px]">
 					<label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
 						Buscar
@@ -466,7 +481,11 @@ export default function EmailsPage() {
 						onClick={handleBulkRetry}
 						className="cursor-pointer gap-1.5"
 					>
-						{bulkLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+						{bulkLoading ? (
+							<Loader2 className="h-3.5 w-3.5 animate-spin" />
+						) : (
+							<RefreshCw className="h-3.5 w-3.5" />
+						)}
 						Reenviar selecionados ({selectedFailed.length})
 					</Button>
 					<Button
@@ -528,7 +547,9 @@ export default function EmailsPage() {
 										<TableCell>{getStatusBadge(email.status)}</TableCell>
 										<TableCell className="font-medium text-xs">{email.serviceName}</TableCell>
 										<TableCell className="text-sm">{email.recipient_to}</TableCell>
-										<TableCell className="text-sm max-w-[200px] truncate">{email.subject}</TableCell>
+										<TableCell className="text-sm max-w-[200px] truncate">
+											{email.subject}
+										</TableCell>
 										<TableCell className="text-xs font-mono text-muted-foreground truncate max-w-[120px]">
 											{email.credentialName || email.credential_id || 'N/A'}
 										</TableCell>

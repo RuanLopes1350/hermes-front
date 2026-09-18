@@ -45,8 +45,32 @@ import {
 	SelectValue,
 } from '@/src/components/ui/select';
 import Editor, { OnMount } from '@monaco-editor/react';
+import { loader } from '@monaco-editor/react';
+import * as monaco from 'monaco-editor';
 import format from 'xml-formatter';
-import { onMount } from 'better-auth/react';
+
+// Forçar o React a usar a versão do Monaco que vem com o pacote @monaco-editor/react, e não a versão global do window.monaco (que é carregada via CDN).
+// Isso evita conflitos de versão e problemas de tipagem.
+loader.config({ monaco });
+
+if (typeof window !== 'undefined') {
+	// @ts-ignore
+	window.MonacoEnvironment = {
+		getWorker() {
+			return new Worker(
+				URL.createObjectURL(
+					new Blob(
+						[
+							`self.onmessage = function () {};
+                                self.postMessage({ type: 'vscode-worker-ready' });`,
+						],
+						{ type: 'application/javascript' },
+					),
+				),
+			);
+		},
+	};
+}
 
 interface Service {
 	id: string;
@@ -402,7 +426,8 @@ export default function TemplateDetailsPage() {
 			waitForElement: 1500,
 			popover: {
 				title: 'Editor MJML',
-				description: 'Escreva o layout do e-mail em MJML. Use {{variavel}} para marcar pontos que serão preenchidos dinamicamente pelo Handlebars.',
+				description:
+					'Escreva o layout do e-mail em MJML. Use {{variavel}} para marcar pontos que serão preenchidos dinamicamente pelo Handlebars.',
 				side: 'right',
 			},
 		},
@@ -410,7 +435,8 @@ export default function TemplateDetailsPage() {
 			element: '#tour-template-preview',
 			popover: {
 				title: 'Preview em Tempo Real',
-				description: 'O HTML final compilado aparece aqui automaticamente, poucos segundos depois de você parar de digitar.',
+				description:
+					'O HTML final compilado aparece aqui automaticamente, poucos segundos depois de você parar de digitar.',
 				side: 'left',
 			},
 		},
@@ -418,7 +444,8 @@ export default function TemplateDetailsPage() {
 			element: '#tour-template-vars',
 			popover: {
 				title: 'Variáveis Detectadas',
-				description: 'Toda variável {{assim}} usada no código MJML é detectada automaticamente e listada aqui — sem precisar declarar nada manualmente.',
+				description:
+					'Toda variável {{assim}} usada no código MJML é detectada automaticamente e listada aqui — sem precisar declarar nada manualmente.',
 				side: 'left',
 			},
 		},
@@ -426,7 +453,8 @@ export default function TemplateDetailsPage() {
 			element: '#tour-template-save',
 			popover: {
 				title: 'Salvar',
-				description: 'Salva o template. Ele fica disponível imediatamente para uso via template_id nas requisições de e-mail.',
+				description:
+					'Salva o template. Ele fica disponível imediatamente para uso via template_id nas requisições de e-mail.',
 				side: 'bottom',
 			},
 		},
@@ -448,7 +476,8 @@ export default function TemplateDetailsPage() {
 			waitForElement: 1000,
 			popover: {
 				title: 'Registro de Auditoria',
-				description: 'Toda edição, criação e exclusão relacionada a este template fica registrada aqui, com autor e data/hora.',
+				description:
+					'Toda edição, criação e exclusão relacionada a este template fica registrada aqui, com autor e data/hora.',
 				side: 'left',
 				onNextClick: () => {
 					setShowHistoryModal(false);
@@ -557,7 +586,10 @@ export default function TemplateDetailsPage() {
 						Tour Guiado
 					</Button>
 
-					<div id="tour-template-subject" className="flex items-center gap-2 bg-card border rounded-xl px-3 py-1 h-10 text-left flex-1 min-w-[180px] shadow-sm">
+					<div
+						id="tour-template-subject"
+						className="flex items-center gap-2 bg-card border rounded-xl px-3 py-1 h-10 text-left flex-1 min-w-[180px] shadow-sm"
+					>
 						<span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-left whitespace-nowrap">
 							Assunto:
 						</span>
@@ -619,7 +651,10 @@ export default function TemplateDetailsPage() {
 			)}
 
 			<div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0 text-left overflow-auto lg:overflow-hidden">
-				<Card id="tour-template-editor" className="flex-1 bg-card rounded-xl border shadow-sm overflow-hidden flex flex-col text-left">
+				<Card
+					id="tour-template-editor"
+					className="flex-1 bg-card rounded-xl border shadow-sm overflow-hidden flex flex-col text-left"
+				>
 					<div className="p-4 border-b bg-muted/30 flex items-center justify-between text-left">
 						<div className="flex items-center gap-2 text-left">
 							<Code size={14} className="text-primary" />
@@ -659,7 +694,10 @@ export default function TemplateDetailsPage() {
 				</Card>
 
 				<div className="w-full lg:w-[450px] flex flex-col gap-4 lg:gap-6 shrink-0 text-left">
-					<Card id="tour-template-preview" className="flex-1 bg-card rounded-xl border shadow-sm overflow-hidden flex flex-col relative text-left">
+					<Card
+						id="tour-template-preview"
+						className="flex-1 bg-card rounded-xl border shadow-sm overflow-hidden flex flex-col relative text-left"
+					>
 						<div className="p-4 border-b bg-muted/30 flex items-center justify-between text-left">
 							<div className="flex items-center gap-2 text-left">
 								<Eye size={14} className="text-emerald-500" />
@@ -709,7 +747,10 @@ export default function TemplateDetailsPage() {
 						</div>
 					</Card>
 
-					<Card id="tour-template-vars" className="bg-card rounded-xl shadow-sm p-5 border shrink-0 text-left">
+					<Card
+						id="tour-template-vars"
+						className="bg-card rounded-xl shadow-sm p-5 border shrink-0 text-left"
+					>
 						<div className="flex flex-col gap-5 text-left">
 							<div className="flex items-center justify-between text-left">
 								<div className="flex items-center gap-2 text-left">
@@ -755,7 +796,10 @@ export default function TemplateDetailsPage() {
 					logToRestore
 						? `Isso vai substituir o conteúdo atual do editor pela versão de ${new Date(
 								logToRestore.createdAt,
-							).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'medium' })}. Nada é salvo até você clicar em "Salvar".`
+							).toLocaleString('pt-BR', {
+								dateStyle: 'short',
+								timeStyle: 'medium',
+							})}. Nada é salvo até você clicar em "Salvar".`
 						: ''
 				}
 				confirmText="Restaurar no editor"
@@ -772,7 +816,10 @@ export default function TemplateDetailsPage() {
 			/>
 
 			<Sheet open={showHistoryModal} onOpenChange={setShowHistoryModal}>
-				<SheetContent id="tour-template-history-panel" className="sm:max-w-[500px] w-[90vw] overflow-y-auto">
+				<SheetContent
+					id="tour-template-history-panel"
+					className="sm:max-w-[500px] w-[90vw] overflow-y-auto"
+				>
 					<SheetHeader className="mb-6">
 						<SheetTitle className="flex items-center gap-2">
 							<History className="h-5 w-5" /> Histórico de Ações

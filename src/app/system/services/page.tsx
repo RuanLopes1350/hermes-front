@@ -1,7 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Search, MoreVertical, Server, Trash2, Pencil, Loader2, ArrowRight } from 'lucide-react';
+import {
+	Plus,
+	Search,
+	MoreVertical,
+	Server,
+	Trash2,
+	Pencil,
+	Loader2,
+	ArrowRight,
+} from 'lucide-react';
 import Link from 'next/link';
 
 import { useServices } from '@/src/hooks/use-services';
@@ -137,7 +146,8 @@ export default function ServicesPage() {
 			element: '#tour-service-list',
 			popover: {
 				title: 'Seus Serviços',
-				description: 'Aqui ficam listados todos os seus serviços. Clique em "Acessar Painel" para gerenciar credenciais, templates e ver as métricas do serviço.',
+				description:
+					'Aqui ficam listados todos os seus serviços. Clique em "Acessar Painel" para gerenciar credenciais, templates e ver as métricas do serviço.',
 				side: 'top',
 			},
 		},
@@ -153,7 +163,11 @@ export default function ServicesPage() {
 					</p>
 				</div>
 				<div className="flex gap-2">
-					<Button onClick={startTour} variant="outline" className="cursor-pointer border-primary text-primary hover:bg-primary/10">
+					<Button
+						onClick={startTour}
+						variant="outline"
+						className="cursor-pointer border-primary text-primary hover:bg-primary/10"
+					>
 						Tour Guiado
 					</Button>
 					<Button id="tour-new-service" onClick={handleOpenCreate} className="cursor-pointer">
@@ -181,7 +195,10 @@ export default function ServicesPage() {
 					<span>Carregando serviços...</span>
 				</div>
 			) : filteredServices.length === 0 ? (
-				<div id="tour-service-list" className="flex flex-col items-center justify-center h-48 border border-dashed rounded-xl bg-card text-center p-6">
+				<div
+					id="tour-service-list"
+					className="flex flex-col items-center justify-center h-48 border border-dashed rounded-xl bg-card text-center p-6"
+				>
 					<Server className="h-10 w-10 text-muted-foreground mb-4" />
 					<h3 className="text-lg font-semibold">Nenhum serviço encontrado</h3>
 					<p className="text-sm text-muted-foreground mt-2 max-w-sm">
@@ -192,9 +209,15 @@ export default function ServicesPage() {
 					</Button>
 				</div>
 			) : (
-				<div id="tour-service-list" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+				<div
+					id="tour-service-list"
+					className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+				>
 					{filteredServices.map((service) => (
-						<Card key={service.id} className="flex flex-col shadow-sm hover:shadow-md transition-shadow">
+						<Card
+							key={service.id}
+							className="flex flex-col shadow-sm hover:shadow-md transition-shadow"
+						>
 							<CardHeader className="flex flex-row items-start justify-between pb-2">
 								<div className="space-y-1">
 									<CardTitle className="text-base font-semibold leading-none flex items-center gap-2">

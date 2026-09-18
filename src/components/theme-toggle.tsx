@@ -21,10 +21,16 @@ export function ThemeToggle() {
 			size="icon"
 			onClick={() => setTheme(currentTheme === 'light' ? 'dark' : 'light')}
 			className="rounded-full w-9 h-9 border border-border/50 hover:bg-secondary/50 cursor-pointer"
-            suppressHydrationWarning
+			suppressHydrationWarning
 		>
-			<Sun suppressHydrationWarning className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-			<Moon suppressHydrationWarning className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+			<Sun
+				suppressHydrationWarning
+				className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+			/>
+			<Moon
+				suppressHydrationWarning
+				className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+			/>
 			<span className="sr-only">Alternar tema</span>
 		</Button>
 	);

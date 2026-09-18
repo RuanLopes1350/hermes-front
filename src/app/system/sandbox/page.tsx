@@ -57,7 +57,8 @@ export default function SandboxPage() {
 			element: '#tour-sandbox-apikey',
 			popover: {
 				title: 'Chave de API',
-				description: 'Cole aqui a API Key da credencial do serviço escolhido. Ela nunca é salva, só usada para este teste.',
+				description:
+					'Cole aqui a API Key da credencial do serviço escolhido. Ela nunca é salva, só usada para este teste.',
 				side: 'bottom',
 			},
 		},
@@ -73,7 +74,8 @@ export default function SandboxPage() {
 			element: '#tour-sandbox-template',
 			popover: {
 				title: 'Template (opcional)',
-				description: 'Escolha um template MJML já cadastrado ou use "Nenhum" para enviar um conteúdo direto.',
+				description:
+					'Escolha um template MJML já cadastrado ou use "Nenhum" para enviar um conteúdo direto.',
 				side: 'bottom',
 			},
 		},
@@ -81,7 +83,8 @@ export default function SandboxPage() {
 			element: '#tour-sandbox-vars',
 			popover: {
 				title: 'Variáveis do Template',
-				description: 'Se o template tiver variáveis do tipo {{nome}}, elas aparecem aqui automaticamente para você preencher.',
+				description:
+					'Se o template tiver variáveis do tipo {{nome}}, elas aparecem aqui automaticamente para você preencher.',
 				side: 'left',
 			},
 		},
@@ -89,7 +92,8 @@ export default function SandboxPage() {
 			element: '#tour-sandbox-send',
 			popover: {
 				title: 'Executar Envio',
-				description: 'Dispara o e-mail de verdade usando o SDK hermes-client, direto do servidor (Server Action).',
+				description:
+					'Dispara o e-mail de verdade usando o SDK hermes-client, direto do servidor (Server Action).',
 				side: 'top',
 			},
 		},
@@ -97,7 +101,8 @@ export default function SandboxPage() {
 			element: '#tour-sandbox-preview',
 			popover: {
 				title: 'Preview do E-mail',
-				description: 'Mostra exatamente como o e-mail vai chegar, já com os valores reais que você digitou nas variáveis — como esse é um envio de verdade, confira aqui antes de disparar.',
+				description:
+					'Mostra exatamente como o e-mail vai chegar, já com os valores reais que você digitou nas variáveis — como esse é um envio de verdade, confira aqui antes de disparar.',
 				side: 'top',
 			},
 		},
@@ -105,7 +110,8 @@ export default function SandboxPage() {
 			element: '#tour-sandbox-terminal',
 			popover: {
 				title: 'Terminal de Execução',
-				description: 'Acompanhe aqui o payload exato enviado (Request) e a resposta da API (Response) — ótimo para depurar integrações.',
+				description:
+					'Acompanhe aqui o payload exato enviado (Request) e a resposta da API (Response) — ótimo para depurar integrações.',
 				side: 'top',
 			},
 		},
@@ -187,7 +193,10 @@ export default function SandboxPage() {
 	// Só pra exibição no cabeçalho do preview — substitui {{var}} pelos valores já digitados.
 	const previewSubject = useMemo(() => {
 		if (!subject) return '';
-		return subject.replace(/{{\s*([\w.]+)\s*}}/g, (_match, key) => templateVars[key] || `{{${key}}}`);
+		return subject.replace(
+			/{{\s*([\w.]+)\s*}}/g,
+			(_match, key) => templateVars[key] || `{{${key}}}`,
+		);
 	}, [subject, templateVars]);
 
 	const handleSendTest = async () => {
@@ -419,7 +428,8 @@ export default function SandboxPage() {
 							<span className="font-semibold text-foreground">Para:</span> {recipientTo || '—'}
 						</p>
 						<p>
-							<span className="font-semibold text-foreground">Assunto:</span> {previewSubject || '—'}
+							<span className="font-semibold text-foreground">Assunto:</span>{' '}
+							{previewSubject || '—'}
 						</p>
 					</div>
 
@@ -452,7 +462,10 @@ export default function SandboxPage() {
 				</CardContent>
 			</Card>
 
-			<Card id="tour-sandbox-terminal" className="bg-slate-950 text-slate-50 border-slate-800 shadow-sm">
+			<Card
+				id="tour-sandbox-terminal"
+				className="bg-slate-950 text-slate-50 border-slate-800 shadow-sm"
+			>
 				<CardHeader className="border-b border-slate-800 py-3">
 					<CardTitle className="text-sm flex items-center gap-2">
 						<Terminal className="h-4 w-4" /> Terminal de Execução

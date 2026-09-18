@@ -34,7 +34,10 @@ export default function RecoveryPage() {
 			});
 
 			if (authError) {
-				setError(authError.message || 'Não foi possível enviar o link. Verifique o e-mail e tente novamente.');
+				setError(
+					authError.message ||
+						'Não foi possível enviar o link. Verifique o e-mail e tente novamente.',
+				);
 			} else {
 				setSent(true);
 			}
@@ -56,8 +59,9 @@ export default function RecoveryPage() {
 						<div className="space-y-1.5 max-w-xs">
 							<p className="text-base font-semibold text-foreground">Link enviado!</p>
 							<p className="text-sm text-muted-foreground">
-								Verifique sua caixa de entrada em <span className="font-medium text-foreground">{email}</span>.
-								O link expira em 1 hora.
+								Verifique sua caixa de entrada em{' '}
+								<span className="font-medium text-foreground">{email}</span>. O link expira em 1
+								hora.
 							</p>
 						</div>
 						<Link
@@ -78,9 +82,7 @@ export default function RecoveryPage() {
 			<Card className="shadow-md ring-1 ring-border/60">
 				<CardHeader className="space-y-1 text-center pb-2">
 					<CardTitle className="text-2xl font-semibold tracking-tight">Recuperar Acesso</CardTitle>
-					<CardDescription>
-						Enviaremos um link seguro para o e-mail cadastrado.
-					</CardDescription>
+					<CardDescription>Enviaremos um link seguro para o e-mail cadastrado.</CardDescription>
 				</CardHeader>
 
 				<CardContent className="pt-4">
