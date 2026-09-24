@@ -22,6 +22,8 @@ import {
 import { apiFetch } from '@/src/lib/api';
 import { useToast } from '@/src/hooks/use-toast';
 import { useTour } from '@/src/hooks/use-tour';
+import { checkEmailDomainAction } from './actions';
+import { CheckCircle, XCircle, Loader } from 'lucide-react';
 
 export default function SandboxPage() {
 	const { toast } = useToast();
@@ -43,6 +45,9 @@ export default function SandboxPage() {
 	const [sending, setSending] = useState(false);
 	const [requestLog, setRequestLog] = useState<any>(null);
 	const [responseLog, setResponseLog] = useState<any>(null);
+
+	const [dnsStatus, setDnsStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid'>('idle');
+	const [dnsReason, setDnsReason] = useState<string>('');
 
 	const { startTour } = useTour([
 		{
@@ -131,6 +136,24 @@ export default function SandboxPage() {
 		};
 		loadData();
 	}, []);
+
+	// Use effect para verificar registro MX
+	useEffect(() => {
+		if (!recipientTo.includes('@')) {
+			setDnsStatus('idle');
+			setDnsReason('');
+			return;
+		}
+
+		setDnsStatus('checking');
+		const timer = setTimeout(async () => {
+			const result = await checkEmailDomainAction(recipientTo);
+			setDnsStatus(result.valid ? 'valid' : 'invalid');
+			setDnsReason(result.reason || '');
+		}, 800); // Espera 800ms após o usuário parar de digitar
+
+		return () => clearTimeout(timer);
+	}, [recipientTo]);
 
 	const extractedVars = useMemo<string[]>(() => {
 		if (selectedTemplateId === 'none') return [];
@@ -320,33 +343,37 @@ export default function SandboxPage() {
 							</div>
 						</div>
 
-						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-							<div id="tour-sandbox-recipient" className="space-y-2">
-								<label className="text-sm font-medium">Destinatário</label>
+						<div id="tour-sandbox-recipient" className="flex flex-col gap-1.5">
+							<label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+								Destinatário
+							</label>
+							<div className="relative flex items-center">
 								<Input
+									type="email"
+									placeholder="destinatario@dominio.com"
 									value={recipientTo}
 									onChange={(e) => setRecipientTo(e.target.value)}
-									placeholder="email@exemplo.com"
+									className={`pr-8 ${
+										dnsStatus === 'invalid'
+											? 'border-destructive focus-visible:ring-destructive/30'
+											: dnsStatus === 'valid'
+												? 'border-emerald-500 focus-visible:ring-emerald-500/30'
+												: ''
+									}`}
 								/>
+								{/* Ícone de status DNS */}
+								<div className="absolute right-2.5 pointer-events-none">
+									{dnsStatus === 'checking' && (
+										<Loader size={14} className="animate-spin text-muted-foreground" />
+									)}
+									{dnsStatus === 'valid' && <CheckCircle size={14} className="text-emerald-500" />}
+									{dnsStatus === 'invalid' && <XCircle size={14} className="text-destructive" />}
+								</div>
 							</div>
-							<div id="tour-sandbox-template" className="space-y-2">
-								<label className="text-sm font-medium">Template HTML</label>
-								<Select value={selectedTemplateId} onValueChange={setSelectedTemplateId}>
-									<SelectTrigger>
-										<SelectValue placeholder="Envio manual" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="none">Nenhum (Texto Puro)</SelectItem>
-										{templates
-											.filter((t) => t.global || t.service_id === selectedServiceId)
-											.map((t) => (
-												<SelectItem key={t.id} value={t.id}>
-													{t.name}
-												</SelectItem>
-											))}
-									</SelectContent>
-								</Select>
-							</div>
+							{/* Mensagem de erro inline */}
+							{dnsStatus === 'invalid' && dnsReason && (
+								<p className="text-[10px] text-destructive leading-snug">{dnsReason}</p>
+							)}
 						</div>
 
 						<div className="space-y-2">
